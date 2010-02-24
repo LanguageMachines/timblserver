@@ -29,15 +29,15 @@
 
 #include <string>
 #include <vector>
-#include "StringOps.h"
-#include "Common.h"
-#include "MsgClass.h"
-#include "Types.h"
-#include "CommandLine.h"
-#include "Tree.h"
-#include "Instance.h"
-#include "neighborSet.h"
-#include "TimblAPI.h"
+#include "timbl/StringOps.h"
+#include "timbl/Common.h"
+#include "timbl/MsgClass.h"
+#include "timbl/Types.h"
+#include "timbl/CommandLine.h"
+#include "timbl/Tree.h"
+#include "timbl/Instance.h"
+#include "timbl/neighborSet.h"
+#include "timbl/TimblAPI.h"
 
 namespace Timbl{
   class TimblExperiment;
