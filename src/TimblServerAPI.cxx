@@ -41,9 +41,9 @@
 using namespace std;
 
 #include "timbl/TimblAPI.h"
-#include "timbl/ServerBase.h"
-#include "timbl/TimblServerAPI.h"
 #include "timbl/TimblExperiment.h"
+#include "timblserver/ServerBase.h"
+#include "timblserver/TimblServerAPI.h"
 namespace Timbl {
   
   TimblServer *CreateServerPimpl( AlgorithmType algo, GetOptClass *opt ){
