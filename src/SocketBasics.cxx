@@ -38,7 +38,7 @@
 #include "config.h"
 #include "timbl/Types.h"
 #include "timbl/Common.h"
-#include "timbl/SocketBasics.h"
+#include "timblserver/SocketBasics.h"
 
 using namespace std;
 using namespace Timbl;

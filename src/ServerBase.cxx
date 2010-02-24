@@ -38,7 +38,7 @@
 #include "timbl/Options.h"
 #include "timbl/GetOptClass.h"
 #include "timbl/TimblAPI.h"
-#include "timbl/ServerBase.h"
+#include "timblserver/ServerBase.h"
 
 using namespace std;
 
