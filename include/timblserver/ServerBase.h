@@ -28,8 +28,8 @@
 #define TIMBLSERVER_H
 
 #include "timbl/TimblExperiment.h"
-#include "timbl/LogStream.h"
-#include "timbl/SocketBasics.h"
+#include "timblserver/LogStream.h"
+#include "timblserver/SocketBasics.h"
 
 namespace Timbl {
 
