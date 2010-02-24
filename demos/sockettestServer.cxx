@@ -30,7 +30,7 @@
 #include <signal.h>
 #include <iostream>
 #include "timbl/Types.h"
-#include "timbl/SocketBasics.h"
+#include "timblserver/SocketBasics.h"
 
 using namespace std;
 
