@@ -30,14 +30,9 @@
 #include <string>
 #include <cerrno>
 #include <csignal>
-#include "timbl/Types.h"
-#include "timbl/Tree.h"
-#include "timbl/Instance.h"
-#include "timbl/Common.h"
 #include "timbl/FdStream.h"
-#include "timbl/Options.h"
-#include "timbl/GetOptClass.h"
 #include "timbl/TimblAPI.h"
+#include "timbl/GetOptClass.h"
 #include "timblserver/ServerBase.h"
 
 using namespace std;

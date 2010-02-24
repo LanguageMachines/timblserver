@@ -25,23 +25,11 @@
 */
 #include <map>
 #include <string>
-#include "timbl/Common.h"
-#include "timbl/StringOps.h"
-#include "timbl/MsgClass.h"
-#include "timbl/Types.h"
-#include "timbl/Options.h"
-#include "timbl/Tree.h"
-#include "timbl/Instance.h"
-#include "timbl/neighborSet.h"
-#include "timbl/BestArray.h"
-#include "timbl/Statistics.h"
-#include "timbl/MBLClass.h"
-#include "timbl/GetOptClass.h"
 
 using namespace std;
 
 #include "timbl/TimblAPI.h"
-#include "timbl/TimblExperiment.h"
+#include "timbl/GetOptClass.h"
 #include "timblserver/ServerBase.h"
 #include "timblserver/TimblServerAPI.h"
 namespace Timbl {

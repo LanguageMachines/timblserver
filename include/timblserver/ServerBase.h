@@ -27,7 +27,7 @@
 #ifndef TIMBLSERVER_H
 #define TIMBLSERVER_H
 
-#include "timbl/TimblExperiment.h"
+#include "timbl/TimblAPI.h"
 #include "timblserver/LogStream.h"
 #include "timblserver/SocketBasics.h"
 

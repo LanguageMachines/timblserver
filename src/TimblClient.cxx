@@ -32,24 +32,11 @@
 #include <cstring>
 #include <cctype>
 #include <ctime>
+#include <map>
 
 using namespace std;
 
-#include <map>
-#include "timbl/Common.h"
-#include "timbl/StringOps.h"
-#include "timbl/MsgClass.h"
-#include "timbl/Types.h"
-#include "timbl/Options.h"
-#include "timbl/Tree.h"
-#include "timbl/IBtree.h"
-#include "timbl/Instance.h"
-#include "timbl/neighborSet.h"
-#include "timbl/Statistics.h"
-#include "timbl/BestArray.h"
-#include "timbl/MBLClass.h"
-#include "timbl/GetOptClass.h"
-#include "timbl/TimblExperiment.h"
+#include "timbl/TimblAPI.h"
 #include "timblserver/SocketBasics.h"
 
 using namespace std;

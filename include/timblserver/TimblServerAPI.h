@@ -29,14 +29,6 @@
 
 #include <string>
 #include <vector>
-#include "timbl/StringOps.h"
-#include "timbl/Common.h"
-#include "timbl/MsgClass.h"
-#include "timbl/Types.h"
-#include "timbl/CommandLine.h"
-#include "timbl/Tree.h"
-#include "timbl/Instance.h"
-#include "timbl/neighborSet.h"
 #include "timbl/TimblAPI.h"
 
 namespace Timbl{

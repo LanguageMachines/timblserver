@@ -37,7 +37,6 @@
 
 #include "config.h"
 #include "timbl/Types.h"
-#include "timbl/Common.h"
 #include "timblserver/SocketBasics.h"
 
 using namespace std;
@@ -49,6 +48,16 @@ namespace Sockets {
   Socket::~Socket() { 
     if ( sock >= 0 ) ::close(sock); 
   };
+
+  void milli_wait( int m_secs ){
+    struct timespec tv;
+    ldiv_t div = ldiv( m_secs, 1000 );
+    tv.tv_sec = div.quot;               // seconds
+    tv.tv_nsec = div.rem * 1000000;     // nanoseconds
+    while ( nanosleep( &tv, &tv ) < 0 ){
+      // continue when interupted
+    }
+  }
 
   bool Socket::read( string& line ) {
     if ( !isValid() ){
@@ -120,7 +129,7 @@ namespace Sockets {
 	  result += c;
 	}
 	else if ( res == -1 || res == EAGAIN || res == EWOULDBLOCK ){
-	  Common::milli_wait(100);
+	  milli_wait(100);
 	  if ( ++count == 10 ){
 	    --timeout;
 	    count = 0;
@@ -184,7 +193,7 @@ namespace Sockets {
 	  ++str;
 	}
 	else if ( res == EAGAIN || res == EWOULDBLOCK ){
-	  Common::milli_wait(100);
+	  milli_wait(100);
 	  if ( ++count == 10 ){
 	    --timeout;
 	    count = 0;
