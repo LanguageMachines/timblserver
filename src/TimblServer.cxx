@@ -38,8 +38,8 @@
 
 #include "timbl/TimblAPI.h"
 #include "timbl/Options.h"
-#include "timbl/ServerBase.h"
-#include "timbl/TimblServerAPI.h"
+#include "timblserver/ServerBase.h"
+#include "timblserver/TimblServerAPI.h"
 
 using namespace std;
 using namespace Timbl;
