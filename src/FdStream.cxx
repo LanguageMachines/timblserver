@@ -32,7 +32,7 @@
 #include <streambuf>
 #include <unistd.h>
 #include <cstdlib>
-#include "timbl/FdStream.h"
+#include "timblserver/FdStream.h"
 
 using namespace std;
 
