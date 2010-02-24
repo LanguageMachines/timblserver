@@ -126,7 +126,8 @@ namespace Timbl {
     TimblExperiment *result = exp->clone();
     *result = *exp;
     string line = "Client on socket: " + toString<int>( id );
-    if ( !result->connectToSocket( id ) ){
+    ostream *fd = new fdostream( id );
+    if ( !result->connectToSocket( fd ) ){
       cerr << "unable to create working client" << endl;
       return 0;
     }
