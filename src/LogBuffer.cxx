@@ -44,7 +44,7 @@ void gettimeofday( timeval *tv, void *tz ){
 #else
 #include <sys/time.h>
 #endif
-#include "timbl/LogBuffer.h"
+#include "timblserver/LogBuffer.h"
 
 
 using std::ostream;

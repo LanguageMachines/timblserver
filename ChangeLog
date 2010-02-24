@@ -1,1 +1,86 @@
-stub
+2010-02-23 13:42  sloot
+
+	* [r3782]
+	  include/timblserver/LogBuffer.h,
+	  include/timblserver/LogStream.h,
+	  include/timblserver/Makefile.am,
+	  src/LogBuffer.cxx,
+	  src/LogStream.cxx,
+	  src/Makefile.am:
+	  added
+	  some
+	  more
+	  stuff
+	  from
+	  Timbl
+
+2010-02-22 16:23  sloot
+
+	* [r3778]
+	  COPYING:
+	  added
+
+2010-02-22 15:55  sloot
+
+	* [r3777]
+	  .cvsignore:
+	  not
+	  needed
+
+2010-02-22 15:54  sloot
+
+	* [r3776]
+	  .,
+	  .cvsignore,
+	  AUTHORS,
+	  ChangeLog,
+	  INSTALL,
+	  Makefile.am,
+	  NEWS,
+	  README,
+	  TODO,
+	  aclocal.m4,
+	  bootstrap,
+	  config.h.in,
+	  configure.ac,
+	  demos,
+	  demos/Makefile.am,
+	  demos/sockettestClient.cxx,
+	  demos/sockettestServer.cxx,
+	  docs,
+	  docs/.cvsignore,
+	  docs/Makefile.am,
+	  docs/TimblServer_1.O_Manual.pdf,
+	  include,
+	  include/Makefile.am,
+	  include/timblserver,
+	  include/timblserver/Makefile.am,
+	  include/timblserver/ServerBase.h,
+	  include/timblserver/SocketBasics.h,
+	  include/timblserver/TimblServerAPI.h,
+	  init,
+	  init/Makefile.am,
+	  init/timblserver.in,
+	  m4,
+	  m4/Makefile.am,
+	  m4/ac_define_dir.m4,
+	  m4/acx_pthread.m4,
+	  m4/ax_openmp.m4,
+	  m4/pkg.m4,
+	  src,
+	  src/Makefile.am,
+	  src/ServerBase.cxx,
+	  src/SocketBasics.cxx,
+	  src/Testers.cxx,
+	  src/TimblClient.cxx,
+	  src/TimblServer.cxx,
+	  src/TimblServerAPI.cxx,
+	  timblserver.pc.in:
+	  added
+	  separate
+	  tree
+	  for
+	  Timbl
+	  Server
+	  code
+

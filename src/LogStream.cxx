@@ -30,7 +30,7 @@
 #include <cstdio>
 
 #include <typeinfo>
-#include "timbl/LogStream.h"
+#include "timblserver/LogStream.h"
 #include <pthread.h>
 
 #if defined __GNUC__
