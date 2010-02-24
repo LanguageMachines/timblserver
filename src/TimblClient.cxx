@@ -47,10 +47,10 @@ using namespace std;
 #include "timbl/neighborSet.h"
 #include "timbl/Statistics.h"
 #include "timbl/BestArray.h"
-#include "timbl/SocketBasics.h"
 #include "timbl/MBLClass.h"
 #include "timbl/GetOptClass.h"
 #include "timbl/TimblExperiment.h"
+#include "timblserver/SocketBasics.h"
 
 using namespace std;
 using namespace Timbl;
