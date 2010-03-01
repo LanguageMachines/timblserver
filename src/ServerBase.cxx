@@ -483,14 +483,14 @@ namespace Timbl {
     static pthread_mutex_t my_lock = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_lock(&my_lock);
     // use a mutex to update the global service counter
-    service_count++;
-    if ( service_count > args->maxC ){
+    if ( service_count >= args->maxC ){
       args->socket->write( "Maximum connections exceeded.\n" );
       args->socket->write( "try again later...\n" );
       pthread_mutex_unlock( &my_lock );
       cerr << "Thread " << (uintptr_t)pthread_self() << " refused " << endl;
     }
     else {
+      ++service_count;
       pthread_mutex_unlock( &my_lock );
       int nw = runFromSocket( args );
       *Log(theServer->myLog) << "Thread " << (uintptr_t)pthread_self() 

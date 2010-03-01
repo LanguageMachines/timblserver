@@ -159,6 +159,7 @@ inline void usage_full(void){
        << "            then normalize between 0 and 1 (default f=1.0)" << endl;
   cerr << "Server options" << endl;
   cerr << "-S <port> : run as a server on <port>" << endl;
+  cerr << "-C <num>  : accept a maximum of 'num' parallel connections (default 10)" << endl;
   cerr << "--pidfile=<f> store pid in file <f>" << endl; 
   cerr << "--logfile=<f> log server activity in file <f>" << endl; 
   cerr << "--serverconfig=<f> read server settings from file <f>" << endl; 
