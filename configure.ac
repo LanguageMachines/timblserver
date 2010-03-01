@@ -52,11 +52,6 @@ AX_OPENMP(
 
 AM_CONDITIONAL( WANT_OMP, test "$OPENMP_CXXFLAGS" != "" )
 
-PKG_PROG_PKG_CONFIG
-PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
-CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
-LIBS="$LIBS $XML2_LIBS"
-
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h sys/time.h sys/timeb.h unistd.h])
 
@@ -133,40 +128,23 @@ AC_MSG_RESULT($ac_cv_check_socklen_t)
 AC_DEFINE_UNQUOTED(TIMBL_SOCKLEN_T,$ac_cv_check_socklen_t, "sock_len" )
 
 # Checks for timbl library.
-
+PKG_PROG_PKG_CONFIG
 # inspired by feh-1.3.4/configure.ac.  Tnx Tom Gilbert and feh hackers.
-if test "$pkgconfigpath" != "NONE"; then
 # ugly hack when PKG_CONFIG_PATH isn't defined.
 # couldn't get it to work otherwise
-  if test "x$PKG_CONFIG_PATH" = x; then
-     export PKG_CONFIG_PATH=""
-  fi
-  AC_ARG_WITH(timbl,
+if test "x$PKG_CONFIG_PATH" = x; then
+    export PKG_CONFIG_PATH=""
+fi
+AC_ARG_WITH(timbl,
        [  --with-timbl=DIR       use timbl installed in <DIR>; 
                note that you can install Timbl in a non-default directory with
                ./configure --prefix=<DIR> in the Timbl installation directory],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-  AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
-  PKG_CHECK_MODULES([timbl], [timbl >= 6.2.0] )
-  CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
-  LIBS="$LIBS $timbl_LIBS"
-else
-  AC_ARG_WITH(timbl,
-       [  --with-timbl=DIR       use timbl installed in <DIR>;
-      	  	note that you can install Timbl in a non-default directory with
-		./configure --prefix=<DIR> in the Timbl installation directory],
-       [CXXFLAGS="$CXXFLAGS -I$withval/include"
-        LIBS="-L$withval/lib $LIBS"],
-        [CXXFLAGS="$CXXFLAGS -I$prefix/include"
-        LIBS="-L$prefix/lib $LIBS"])
-
-  noTimbl=0
-  AC_CHECK_LIB([Timbl],timbl_present,,noTimbl=1)
-  if test "$noTimbl" =  "1"; then
-     AC_MSG_FAILURE( [libTimbl not found, please see usage of --with-timbl] )
-  fi
-fi
+AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
+PKG_CHECK_MODULES([timbl], [timbl >= 6.2.3] )
+CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
+LIBS="$LIBS $timbl_LIBS"
 
 AC_OUTPUT([
   Makefile
