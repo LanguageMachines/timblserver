@@ -30,9 +30,9 @@
 #include <string>
 #include <cerrno>
 #include <csignal>
-#include "timbl/FdStream.h"
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
+#include "timblserver/FdStream.h"
 #include "timblserver/ServerBase.h"
 
 using namespace std;
