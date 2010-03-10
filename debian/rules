@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+# $Id: rules 2681 2009-06-21 11:57:41Z  $
+# $URL: https://ilk.uvt.nl/svn/trunk/sources/Mbt3/debian/rules $
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+
+
+# variable or target overrides
+# DEB_DH_INSTALLINIT_ARGS := --onlyscripts --name mbt

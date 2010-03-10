@@ -1,0 +1,15 @@
+Source: timblserver
+Section: science
+Priority: extra
+Maintainer: Ko van der Sloot <Ko.vanderSloot@uvt.nl>
+Build-Depends: cdbs, debhelper (>= 7), autotools-dev, timbl (>= 6.2.3)
+Standards-Version: 3.8.0
+Homepage: http://ilk.uvt.nl/TimblServer/
+Vcs-Svn: https://svn.ilk.uvt.nl/svn/trunk/sources/TimblServer
+
+Package: timblserver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, timbl (>= 6.2.3)
+Description: Server extensions for Timbl
+  Enables Timbl to run multiple experiment as a TCP or HTTP server
+
