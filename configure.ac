@@ -3,8 +3,8 @@
 # $Id: configure.ac 3735 2010-02-15 13:59:32Z sloot $
 # $URL $
 
-AC_PREREQ(2.59)
-AC_INIT([TimblServer], [1.0.0], [timbl@uvt.nl])
+AC_PREREQ(2.61)
+AC_INIT([TimblServer],[1.0.0],[timbl@uvt.nl])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([.])
 AC_CONFIG_MACRO_DIR([m4])
@@ -21,14 +21,13 @@ if test x"${CXXFLAGS+set}" = xset; then
 else
   cxx_flags_were_set=false
 fi
-
-# Checks for programs.
-AC_PROG_CXX( [g++] )
-
 if $cxx_flags_were_set; then
   CXXFLAGS=$CXXFLAGS
 fi
 
+# Checks for programs.
+AC_PROG_CXX( [g++] )
+AC_PROG_RANLIB
 
 # libtool stuff
 # unfortunately, a lot of old libtools hang around.
@@ -53,17 +52,24 @@ AX_OPENMP(
 AM_CONDITIONAL( WANT_OMP, test "$OPENMP_CXXFLAGS" != "" )
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h sys/time.h sys/timeb.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h sys/time.h sys/timeb.h unistd.h,fcntl.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_INLINE
+AC_C_CONST
+AC_FUNC_FORK
+AC_FUNC_STRFTIME
+AC_HEADER_TIME
+AC_STRUCT_TM
+AC_TYPE_SIGNAL
+AC_TYPE_SSIZE_T
 AC_TYPE_SIZE_T
 AC_TYPE_PID_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
-AC_CHECK_FUNCS([floor getaddrinfo gethostbyaddr gethostbyname gettimeofday inet_ntoa localtime_r memset pow rint socket sqrt strchr strerror daemon])
+AC_CHECK_FUNCS([floor getaddrinfo gethostbyaddr gethostbyname gettimeofday inet_ntoa localtime_r memset pow rint socket sqrt strchr strerror daemon dup2 memmove])
 dnl
 dnl ----- Sockets
 checkBoth=0
@@ -146,7 +152,7 @@ PKG_CHECK_MODULES([timbl], [timbl >= 6.2.3] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$LIBS $timbl_LIBS"
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
   Makefile
   timblserver.pc
   m4/Makefile
@@ -156,3 +162,4 @@ AC_OUTPUT([
   include/timblserver/Makefile
   demos/Makefile
 ])
+AC_OUTPUT
