@@ -154,7 +154,5 @@ AC_OUTPUT([
   docs/Makefile
   include/Makefile
   include/timblserver/Makefile
-  init/Makefile
-  init/timblserver
   demos/Makefile
 ])
