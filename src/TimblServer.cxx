@@ -259,7 +259,8 @@ void Preset_Values( TimblOpts& Opts ){
     throw( softExit() );
   }
   if ( Opts.Find( 'V', value, mood ) ){
-    cerr << "TiMBL " << TimblAPI::VersionInfo( true ) << endl;
+    cerr << "TiMBL server " << TimblServerAPI::VersionInfo( true ) << endl;
+    cerr << "Based on TiMBL " << TimblAPI::VersionInfo( true ) << endl;
     throw( softExit() );
   }
   if ( Opts.Find( 'a', value, mood ) ){
@@ -435,7 +436,7 @@ int main(int argc, char *argv[]){
     time_t Time;
     // Start.
     //
-    cerr << "TiMBL Server " << TimblAPI::VersionInfo()
+    cerr << "TiMBL Server " << TimblServerAPI::VersionInfo()
 	 << " (c) ILK 1998 - 2010.\n" 
 	 << "Tilburg Memory Based Learner\n"
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"

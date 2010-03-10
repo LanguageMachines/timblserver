@@ -255,11 +255,7 @@ namespace Timbl {
   }
   
   string TimblServerAPI::VersionInfo( bool full ){
-    return Common::VersionInfo( full );
-  }
-  
-  int TimblServerAPI::Default_Max_Feats() {
-    return Common::DEFAULT_MAX_FEATS;
+    return TimblServer::VersionInfo( full );
   }
   
 }

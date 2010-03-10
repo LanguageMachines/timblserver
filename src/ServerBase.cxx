@@ -32,12 +32,27 @@
 #include <csignal>
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
+#include "config.h"
 #include "timblserver/FdStream.h"
 #include "timblserver/ServerBase.h"
 
 using namespace std;
 
 namespace Timbl {
+
+  static void ShowVersionInfo( std::ostream& os, bool full ){
+    os << VERSION;
+    if ( full )
+      os << ", compiled on " << __DATE__ << ", " << __TIME__;
+  }
+  
+  string TimblServer::VersionInfo( bool full ){
+    string result;
+    ostringstream oss;
+    ShowVersionInfo( oss, full );
+    result = oss.str();
+    return result; 
+  }
 
   TimblServer::TimblServer(): myLog("TimblServer"){
     debug = false;

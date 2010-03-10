@@ -43,6 +43,7 @@ namespace Timbl {
     bool classifyOneLine( TimblExperiment *, const std::string& );
     TimblExperiment *theExp(){ return exp; };
     virtual ~TimblServer();
+    static std::string VersionInfo( bool );
   protected:
     TimblServer();
     bool getConfig( const std::string& );
