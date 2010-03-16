@@ -64,138 +64,25 @@ Weighting WgtType = UNKNOWN_W;
 string ProbInFile;
 
 inline void usage_full(void){
-  cerr << "usage: TimblServer -f data-file {-t test-file} [options]" << endl;
-  cerr << "Algorithm and Metric options:" << endl;
-  cerr << "-a n      : algorithm" << endl;
-  cerr << "     0 or IB1   : IB1     (default)" << endl;
-  cerr << "     1 or IG    : IGTree" << endl;
-  cerr << "     2 or TRIBL : TRIBL" << endl;
-  cerr << "     3 or IB2   : IB2" << endl;
-  cerr << "     4 or TRIBL2 : TRIBL2" << endl;
-  cerr << "-m s      : use feature metrics as specified in string s:" 
-       << endl
-       << "            format: GlobalMetric:MetricRange:MetricRange" 
-	 << endl
-       << "            e.g.: mO:N3:I2,5-7" << endl;
-  cerr << "     C: Cosine distance. (Global only. numeric features implied)" 
-       << endl;
-  cerr << "     D: Dot product. (Global only. numeric features implied)" 
-       << endl;
-  cerr << "     DC: Dice Coefficient" << endl;
-  cerr << "     O: weighted Overlap (default)" << endl;
-  cerr << "     L: Levenshtein distance" << endl;
-  cerr << "     M: Modified value difference" << endl;
-  cerr << "     J: Jeffrey Divergence" << endl;
-  cerr << "     N: numeric values" << endl;
-  cerr << "     I: Ignore named  values" << endl;
-  cerr << "-w n      : Weighting" << endl;
-  cerr << "     0: No Weighting" << endl;
-  cerr << "     1: Weight using GainRatio (default)" << endl;
-  cerr << "     2: Weight using InfoGain" << endl;
-  cerr << "     3: Weight using Chi-square" << endl;
-  cerr << "     4: Weight using Shared Variance" << endl;
-  cerr << "-w f      : read Weights from file 'f'" << endl;
-  cerr << "-w f:n    : read Weight n from file 'f'" << endl;
-  cerr << "-b n      : number of lines used for bootstrapping (IB2 only)" 
-       << endl;
-  cerr << "--Diversify: rescale weight (see docs)" << endl;
-  cerr << "-d val    : weight neighbors as function of their distance:" 
-       << endl;
-  cerr << "     Z      : equal weights to all (default)" << endl;
-  cerr << "     ID     : Inverse Distance" << endl;
-  cerr << "     IL     : Inverse Linear" << endl;
-  cerr << "     ED:a   : Exponential Decay with factor a (no whitespace!)"
-       << endl;
-  cerr << "     ED:a:b : Exponential Decay with factor a and b (no whitespace!)"
-       << endl;
-  cerr << "-k n      : k nearest neighbors (default n = 1)" << endl;
-  cerr << "-q n      : TRIBL treshold at level n" << endl;
-  cerr << "-L n      : MVDM treshold at level n" << endl;
-  cerr << "-R n      : solve ties at random with seed n" << endl;
-  cerr << "Input options:" << endl;
-  cerr << "-f f      : read from Datafile 'f'" << endl;
-  cerr << "-F format : Assume the specified inputformat" << endl;
-  cerr << "            (Compact, C4.5, ARFF, Columns, Binary, Sparse )" 
-       << endl;
-  cerr << "-l n      : length of Features (Compact format only)" << endl;
-  cerr << "-i f      : read the InstanceBase from file 'f' "
-       << "(skips phase 1 & 2 )"
-       << endl;
-  cerr << "--matrixin=<f> read ValueDifference Matrices from file 'f'" << endl;
-  cerr << "-u f      : read value_class probabilities from file 'f'" 
-       << endl;
-  cerr << "-P d      : read data using path 'd'" << endl;
-  cerr << "-s        : use exemplar weights from the input file" << endl;
-  cerr << "-s0       : silently ignore the exemplar weights from the input file" << endl;
-  cerr << "-T n      : use input field 'n' as the target. (default is: the last field)" << endl;
-  cerr << "Output options:" << endl;
-  cerr << "--Beam=<n> : limit +v db output to n highest-vote classes" << endl;
-  cerr << "-V        : Show VERSION" << endl;
-  cerr << "+v or -v level : set or unset verbosity level, where level is"
-       << endl;
-  cerr << "      s:  work silently" << endl;
-  cerr << "      o:  show all options set" << endl;
-  cerr << "      b:  show node/branch count and branching factor" << endl;
-  cerr << "      f:  show Calculated Feature Weights (default)" 
-       << endl;
-  cerr << "      p:  show Value Difference matrices" << endl;
-  cerr << "      e:  show exact matches" << endl;
-  cerr << "      as: show advanced statistics (memory consuming)" << endl;
-  cerr << "      cm: show Confusion Matrix (implies +vas)" << endl;
-  cerr << "      cs: show per Class Statistics (implies +vas)" << endl;
-  cerr << "      di: add distance to output file" << endl;
-  cerr << "      db: add distribution of best matched to output file" 
-       << endl;
-  cerr << "      md: add matching depth to output file." << endl;
-  cerr << "      k:  add a summary for all k neigbors to output file"
-       << " (sets -x)" << endl;
-  cerr << "      n:  add nearest neigbors to output file (sets -x)"
-       << endl;
-  cerr << "  You may combine levels using '+' e.g. +v p+db or -v o+di"
-       << endl;
-  cerr << "-G        : normalize distibutions (+vdb option only)" << endl
-       << "    O     : normalize between 0 and 1" << endl
-       << "    1:<f> : add f to all possible targets" << endl
-       << "            then normalize between 0 and 1 (default f=1.0)" << endl;
+  cerr << "usage: TimblServer [TiMBLoptions] [ServerOptions]" << endl << endl;
+  cerr << "for an overwiew of all TiMBLoptions, use 'Timbl -h'" << endl;
+  cerr << endl;
   cerr << "Server options" << endl;
-  cerr << "-S <port> : run as a server on <port>" << endl;
-  cerr << "-C <num>  : accept a maximum of 'num' parallel connections (default 10)" << endl;
+  cerr << "--config=<f> read server settings from file <f>" << endl; 
   cerr << "--pidfile=<f> store pid in file <f>" << endl; 
   cerr << "--logfile=<f> log server activity in file <f>" << endl; 
-  cerr << "--serverconfig=<f> read server settings from file <f>" << endl; 
-  cerr << "--daemonize=[yes|no] (default yes)" << endl;
-  cerr << "Internal representation options:" << endl;
-  cerr << "-B n      : number of bins used for discretization of numeric " 
-       << "feature values" << endl;
-  cerr << "-c n      : clipping frequency for prestoring MVDM matrices"
-       << endl;
-  cerr << "-M n      : size of MaxBests Array" << endl;
-  cerr << "-N n      : Number of features (default " 
-       << TimblAPI::Default_Max_Feats() << ")" << endl;
-  cerr << "-T n      : ordering of the Tree :" << endl;
-  cerr << "       DO: none" << endl;
-  cerr << "       GRO: using GainRatio" << endl;
-  cerr << "       IGO: using InformationGain" << endl;
-  cerr << "       1/V: using 1/# of Vals" << endl;
-  cerr << "       G/V: using GainRatio/# of Vals" << endl;
-  cerr << "       I/V: using InfoGain/# of Vals" << endl;
-  cerr << "       X2O: using X-square" << endl;
-  cerr << "       X/V: using X-square/# of Vals" << endl;
-  cerr << "       SVO: using Shared Variance" << endl;
-  cerr << "       S/V: using Shared Variance/# of Vals" << endl;
-  cerr << "       GxE: using GainRatio * SplitInfo" << endl;
-  cerr << "       IxE: using InformationGain * SplitInfo" << endl;
-  cerr << "       1/S: using 1/SplitInfo" << endl;
-  cerr << "+x or -x  : Do or don't use the exact match shortcut " << endl
-       << "            (IB1 and IB2 only, default is -x)"
-       << endl;
+  cerr << "--daemonize=[yes|no] (default yes)" << endl << endl;
+  cerr << "-S <port> : run as a server on <port>" << endl;
+  cerr << "-C <num>  : accept a maximum of 'num' parallel connections (default 10)" << endl;
 }
 
 inline void usage(void){
-  cerr << "usage:  Timbl -f data-file {-t test-file}"
+  cerr << "usage:  TimblServer --config=config-file"
        << endl;
-  cerr << "or see: Timbl -h" << endl;
-  cerr << "        for all possible options" << endl;
+  cerr << "or      TimblServer -f data-file {-S socket} {-C num}"
+       << endl;
+  cerr << "or see: TimblServer -h" << endl;
+  cerr << "        for more options" << endl;
   cerr << endl;
 }
 
@@ -287,14 +174,14 @@ void Preset_Values( TimblOpts& Opts ){
   }
   Opts.Add( 'v', "F", true );
   Opts.Add( 'v', "S", false );
-  if ( Opts.Find( "serverconfig", value, mood ) ){
+  if ( Opts.Find( "config", value, mood ) ){
     ServerConfigFile = correct_path( value, I_Path, true );
-    Opts.Delete( "serverconfig" );
+    Opts.Delete( "config" );
     Do_Multi_Server = true;
   }
   if ( Opts.Find( 'S', value, mood ) ){
     if ( Do_Multi_Server ){
-      cerr << "options -S conflicts with option --serverconfig" << endl;
+      cerr << "options -S conflicts with option --config" << endl;
       throw( softExit() );
     }
     else {
@@ -314,7 +201,7 @@ void Preset_Values( TimblOpts& Opts ){
   }
   if ( Opts.Find( 'C', value, mood ) ){
     if ( Do_Multi_Server ){
-      cerr << "-C must be specified in the severconfigfile" << endl;
+      cerr << "-C must be specified in the configfile" << endl;
       throw( softExit() );
     }
     if ( !Do_Server ){
