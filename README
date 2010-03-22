@@ -29,4 +29,9 @@ Contents of this distribution:
 - Example data files ( in the demos directory )
 - Documentation ( in the docs directory )
 
-
+Dependecies:
+To be able to succesfully build Timbl from the tarball, you need the
+following pakages:
+- pkg-config
+- timbl
+- libxml2-dev
