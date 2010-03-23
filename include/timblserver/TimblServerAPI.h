@@ -32,9 +32,6 @@
 #include "timbl/TimblAPI.h"
 
 namespace Timbl{
-  class TimblExperiment;
-  
-  class Distribution;
   
   class TimblServerAPI {
     friend class TimblServer;
@@ -66,6 +63,8 @@ namespace Timbl{
     TimblServer *pimpl;
     bool i_am_fine;
   }; 
-  
+
+  int daemonize( int , int  );
+
 }
 #endif // TIMBL_SERVER_API_H

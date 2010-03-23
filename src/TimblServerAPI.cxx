@@ -32,6 +32,7 @@ using namespace std;
 #include "timbl/GetOptClass.h"
 #include "timblserver/ServerBase.h"
 #include "timblserver/TimblServerAPI.h"
+
 namespace Timbl {
   
   TimblServer *CreateServerPimpl( AlgorithmType algo, GetOptClass *opt ){
@@ -256,6 +257,10 @@ namespace Timbl {
   
   string TimblServerAPI::VersionInfo( bool full ){
     return TimblServer::VersionInfo( full );
+  }
+
+  int daemonize( int noDC, int noClose ){
+    return TimblServer::daemonize( noDC, noClose );
   }
   
 }

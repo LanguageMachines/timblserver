@@ -44,6 +44,7 @@ namespace Timbl {
     TimblExperiment *theExp(){ return exp; };
     virtual ~TimblServer();
     static std::string VersionInfo( bool );
+    static int daemonize( int , int );
   protected:
     TimblServer();
     bool getConfig( const std::string& );

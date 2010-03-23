@@ -317,12 +317,12 @@ namespace Timbl {
   }
 
 #ifdef HAVE_DAEMOM
-  int daemonize( int noCD , int noClose ){
+  int TimblServer::daemonize( int noCD , int noClose ){
     return daemon( noDC, noClose );
   }
 #else
-
-  int daemonize( int noCD , int noClose ){
+  
+  int TimblServer::daemonize( int noCD , int noClose ){
     switch (fork()) {
     case -1:
       /* error */
@@ -1116,7 +1116,7 @@ namespace Timbl {
       exp->setOptParams( opt );
       logFile = opt->getLogFile();
       pidFile = opt->getPidFile();
-      doDaemon = opt->daemonize();
+      doDaemon = opt->daemonizeFlag();
     }
   }
 
@@ -1126,7 +1126,7 @@ namespace Timbl {
       exp->setOptParams( opt );
       logFile = opt->getLogFile();
       pidFile = opt->getPidFile();
-      doDaemon = opt->daemonize();
+      doDaemon = opt->daemonizeFlag();
     }
   }
 
@@ -1136,7 +1136,7 @@ namespace Timbl {
       exp->setOptParams( opt );
       logFile = opt->getLogFile();
       pidFile = opt->getPidFile();
-      doDaemon = opt->daemonize();
+      doDaemon = opt->daemonizeFlag();
     }
   }
 
@@ -1146,7 +1146,7 @@ namespace Timbl {
       exp->setOptParams( opt );
       logFile = opt->getLogFile();
       pidFile = opt->getPidFile();
-      doDaemon = opt->daemonize();
+      doDaemon = opt->daemonizeFlag();
     }
   }
 
