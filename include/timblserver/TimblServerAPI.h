@@ -30,9 +30,12 @@
 #include <string>
 #include <vector>
 #include "timbl/TimblAPI.h"
+#include "timblserver/SocketBasics.h" //expose Sockets to the world
 
 namespace Timbl{
-  
+
+  class TimblServer;
+
   class TimblServerAPI {
     friend class TimblServer;
     friend class TimblExperiment;
