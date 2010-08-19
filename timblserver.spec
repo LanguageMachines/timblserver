@@ -18,7 +18,6 @@ Requires: timbl
 BuildRequires: gcc-c++, timbl
 
 %description
-
 TimblServer is a TiMBL wrapper; it adds server functionality to TiMBL.  It
 allows TiMBL to run multiple experiments as a TCP server, optionally via HTTP.
 
@@ -45,16 +44,14 @@ If you do scientific research in NLP, TimblServer will likely be of use to you.
 %clean
 %{__rm} -rf %{buildroot}
 
-# %files
-# %defattr(-, root, root, 0755)
-# %doc AUTHORS ChangeLog NEWS README TODO
-# %{_datadir}/doc/%{name}/*.pdf
-# %{_datadir}/doc/%{name}/examples/*
-# %{_libdir}/libMbt*
-# %{_bindir}/Mbt*
-# %{_includedir}/%{name}/*.h
-# %{_includedir}/%{name}/Makefile.am
-# %{_libdir}/pkgconfig/mbt.pc
+%files
+%defattr(-, root, root, 0755)
+%doc AUTHORS ChangeLog NEWS README TODO
+%{_datadir}/doc/%{name}/*.pdf
+%{_libdir}/libTimblServer*
+%{_bindir}/Timbl*
+%{_includedir}/%{name}/*.h
+%{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
 * Thu Aug 19 2010 Joost van Baal <joostvb-timbl@ad1810.com> - 1.0.0-1
