@@ -11,5 +11,15 @@ Package: timblserver
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, timbl (>= 6.2.3)
 Description: Server extensions for Timbl
-  Enables Timbl to run multiple experiment as a TCP or HTTP server
-
+ TimblServer is a TiMBL wrapper; it adds server functionality to TiMBL.  It
+ allows TiMBL to run multiple experiments as a TCP server, optionally via HTTP.
+ . 
+ The Tilburg Memory Based Learner, TiMBL, is a tool for Natural Language
+ Processing research, and for many other domains where classification tasks are
+ learned from examples.
+ .
+ TimblServer is a product of the ILK (Induction of Linguistic Knowledge)
+ research group of the Tilburg University and the CNTS research group of the
+ University of Antwerp.
+ .
+ If you do scientific research in NLP, TimblServer will likely be of use to you.
