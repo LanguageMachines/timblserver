@@ -1,3 +1,9 @@
+timblserver (1.0.0-2) unstable; urgency=low
+
+  * rebuild because of dependency problems
+
+ -- Ko van der Sloot <Ko.vanderSloot@uvt.nl>  Tue, 05 Oct 2010 16:57:28 +0200
+
 timblserver (1.0.0-1) unstable; urgency=low
 
   * Initial Debian packaging.
