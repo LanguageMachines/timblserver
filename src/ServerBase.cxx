@@ -70,7 +70,7 @@ namespace Timbl {
   bool TimblServer::getConfig( const string& serverConfigFile ){
     maxConn = 25;
     serverPort = -1;
-    serverProtocol = "http";
+    serverProtocol = "tcp";
     ifstream is( serverConfigFile.c_str() );
     if ( !is ){
       Error( "problem reading " + serverConfigFile );
