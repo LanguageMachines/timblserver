@@ -24,7 +24,7 @@
       Timbl@uvt.nl
 */
 
-#ifndef HAVE_DAEMOM
+#ifndef HAVE_DAEMON
 #include <fcntl.h> // for implementing daemon
 #endif
 #include <string>
@@ -316,9 +316,9 @@ namespace Timbl {
     }
   }
 
-#ifdef HAVE_DAEMOM
+#ifdef HAVE_DAEMON
   int TimblServer::daemonize( int noCD , int noClose ){
-    return daemon( noDC, noClose );
+    return daemon( noCD, noClose );
   }
 #else
   
