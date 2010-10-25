@@ -1,5 +1,5 @@
-# $Id$
-# $URL$
+# $Id: timblserver.spec 5780 2010-08-19 20:06:07Z joostvb $
+# $URL: https://ilk.uvt.nl/svn/trunk/sources/TimblServer/timblserver.spec $
 
 Summary: Server extensions for TiMBL
 Name: timblserver

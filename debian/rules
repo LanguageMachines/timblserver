@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
-# $Id$
-# $URL$
+# $Id: rules 5759 2010-08-19 13:50:46Z joostvb $
+# $URL: https://ilk.uvt.nl/svn/trunk/sources/TimblServer/debian/rules $
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk

@@ -11,5 +11,5 @@ timblserver (1.0.0-1) unstable; urgency=low
  -- Ko van der Sloot <Ko.vanderSloot@uvt.nl>  Wed, 10 Mar 2010 10:47:44 +0200
 
 	
-# $Id$
-# $URL$
+# $Id: changelog 6371 2010-10-05 15:00:05Z sloot $
+# $URL: https://ilk.uvt.nl/svn/trunk/sources/TimblServer/debian/changelog $
