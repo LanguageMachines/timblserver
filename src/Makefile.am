@@ -13,6 +13,5 @@ TimblServer_SOURCES = TimblServer.cxx
 lib_LTLIBRARIES = libTimblServer.la
 libTimblServer_la_LDFLAGS= -version-info 2:0:0
 
-libTimblServer_la_SOURCES = LogBuffer.cxx LogStream.cxx \
-	FdStream.cxx SocketBasics.cxx \
+libTimblServer_la_SOURCES = FdStream.cxx SocketBasics.cxx \
 	ServerBase.cxx TimblServerAPI.cxx
