@@ -1,5 +1,8 @@
-# $Id: $
-# $URL: $
+# $Id$
+# $URL$
+
+1.1 2010-11-17
+* moved LogStream stuff back to Timbl
 
 1.0.0 - 2010-02-22
 
