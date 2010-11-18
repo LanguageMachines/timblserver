@@ -40,9 +40,13 @@ AC_SUBST([LIBTOOL_DEPS])
 # when running tests, use CXX
 AC_LANG([C++])
 
-ACX_PTHREAD([LIBS="$PTHREAD_LIBS $LIBS"
-	    CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"],
-	    [AC_MSG_ERROR([We need pthreads!])])
+ACX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
+
+if test x"$acx_pthread_ok" = xyes; then
+   LIBS="$PTHREAD_LIBS $LIBS" \
+   CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS" \
+   CXX="$PTHREAD_CC"
+fi
 
 AX_OPENMP(
   [AC_MSG_NOTICE( we have Open MP )
