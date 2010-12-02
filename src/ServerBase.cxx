@@ -121,7 +121,7 @@ namespace Timbl {
 	      string::size_type epos = rest.length()-1;
 	      if ( rest[epos] == '"' ) 
 		--epos;
-	      serverConfig[base] = rest.substr( spos, epos );
+	      serverConfig[base] = rest.substr( spos, epos-spos+1 );
 	    }
 	  }
 	}
