@@ -514,7 +514,7 @@ namespace Timbl {
       //
       pthread_mutex_lock(&my_lock);
       // use a mutex to update and display the global service counter
-      *Log(theServer->myLog) << "Socket Total = " << --service_count << endl;
+      *Log(theServer->myLog) << "Socket total = " << --service_count << endl;
       pthread_mutex_unlock(&my_lock);
       // close the socket and exit this thread
       delete args->socket;
@@ -907,7 +907,7 @@ namespace Timbl {
       delete args;
       pthread_mutex_lock(&my_lock);
       // use a mutex to update and display the global service counter
-      *Log(theServer->myLog) << "Socket Total = " << --service_count << endl;
+      *Log(theServer->myLog) << "Socket total = " << --service_count << endl;
       pthread_mutex_unlock(&my_lock);
       //
     }
