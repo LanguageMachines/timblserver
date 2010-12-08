@@ -1,3 +1,9 @@
+timblserver (1.1.0) unstable; urgency=low
+
+  * Some stuff is moved back to Timbl
+
+ -- Ko van der Sloot 
+
 timblserver (1.0.0-1) unstable; urgency=low
 
   * First packaging attempt.
