@@ -10,5 +10,5 @@ EXTRA_DIST = bootstrap AUTHORS TODO NEWS timblserver.pc.in
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = timblserver.pc
 
-$(top_srcdir)/ChangeLog: $(top_srcdir)/NEWS
+ChangeLog: NEWS
 	svn update; svn2cl --include-rev
