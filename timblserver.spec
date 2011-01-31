@@ -3,8 +3,8 @@
 
 Summary: Server extensions for TiMBL
 Name: timblserver
-Version: 1.0.0
-Release: 2
+Version: 1.1
+Release: 1
 License: GPL
 Group: Applications/System
 URL: http://ilk.uvt.nl/timbl
@@ -37,7 +37,6 @@ If you do scientific research in NLP, TimblServer will likely be of use to you.
 %build
 %configure
 
-
 %install
 %{__rm} -rf %{buildroot}
 %makeinstall
@@ -56,6 +55,8 @@ If you do scientific research in NLP, TimblServer will likely be of use to you.
 %{_libdir}/pkgconfig/%{name}.pc
 
 %changelog
+* Mon Jan 31 2011 Joost van Baal <joostvb-timbl@ad1810.com> - 1.1-1
+- New upstream release
 * Thu Aug 19 2010 Joost van Baal <joostvb-timbl@ad1810.com> - 1.0.0-2
 - Don't install libTimblServer.la: some builds fail on its presence.
 * Thu Aug 19 2010 Joost van Baal <joostvb-timbl@ad1810.com> - 1.0.0-1
