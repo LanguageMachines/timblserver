@@ -25,9 +25,8 @@ The Tilburg Memory Based Learner, TiMBL, is a tool for Natural Language
 Processing research, and for many other domains where classification tasks are
 learned from examples.
 
-TimblServer is a product of the ILK (Induction of Linguistic Knowledge)
-research group of the Tilburg University and the CNTS research group of the
-University of Antwerp.
+TimblServer is a product of the ILK Research Group (Tilburg University, The
+Netherlands) and the CLiPS Research Centre (University of Antwerp, Belgium).
 
 If you do scientific research in NLP, TimblServer will likely be of use to you.
 
@@ -48,15 +47,17 @@ If you do scientific research in NLP, TimblServer will likely be of use to you.
 %files
 %defattr(-, root, root, 0755)
 %doc AUTHORS ChangeLog NEWS README TODO
-%{_datadir}/doc/%{name}/*.pdf
 %{_libdir}/libTimblServer*
 %{_bindir}/Timbl*
 %{_includedir}/%{name}/*.h
 %{_libdir}/pkgconfig/%{name}.pc
+%{_mandir}/man*/*imbl*
 
 %changelog
 * Mon Jan 31 2011 Joost van Baal <joostvb-timbl@ad1810.com> - 1.1-1
 - New upstream release
+  + No longer ships pdf manual; does ship TimblServer(1).
+  + CNTS is now called CLiPS, update description.
 * Thu Aug 19 2010 Joost van Baal <joostvb-timbl@ad1810.com> - 1.0.0-2
 - Don't install libTimblServer.la: some builds fail on its presence.
 * Thu Aug 19 2010 Joost van Baal <joostvb-timbl@ad1810.com> - 1.0.0-1
