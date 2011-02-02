@@ -1,5 +1,5 @@
-# $Id: Makefile.am 3499 2010-01-12 11:56:37Z sloot $
-# $URL: $
+# $Id$
+# $URL$
 
 AM_CPPFLAGS = -I@top_srcdir@/include
 

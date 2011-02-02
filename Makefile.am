@@ -1,5 +1,5 @@
-# $Id: Makefile.am 3523 2010-01-18 16:14:30Z sloot $
-# $URL: https://ilk.uvt.nl/svn/trunk/sources/Timbl6/Makefile.am $
+# $Id$
+# $URL$
 
 ACLOCAL_AMFLAGS =-I m4 --install
 
