@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-# $Id: configure.ac 3735 2010-02-15 13:59:32Z sloot $
-# $URL $
+# $Id$
+# $URL$
 
 AC_PREREQ(2.61)
 AC_INIT([TimblServer],[1.2],[timbl@uvt.nl])
