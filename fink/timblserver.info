@@ -2,9 +2,8 @@
 # $URL$
 Package: timblserver
 Version: 1.1
-Revision: 1
-BuildDependsOnly: false
-Shlibs: %p/lib/libTimblServer.2.dylib 3.0.0 %n (>= 1.1-1)
+Revision: 2
+Depends: %N-shlibs (= %v-%r)
 BuildDepends: libxml2, timbl-dev
 DescPackaging: <<
 This package was built on i386 running Darwin / Mac OS X v. 10.6.0,
@@ -15,7 +14,17 @@ Source: http://ilk.uvt.nl/downloads/pub/software/timblserver-%v.tar.gz
 Source-Checksum: SHA1(27253c7f9ccd540ee652301317609c4ede7a9d51)
 InstallScript: <<
  make install DESTDIR=%d
- test -L %d/%p/lib/libTimblServer.dylib && rm %d/%p/lib/libTimblServer.dylib || true
+<<
+SplitOff: <<
+  Package: %N-shlibs
+  Files: lib/libTimblServer.2.dylib
+  Shlibs: %p/lib/libTimblServer.2.dylib 3.0.0 %n (>= 1.1-2)
+<<
+SplitOff2: <<
+  Package: %N-dev
+  Depends: %N-shlibs (= %v-%r)
+  BuildDependsOnly: true
+  Files: lib/libTimblServer.dylib include/timblserver lib/pkgconfig
 <<
 DocFiles: AUTHORS ChangeLog NEWS README TODO
 DescDetail: <<
