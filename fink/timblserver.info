@@ -4,8 +4,8 @@ Package: timblserver
 Version: 1.1
 Revision: 1
 BuildDependsOnly: false
-Shlibs: %p/lib/libtimblserver.1.dylib 2.0.0 %n (>= 1.1-1)
-BuildDepends: timbl-dev
+Shlibs: %p/lib/libTimblServer.2.dylib 3.0.0 %n (>= 1.1-1)
+BuildDepends: libxml2, timbl-dev
 DescPackaging: <<
 This package was built on i386 running Darwin / Mac OS X v. 10.6.0,
 using fink 0.29.19-51.
@@ -15,7 +15,7 @@ Source: http://ilk.uvt.nl/downloads/pub/software/timblserver-%v.tar.gz
 Source-Checksum: SHA1(27253c7f9ccd540ee652301317609c4ede7a9d51)
 InstallScript: <<
  make install DESTDIR=%d
- test -L %d/%p/lib/libtimblserver.dylib && rm %d/%p/lib/libtimblserver.dylib || true
+ test -L %d/%p/lib/libTimblServer.dylib && rm %d/%p/lib/libTimblServer.dylib || true
 <<
 DocFiles: AUTHORS ChangeLog NEWS README TODO
 DescDetail: <<
