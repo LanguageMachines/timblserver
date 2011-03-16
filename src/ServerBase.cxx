@@ -68,7 +68,7 @@ namespace Timbl {
 
   TimblServer::~TimblServer(){
     delete exp;
-  };
+  }
 
   bool TimblServer::getConfig( const string& serverConfigFile ){
     maxConn = 25;
