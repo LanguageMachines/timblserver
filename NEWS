@@ -1,11 +1,23 @@
 # $Id$
 # $URL$
 
-1.1 2010-11-17
+1.2 - 2011-03-17
+
+[ Joost van Baal ]
+* FIXME
+
+[ Ko van der Sloot ]
+* src/ServerBase.cxx, src/SocketBasics.cxx: -pedantic proof
+
+
+1.1 - 2010-11-17
+
+[ Ko van der Sloot ]
 * moved LogStream stuff back to Timbl
+
 
 1.0.0 - 2010-02-22
 
-- Started a separate TimblServer package
-
+[ Ko van der Sloot ]
+* Started a separate TimblServer package
 
