@@ -1,17 +1,17 @@
-.TH TimblServer 1 "2010 november 17"
+.TH timblserver 1 "2011 march 21"
 
 .SH NAME
-TimblServer - Tilburg Memory Based Learner Server
+timblserver - Tilburg Memory Based Learner Server
 .SH SYNOPSYS
-TimblServer [TiMBL options] [Server options]
+timblserver [TiMBL options] [Server options]
 
-TimblServer --config=configfile [--pidfile=pfile] [--logfile=lfile] [--daemonize=val]
+timblserver --config=configfile [--pidfile=pfile] [--logfile=lfile] [--daemonize=val]
 
 .SH DESCRIPTION
-Timblserver extends 
-.B Timbl
-with a server layer. It provides the possibility to access one Timbl instance
-from multiple sessions. It also allows running and accessing different Timbl 
+timblserver extends 
+.B simbl
+with a server layer. It provides the possibility to access one timbl instance
+from multiple sessions. It also allows running and accessing different timbl 
 instances in parallel.
 
 .SH OPTIONS
@@ -54,9 +54,9 @@ set maximum number of parallel connections to 'num' (deprecated)
 .RE
 
 all
-.B Timbl
+.B timbl
 options are documenented in
-.BR Timbl (1)
+.BR timbl (1)
 
 .SH BUGS
 possibly
@@ -67,4 +67,4 @@ Ko van der Sloot Timbl@uvt.nl
 Antal van den Bosch Timbl@uvt.nl
 
 .SH SEE ALSO
-.BR Timbl (1)
+.BR timbl (1)
