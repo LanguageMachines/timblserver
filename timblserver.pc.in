@@ -3,10 +3,10 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: TimblServer
+Name: timblserver
 Version: @VERSION@
 Description: Timbl Server library.
-Requires: timbl >= 6.2.2
-Libs: -L${libdir} -lTimblServer
+Requires: timbl >= 6.4.0
+Libs: -L${libdir} -ltimblserver
 Libs.private: @LIBS@
 Cflags: -I${includedir}

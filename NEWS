@@ -1,12 +1,10 @@
 # $Id$
 # $URL$
 
-1.N - 2011-MM-DD
-
-[ Joost van Baal ]
-* FIXME
+1.2 - 2011-03-21
 
 [ Ko van der Sloot ]
+* decapped TimblServer ==> timblserver and libTimblServer ==> libtimblserver
 * src/ServerBase.cxx, src/SocketBasics.cxx: -pedantic proof
 
 

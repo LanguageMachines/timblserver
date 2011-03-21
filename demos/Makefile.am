@@ -9,7 +9,7 @@ else
 noinst_PROGRAMS =
 endif
 
-LDADD = ../src/libTimblServer.la
+LDADD = ../src/libtimblserver.la
 
 if WANT_OMP
 sockettestClient_SOURCES = sockettestClient.cxx
