@@ -32,6 +32,7 @@
 #endif
 #include <string>
 #include <cerrno>
+#include <cstdlib>
 #include <csignal>
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
