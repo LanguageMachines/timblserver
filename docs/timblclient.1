@@ -1,0 +1,67 @@
+.TH timblclient 1 "2011 march 28"
+
+.SH NAME
+timblclient - a simple client to access the Tilburg Memory Based Learner Server
+.SH SYNOPSYS
+timblclient host port [inputfile [outputfile [BATCH [basename]]]]
+
+.SH DESCRIPTION
+timblclient connects to a TimblServer on 'host':'port' and sends it the normal 
+instructions. (see
+.B timblserver
+)
+
+.SH OPTIONS
+The
+.B timblclient 
+options are
+.TP
+
+.BR inputfile
+.RS
+a series of timblserver commands.
+
+When BATCH is specified, inputfile is supposed to be a 'normal' 
+.B Timbl
+testfile. Every line is send to the timblserver as a 'classify' command.
+Default is stdin.
+.RE
+
+.BR outputfile
+.RS
+Where to put the results. Default is stdout.
+.RE
+
+.BR BATCH
+.RS
+When BATCH is specified, the input from 'inputfile' is not interpreted as 
+timblserver commands, but as instances that will be send 'as is' prepended by
+ a classify instruction.
+.RE
+
+.B host
+.RS
+connect to the server on 'host'
+.RE
+
+.B 
+port
+.RS
+connect to 'port' on 'host' 
+.RE
+
+.B 
+basename
+.RS
+set the base in TimblServer to 'base'
+.RE
+
+.SH BUGS
+This is just a simple testprogram, and rather clumsy.
+
+.SH AUTHORS
+Ko van der Sloot timbl@uvt.nl
+
+.SH SEE ALSO
+.BR timbl (1)
+.BR timblserver (1)
