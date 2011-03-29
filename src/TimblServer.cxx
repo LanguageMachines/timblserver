@@ -6,14 +6,14 @@
   ILK   - Tilburg University
   CLiPS - University of Antwerp
  
-  This file is part of Timbl
+  This file is part of timblserver
 
-  Timbl is free software; you can redistribute it and/or modify
+  timblserver is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
 
-  Timbl is distributed in the hope that it will be useful,
+  timblserver is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
@@ -24,7 +24,7 @@
   For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
   or send mail to:
-      Timbl@uvt.nl
+      timbl@uvt.nl
 */
 
 #include <exception>
@@ -67,8 +67,8 @@ Weighting WgtType = UNKNOWN_W;
 string ProbInFile;
 
 inline void usage_full(void){
-  cerr << "usage: TimblServer [TiMBLoptions] [ServerOptions]" << endl << endl;
-  cerr << "for an overwiew of all TiMBLoptions, use 'Timbl -h'" << endl;
+  cerr << "usage: timblserver [TiMBLoptions] [ServerOptions]" << endl << endl;
+  cerr << "for an overwiew of all TiMBLoptions, use 'timbl -h'" << endl;
   cerr << endl;
   cerr << "Server options" << endl;
   cerr << "--config=<f> read server settings from file <f>" << endl; 
@@ -80,11 +80,11 @@ inline void usage_full(void){
 }
 
 inline void usage(void){
-  cerr << "usage:  TimblServer --config=config-file"
+  cerr << "usage:  timblserver --config=config-file"
        << endl;
-  cerr << "or      TimblServer -f data-file {-S socket} {-C num}"
+  cerr << "or      timblserver -f data-file {-S socket} {-C num}"
        << endl;
-  cerr << "or see: TimblServer -h" << endl;
+  cerr << "or see: timblserver -h" << endl;
   cerr << "        for more options" << endl;
   cerr << endl;
 }
@@ -401,22 +401,22 @@ int main(int argc, char *argv[]){
   }
   catch(std::bad_alloc){
     cerr << "ran out of memory somewhere" << endl;
-    cerr << "Timbl terminated, Sorry for that" << endl;
+    cerr << "timblserver terminated, Sorry for that" << endl;
   }
   catch( softExit& e ){
     return 0;
   }
   catch(std::string& what){
     cerr << "an exception was raised: '" << what << "'" << endl;
-    cerr << "Timbl terminated, Sorry for that" << endl; 
+    cerr << "timblserver terminated, Sorry for that" << endl; 
   }
   catch(std::exception& e){
     cerr << "a standard exception was raised: '" << e.what() << "'" << endl;
-    cerr << "Timbl terminated, Sorry for that" << endl; 
+    cerr << "timblserver terminated, Sorry for that" << endl; 
   }
   catch(...){
     cerr << "some exception was raised" << endl;
-    cerr << "Timbl terminated, Sorry for that" << endl; 
+    cerr << "timblserver terminated, Sorry for that" << endl; 
   }
   return 0;
 }

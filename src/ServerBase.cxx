@@ -6,14 +6,14 @@
   ILK   - Tilburg University
   CLiPS - University of Antwerp
  
-  This file is part of Timbl
+  This file is part of timblserver
 
-  Timbl is free software; you can redistribute it and/or modify
+  timblserver is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
 
-  Timbl is distributed in the hope that it will be useful,
+  timblserver is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
@@ -24,7 +24,7 @@
   For questions and suggestions, see:
       http://ilk.uvt.nl/software.html
   or send mail to:
-      Timbl@uvt.nl
+      timbl@uvt.nl
 */
 
 #ifndef HAVE_DAEMON
@@ -536,7 +536,7 @@ namespace Timbl {
       ofstream pid_file( pidFile.c_str() ) ;
       if ( !pid_file ){
 	*Log(myLog)<< "unable to create pidfile:"<< pidFile << endl;
-	*Log(myLog)<< "TimblServer NOT Started" << endl;
+	*Log(myLog)<< "timblserver NOT Started" << endl;
 	exit(1);
       }
     }
@@ -581,7 +581,7 @@ namespace Timbl {
       ofstream pid_file( pidFile.c_str() ) ;
       if ( !pid_file ){
 	*Log(myLog)<< "unable to create pidfile:"<< pidFile << endl;
-	*Log(myLog)<< "TimblServer NOT Started" << endl;
+	*Log(myLog)<< "timblserver NOT Started" << endl;
 	exit(1);
       }
       else {
@@ -927,7 +927,7 @@ namespace Timbl {
       ofstream pid_file( pidFile.c_str() ) ;
       if ( !pid_file ){
 	*Log(myLog)<< "unable to create pidfile:"<< pidFile << endl;
-	*Log(myLog)<< "TimblServer NOT Started" << endl;
+	*Log(myLog)<< "timblserver not Started" << endl;
 	exit(1);
       }
     }
@@ -969,7 +969,7 @@ namespace Timbl {
       ofstream pid_file( pidFile.c_str() ) ;
       if ( !pid_file ){
 	*Log(myLog)<< "unable to create pidfile:"<< pidFile << endl;
-	*Log(myLog)<< "TimblServer NOT Started" << endl;
+	*Log(myLog)<< "timblserver NOT Started" << endl;
 	exit(1);
       }
       else {
