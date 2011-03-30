@@ -50,11 +50,10 @@ inline void usage(){
   cerr << "timblclient V0.10" << endl
        << "For demonstration purposes only!" << endl
        << "Usage:" << endl
-       << "timblclient -n NodeName -p PortNumber [-i InputFile ][-o OutputFile] [--BATCH] [-b basename]"
+       << "timblclient -n NodeName -p PortNumber [-i InputFile ][-o OutputFile] [--batch] [-b basename]"
        << endl;
 }
 
-const int TCP_BUFFER_SIZE = 2048;     // length of Internet inputbuffers,
 enum CodeType { UnknownCode, Result, Error, OK, Echo, Skip,
 		Neighbors, EndNeighbors, Status, EndStatus };
 
