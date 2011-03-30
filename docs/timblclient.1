@@ -3,7 +3,7 @@
 .SH NAME
 timblclient - a simple client to access the Tilburg Memory Based Learner Server
 .SH SYNOPSYS
-timblclient host port [inputfile [outputfile [BATCH [basename]]]]
+timblclient -h host -p port [-i inputfile] [-i outputfile] [--batch] [-b basename]
 
 .SH DESCRIPTION
 timblclient connects to a TimblServer on 'host':'port' and sends it the normal 
@@ -17,7 +17,7 @@ The
 options are
 .TP
 
-.BR inputfile
+.BR -i " inputfile"
 .RS
 a series of timblserver commands.
 
@@ -27,31 +27,31 @@ testfile. Every line is send to the timblserver as a 'classify' command.
 Default is stdin.
 .RE
 
-.BR outputfile
+.BR -o " outputfile"
 .RS
 Where to put the results. Default is stdout.
 .RE
 
-.BR BATCH
+.BR --batch
 .RS
-When BATCH is specified, the input from 'inputfile' is not interpreted as 
+When 
+.B --batch
+is specified, the input from 'inputfile' is not interpreted as 
 timblserver commands, but as instances that will be send 'as is' prepended by
- a classify instruction.
+a classify instruction.
 .RE
 
-.B host
+.BR -h " host"
 .RS
 connect to the server on 'host'
 .RE
 
-.B 
-port
+.BR -p " port"
 .RS
 connect to 'port' on 'host' 
 .RE
 
-.B 
-basename
+.BR -b " basename"
 .RS
 set the base in TimblServer to 'base'
 .RE

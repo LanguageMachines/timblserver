@@ -46,11 +46,11 @@ using namespace std;
 using namespace Timbl;
 using namespace Sockets;
 
-inline void usage( char *name ){
+inline void usage(){
   cerr << "timblclient V0.10" << endl
        << "For demonstration purposes only!" << endl
        << "Usage:" << endl
-       << name << " NodeName PortNumber [InputFile [OutputFile [BATCH]]]"
+       << "timblclient -n NodeName -p PortNumber [-i InputFile ][-o OutputFile] [--BATCH] [-b basename]"
        << endl;
 }
 
@@ -188,30 +188,45 @@ int main(int argc, char *argv[] ){
   ofstream output_file;
   bool c_mode = false;
   string base;
-  if ( argc > 3 ){
-    if ( (input_file.open( argv[3], ios::in ), !input_file.good() ) ){
-      cerr << argv[0] << " - couldn't open inputfile " << argv[3] << endl;
-      exit(1);
+  string node;
+  string port;
+  TimblOpts opts( argc, argv );
+  string value;
+
+  if ( opts.Find( "i", value ) ){
+    if ( (input_file.open( value.c_str(), ios::in ), !input_file.good() ) ){
+      cerr << argv[0] << " - couldn't open inputfile " << value << endl;
+      exit(EXIT_FAILURE);
     }
-    cout << "reading input from: " << argv[3] << endl;
+    cout << "reading input from: " << value << endl;
     Input = &input_file;
-    if ( argc > 4 ){
-      if ( (output_file.open( argv[4], ios::out ), !output_file.good() ) ){
-	cerr << argv[0] << " - couldn't open outputfile " << argv[4] << endl;
-	exit(1);
-      }
-      cout << "writing output to: " << argv[4] << endl;
-      Output = &output_file;
-      if ( argc > 5 )
-	c_mode = compare_nocase_n( "BATCH", argv[5] );
-      if ( argc > 6 )
-	base = argv[6];
+  }
+  if ( opts.Find( "o", value ) ){
+    if ( (output_file.open( value.c_str(), ios::out ), !output_file.good() ) ){
+      cerr << argv[0] << " - couldn't open outputfile " << value << endl;
+      exit(EXIT_FAILURE);
     }
+    cout << "writing output to: " << value << endl;
+    Output = &output_file;
   }
-  else if ( argc < 3 ){
-    usage( argv[0] );
-    exit(1);
+  if ( opts.Find( "batch", value ) ){
+    c_mode = true;
   }
-  RunClient( *Input, *Output, argv[1], argv[2], c_mode, base );
-  exit(0);
+  if ( opts.Find( "p", value ) ){
+    port = value;
+  }
+  if ( opts.Find( "n", value ) ){
+    node = value;
+  }
+  if ( opts.Find( "b", value ) ){
+    base = value;
+  }
+  if ( !node.empty() && !port.empty() ){
+    RunClient( *Input, *Output, node, port, c_mode, base );
+    exit(EXIT_SUCCESS);
+  }
+  else {
+    usage();
+    exit(EXIT_FAILURE);
+  }
 }
