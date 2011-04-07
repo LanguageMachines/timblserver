@@ -6,6 +6,7 @@
 * created a simple man page for timblclient.
 * addded Version() and VersionName() functions to be consistent withe the 
   whole Timbl family.
+* moved the class in a new namespace TimblServer
 
 1.2 - 2011-03-21
 
