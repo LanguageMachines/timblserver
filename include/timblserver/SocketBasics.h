@@ -44,6 +44,9 @@
 
 namespace Sockets {
 
+  std::string Version();
+  std::string VersionName();
+  
   class Socket {
   public: 
   Socket(): nonBlocking(false),sock(-1){};

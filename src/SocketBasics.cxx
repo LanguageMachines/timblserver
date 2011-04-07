@@ -46,6 +46,10 @@ using namespace std;
 using namespace Timbl;
 
 namespace Sockets {
+
+  string Version() { return VERSION; };
+  string VersionName() { return PACKAGE_STRING; };
+  
   const int TCP_BUFFER_SIZE = 2048;     // length of Internet inputbuffers
 
   Socket::~Socket() { 
