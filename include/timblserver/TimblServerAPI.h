@@ -35,16 +35,19 @@
 #include "timbl/TimblAPI.h"
 #include "timblserver/SocketBasics.h" //expose Sockets to the world
 
-namespace Timbl{
+namespace TimblServer {
 
+  std::string Version();
+  std::string VersionName();
+  
   class TimblServer;
 
   class TimblServerAPI {
     friend class TimblServer;
     friend class TimblExperiment;
   public:
-    TimblServerAPI( TimblOpts * );
-    TimblServerAPI( const TimblAPI& );
+    TimblServerAPI( Timbl::TimblOpts * );
+    TimblServerAPI( const Timbl::TimblAPI& );
     ~TimblServerAPI();
     bool Valid() const;
     bool StartServer( const int, const int=10 );
@@ -53,19 +56,21 @@ namespace Timbl{
     bool Learn( const std::string& = "" );
     std::string ExpName() const;
     static std::string VersionInfo( bool = false );
-    bool GetWeights( const std::string& = "", Weighting = UNKNOWN_W  );
-    Weighting CurrentWeighting() const;
-    Weighting GetCurrentWeights( std::vector<double>& ) const;
+    bool GetWeights( const std::string& = "", 
+		     Timbl::Weighting = Timbl::UNKNOWN_W  );
+    Timbl::Weighting CurrentWeighting() const;
+    Timbl::Weighting GetCurrentWeights( std::vector<double>& ) const;
     bool GetInstanceBase( const std::string& = "" );
     bool GetArrays( const std::string& = "" );
     bool GetMatrices( const std::string& = "" );
-    Algorithm Algo() const;
-    InputFormatType getInputFormat() const;
+    Timbl::Algorithm Algo() const;
+    Timbl::InputFormatType getInputFormat() const;
     static int Default_Max_Feats();
     bool initExperiment();
   private:
     TimblServerAPI();
-    TimblServerAPI& operator=( const TimblAPI& ); // so nobody may use them
+    TimblServerAPI& operator=( const Timbl::TimblAPI& ); 
+    // so nobody may use them
     TimblServer *pimpl;
     bool i_am_fine;
   }; 

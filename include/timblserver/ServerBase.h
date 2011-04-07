@@ -34,17 +34,18 @@
 #include "timbl/LogStream.h"
 #include "timblserver/SocketBasics.h"
 
-namespace Timbl {
+namespace TimblServer {
 
-  class TimblServer : public MsgClass {
+  class TimblServer : public Timbl::MsgClass {
     friend class TimblServerAPI;
-    friend TimblServer *CreateServerPimpl( AlgorithmType, GetOptClass * );
+    friend TimblServer *CreateServerPimpl( Timbl::AlgorithmType, 
+					   Timbl::GetOptClass * );
   public:
     LogStream myLog;
     bool doDebug() { return debug; };
-    bool doSetOptions( TimblExperiment *, const std::string&  );
-    bool classifyOneLine( TimblExperiment *, const std::string& );
-    TimblExperiment *theExp(){ return exp; };
+    bool doSetOptions( Timbl::TimblExperiment *, const std::string&  );
+    bool classifyOneLine( Timbl::TimblExperiment *, const std::string& );
+    Timbl::TimblExperiment *theExp(){ return exp; };
     virtual ~TimblServer();
     static std::string VersionInfo( bool );
     static int daemonize( int , int );
@@ -55,10 +56,10 @@ namespace Timbl {
     bool startMultiServer( const std::string& );
     void RunClassicServer();
     void RunHttpServer();
-    TimblExperiment *splitChild() const;
+    Timbl::TimblExperiment *splitChild() const;
     void setDebug( bool d ){ debug = d; };
     Sockets::ServerSocket *TcpSocket() const { return tcp_socket; };
-    TimblExperiment *exp;
+    Timbl::TimblExperiment *exp;
     std::string logFile;
     std::string pidFile;
     bool doDaemon;
@@ -72,27 +73,27 @@ namespace Timbl {
     std::map<std::string, std::string> serverConfig;
   };
 
-  TimblExperiment *createClient( const TimblExperiment *,
-				 Sockets::ServerSocket* );
+  Timbl::TimblExperiment *createClient( const Timbl::TimblExperiment *,
+					Sockets::ServerSocket* );
 
   class IB1_Server: public TimblServer {
   public:
-    IB1_Server( GetOptClass * );
+    IB1_Server( Timbl::GetOptClass * );
   };
   
   class IG_Server: public TimblServer {
   public:
-    IG_Server( GetOptClass * );
+    IG_Server( Timbl::GetOptClass * );
   };
  
   class TRIBL_Server: public TimblServer {
   public:
-    TRIBL_Server( GetOptClass * );
+    TRIBL_Server( Timbl::GetOptClass * );
   };
   
   class TRIBL2_Server: public TimblServer {
   public:
-    TRIBL2_Server( GetOptClass * );
+    TRIBL2_Server( Timbl::GetOptClass * );
   };
 
 }

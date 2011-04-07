@@ -36,8 +36,10 @@ using namespace std;
 #include "timblserver/ServerBase.h"
 #include "timblserver/TimblServerAPI.h"
 
-namespace Timbl {
-  
+using namespace Timbl;
+
+namespace TimblServer {
+
   TimblServer *CreateServerPimpl( AlgorithmType algo, GetOptClass *opt ){
     TimblServer *result = NULL;
     switch ( algo ){

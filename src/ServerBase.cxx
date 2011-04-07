@@ -41,9 +41,13 @@
 #include "timblserver/ServerBase.h"
 
 using namespace std;
+using namespace Timbl;
 
-namespace Timbl {
+namespace TimblServer {
 
+  string Version() { return VERSION; };
+  string VersionName() { return PACKAGE_STRING; };
+    
   static void ShowVersionInfo( std::ostream& os, bool full ){
     os << VERSION;
     if ( full )

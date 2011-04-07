@@ -46,6 +46,7 @@
 
 using namespace std;
 using namespace Timbl;
+using namespace TimblServer;
 
 static list<string> ind_lines;
 
