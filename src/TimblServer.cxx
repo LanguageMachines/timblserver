@@ -327,11 +327,12 @@ int main(int argc, char *argv[]){
     time_t Time;
     // Start.
     //
-    cerr << "TiMBL Server " << TimblServerAPI::VersionInfo()
+    cerr << "TiMBL Server " << TimblServer::Version()
 	 << " (c) ILK 1998 - 2011.\n" 
 	 << "Tilburg Memory Based Learner\n"
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
-	 << "CLiPS Computational Linguistics Group, University of Antwerp" << endl;
+	 << "CLiPS Computational Linguistics Group, University of Antwerp\n" 
+	 << "based on " << Timbl::VersionName() << endl;
     time(&Time);
     curtime = localtime(&Time);
     cerr << asctime(curtime) << endl;

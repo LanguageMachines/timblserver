@@ -54,7 +54,7 @@ namespace TimblServer {
       os << ", compiled on " << __DATE__ << ", " << __TIME__;
   }
   
-  string TimblServer::VersionInfo( bool full ){
+  string ServerClass::VersionInfo( bool full ){
     string result;
     ostringstream oss;
     ShowVersionInfo( oss, full );
@@ -62,7 +62,7 @@ namespace TimblServer {
     return result; 
   }
 
-  TimblServer::TimblServer(): myLog("TimblServer"){
+  ServerClass::ServerClass(): myLog("TimblServer"){
     debug = false;
     maxConn = 25;
     serverPort = -1;
@@ -71,11 +71,11 @@ namespace TimblServer {
     doDaemon = true;
   }  
 
-  TimblServer::~TimblServer(){
+  ServerClass::~ServerClass(){
     delete exp;
   }
 
-  bool TimblServer::getConfig( const string& serverConfigFile ){
+  bool ServerClass::getConfig( const string& serverConfigFile ){
     maxConn = 25;
     serverPort = -1;
     serverProtocol = "tcp";
@@ -206,7 +206,7 @@ namespace TimblServer {
   }
 
   struct childArgs{
-    TimblServer *Mother;
+    ServerClass *Mother;
     Sockets::ServerSocket *socket;
     int maxC;
     map<string, TimblExperiment*> *experiments;
@@ -267,7 +267,7 @@ namespace TimblServer {
     rest = string( m_it, line.end() );
   }  
 
-  bool TimblServer::doSetOptions( TimblExperiment *Exp, const string& Line ){
+  bool ServerClass::doSetOptions( TimblExperiment *Exp, const string& Line ){
     if ( Exp->SetOptions( Line ) ){
       if ( doDebug() )
 	*Log(myLog) << ": Command :" << Line << endl;
@@ -283,7 +283,7 @@ namespace TimblServer {
     return true;
   }
 
-  bool TimblServer::classifyOneLine( TimblExperiment *Exp, 
+  bool ServerClass::classifyOneLine( TimblExperiment *Exp, 
 				     const string& params ){
     double Distance;
     string Distrib;
@@ -325,12 +325,12 @@ namespace TimblServer {
   }
 
 #ifdef HAVE_DAEMON
-  int TimblServer::daemonize( int noCD , int noClose ){
+  int ServerClass::daemonize( int noCD , int noClose ){
     return daemon( noCD, noClose );
   }
 #else
   
-  int TimblServer::daemonize( int noCD , int noClose ){
+  int ServerClass::daemonize( int noCD , int noClose ){
     switch (fork()) {
     case -1:
       /* error */
@@ -378,7 +378,7 @@ namespace TimblServer {
     string Line;
     Sockets::ServerSocket *sock = args->socket;
     int sockId = sock->getSockId();
-    TimblServer *theServer = args->Mother;
+    ServerClass *theServer = args->Mother;
     TimblExperiment *Chld = 0;
     signal( SIGPIPE, BrokenPipeChildFun );
 
@@ -500,7 +500,7 @@ namespace TimblServer {
   // ***** This is the routine that is executed from a new TCP thread *******
   void *socketChild( void *arg ){
     childArgs *args = (childArgs *)arg;
-    TimblServer *theServer = args->Mother;
+    ServerClass *theServer = args->Mother;
     static int service_count=0;
 
     static pthread_mutex_t my_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -531,7 +531,7 @@ namespace TimblServer {
     return NULL;
   }
 
-  void TimblServer::RunClassicServer(){
+  void ServerClass::RunClassicServer(){
     if ( !pidFile.empty() ){
       // check validity of pidfile
       if ( pidFile[0] != '/' ) // make sure the path is absolute
@@ -706,7 +706,7 @@ namespace TimblServer {
   // ***** This is the routine that is executed from a new HTTP thread *******
   void *httpChild( void *arg ){
     childArgs *args = (childArgs *)arg;
-    TimblServer *theServer = args->Mother;
+    ServerClass *theServer = args->Mother;
     args->socket->setNonBlocking();
     int sockId = args->socket->getSockId(); 
     fdistream is(sockId);
@@ -922,7 +922,7 @@ namespace TimblServer {
     return NULL;
   }
   
-  void TimblServer::RunHttpServer(){
+  void ServerClass::RunHttpServer(){
     if ( !pidFile.empty() ){
       // check validity of pidfile
       if ( pidFile[0] != '/' ) // make sure the path is absolute
@@ -1059,7 +1059,7 @@ namespace TimblServer {
   }
   
   
-  bool TimblServer::startClassicServer( int port , int maxC ){
+  bool ServerClass::startClassicServer( int port , int maxC ){
     serverPort = port;
     if ( maxC > 0 )
       maxConn = maxC;
@@ -1081,7 +1081,7 @@ namespace TimblServer {
     return false;
   }
 
-  bool TimblServer::startMultiServer( const string& config ){
+  bool ServerClass::startMultiServer( const string& config ){
     if ( exp && exp->ConfirmOptions() ){
       if ( getConfig( config ) ){
 	if ( serverProtocol == "http" ){

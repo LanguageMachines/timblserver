@@ -40,8 +40,8 @@ using namespace Timbl;
 
 namespace TimblServer {
 
-  TimblServer *CreateServerPimpl( AlgorithmType algo, GetOptClass *opt ){
-    TimblServer *result = NULL;
+  ServerClass *CreateServerPimpl( AlgorithmType algo, GetOptClass *opt ){
+    ServerClass *result = NULL;
     switch ( algo ){
     case IB1_a:
       result = new IB1_Server( opt );
@@ -261,11 +261,11 @@ namespace TimblServer {
   }
   
   string TimblServerAPI::VersionInfo( bool full ){
-    return TimblServer::VersionInfo( full );
+    return ServerClass::VersionInfo( full );
   }
 
   int daemonize( int noDC, int noClose ){
-    return TimblServer::daemonize( noDC, noClose );
+    return ServerClass::daemonize( noDC, noClose );
   }
   
 }

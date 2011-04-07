@@ -36,9 +36,9 @@
 
 namespace TimblServer {
 
-  class TimblServer : public Timbl::MsgClass {
+  class ServerClass : public Timbl::MsgClass {
     friend class TimblServerAPI;
-    friend TimblServer *CreateServerPimpl( Timbl::AlgorithmType, 
+    friend ServerClass *CreateServerPimpl( Timbl::AlgorithmType, 
 					   Timbl::GetOptClass * );
   public:
     LogStream myLog;
@@ -46,11 +46,11 @@ namespace TimblServer {
     bool doSetOptions( Timbl::TimblExperiment *, const std::string&  );
     bool classifyOneLine( Timbl::TimblExperiment *, const std::string& );
     Timbl::TimblExperiment *theExp(){ return exp; };
-    virtual ~TimblServer();
+    virtual ~ServerClass();
     static std::string VersionInfo( bool );
     static int daemonize( int , int );
   protected:
-    TimblServer();
+    ServerClass();
     bool getConfig( const std::string& );
     bool startClassicServer( int, int=0 );
     bool startMultiServer( const std::string& );
@@ -76,22 +76,22 @@ namespace TimblServer {
   Timbl::TimblExperiment *createClient( const Timbl::TimblExperiment *,
 					Sockets::ServerSocket* );
 
-  class IB1_Server: public TimblServer {
+  class IB1_Server: public ServerClass {
   public:
     IB1_Server( Timbl::GetOptClass * );
   };
   
-  class IG_Server: public TimblServer {
+  class IG_Server: public ServerClass {
   public:
     IG_Server( Timbl::GetOptClass * );
   };
  
-  class TRIBL_Server: public TimblServer {
+  class TRIBL_Server: public ServerClass {
   public:
     TRIBL_Server( Timbl::GetOptClass * );
   };
   
-  class TRIBL2_Server: public TimblServer {
+  class TRIBL2_Server: public ServerClass {
   public:
     TRIBL2_Server( Timbl::GetOptClass * );
   };

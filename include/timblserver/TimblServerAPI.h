@@ -40,10 +40,10 @@ namespace TimblServer {
   std::string Version();
   std::string VersionName();
   
-  class TimblServer;
+  class ServerClass;
 
   class TimblServerAPI {
-    friend class TimblServer;
+    friend class ServerClass;
     friend class TimblExperiment;
   public:
     TimblServerAPI( Timbl::TimblOpts * );
@@ -71,7 +71,7 @@ namespace TimblServer {
     TimblServerAPI();
     TimblServerAPI& operator=( const Timbl::TimblAPI& ); 
     // so nobody may use them
-    TimblServer *pimpl;
+    ServerClass *pimpl;
     bool i_am_fine;
   }; 
 
