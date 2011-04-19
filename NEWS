@@ -1,13 +1,14 @@
 # $Id$
 # $URL$
 
-1.3 - 2011-03-xx
+1.3 - 2011-04-xx
 [ Ko van de Sloot]
 * created a simple man page for timblclient.
 * addded Version() and VersionName() functions to be consistent withe the 
   whole Timbl family.
 * moved the class in a new namespace TimblServer, and renamed 
   the TimblServer class to ServerClass
+* removed unneeded limitation on TCP_BUFFER_SIZE
 
 1.2 - 2011-03-21
 

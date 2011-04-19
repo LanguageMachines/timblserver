@@ -48,8 +48,6 @@ using namespace Timbl;
 
 namespace Sockets {
 
-  const int TCP_BUFFER_SIZE = 2048;     // length of Internet inputbuffers
-
   Socket::~Socket() { 
     if ( sock >= 0 ) ::close(sock); 
   }
@@ -69,20 +67,18 @@ namespace Sockets {
       mess = "read: socket invalid";
       return false;
     }
-    char buf[TCP_BUFFER_SIZE];
     line = "";
     long int total_count = 0;
     char last_read = 0;
-    char *current_position = buf;
     long int bytes_read = -1;
-    while ( last_read != 10 && total_count < TCP_BUFFER_SIZE ) { // read 1 character at a time upto \lf
+    while ( last_read != 10 ) { // read 1 character at a time upto \lf
       bytes_read = ::read( sock, &last_read, 1 );
       if ( bytes_read <= 0) {
 	// The other side may have closed unexpectedly 
 	break;
       }
       if ( ( last_read != 10 ) && ( last_read !=13 ) ) {
-	*current_position++ = last_read;
+	line += last_read;
 	total_count++;
       }
     }
@@ -94,8 +90,6 @@ namespace Sockets {
       return false;
     }
     else {
-      *current_position = 0;
-      line = buf;
       return true;
     }
   }
