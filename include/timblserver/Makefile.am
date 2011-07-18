@@ -1,6 +1,7 @@
 #  $Id$
 #  $URL$
 
-pkginclude_HEADERS = SocketBasics.h FdStream.h TimblServerAPI.h ServerBase.h
+pkginclude_HEADERS = SocketBasics.h FdStream.h TimblServerAPI.h \
+		     ServerBase.h ClientBase.h
 
 

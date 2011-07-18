@@ -41,6 +41,7 @@ using namespace std;
 
 #include "timbl/TimblAPI.h"
 #include "timblserver/SocketBasics.h"
+#include "timblserver/ClientBase.h"
 
 using namespace std;
 using namespace Timbl;
@@ -191,6 +192,7 @@ int main(int argc, char *argv[] ){
   string port;
   TimblOpts opts( argc, argv );
   string value;
+  bool testNew = false;
 
   if ( opts.Find( "i", value ) ){
     if ( (input_file.open( value.c_str(), ios::in ), !input_file.good() ) ){
@@ -220,8 +222,41 @@ int main(int argc, char *argv[] ){
   if ( opts.Find( "b", value ) ){
     base = value;
   }
+  if ( opts.Find( "NEW", value ) ){
+    testNew = true;
+  }
   if ( !node.empty() && !port.empty() ){
-    RunClient( *Input, *Output, node, port, c_mode, base );
+    if ( testNew ){
+      TimblServer::ClientClass client;
+      if ( !client.connect( node, port ) ){
+	cerr << "connection failed " << endl;
+	exit(EXIT_FAILURE);      
+      }
+      if ( !base.empty() ){
+	if ( !client.setBase( base ) ){
+	  cerr << "setbase failed" << endl;
+	  exit(EXIT_FAILURE);
+	}
+      }
+      string result;
+      if ( !client.classify( "=,=,=,=,+,k,u,=,-,bl,u,m,E" ) ){
+	cerr << "classification failed" << endl;
+	exit(EXIT_FAILURE);
+      }
+      else {
+	cout << "classification gave class=" << client.getClass() << endl;
+	cout << "classification gave distance=" << client.getDistance() << endl;
+	cout << "classification gave distribution=" << client.getDistribution() << endl;
+	vector<string> nb = client.getNeighbors();
+	cout << "classification gave neighbors:" << endl;
+	for ( size_t i=0; i < nb.size(); ++i ){
+	  cout << nb[i] << endl;
+	}
+      }
+    }
+    else {
+      RunClient( *Input, *Output, node, port, c_mode, base );
+    }
     exit(EXIT_SUCCESS);
   }
   else {
