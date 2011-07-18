@@ -27,8 +27,8 @@
       timbl@uvt.nl
 */
 
-#ifndef TIMBLSERVER_H
-#define TIMBLSERVER_H
+#ifndef SERVERBASE_H
+#define SERVERBASE_H
 
 #include "timbl/TimblAPI.h"
 #include "timbl/LogStream.h"
@@ -97,4 +97,4 @@ namespace TimblServer {
   };
 
 }
-#endif // TIMBLSERVER_H
+#endif // SERVERBASE_H
