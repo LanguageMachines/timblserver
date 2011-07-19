@@ -55,130 +55,6 @@ inline void usage(){
        << endl;
 }
 
-enum CodeType { UnknownCode, Result, Error, OK, Echo, Skip,
-		Neighbors, EndNeighbors, Status, EndStatus };
-
-
-bool check_for_neigbors( const string& line ){
-  return line.find( "NEIGHBORS" ) != string::npos;
-}
-
-inline void Split( const string& line, string& com, string& rest ){
-  string::const_iterator b_it = line.begin();
-  while ( b_it != line.end() && isspace( *b_it ) ) ++b_it;
-  string::const_iterator m_it = b_it;
-  while ( m_it != line.end() && !isspace( *m_it ) ) ++m_it;
-  com = string( b_it, m_it );
-  while ( m_it != line.end() && isspace( *m_it) ) ++m_it;
-  rest = string( m_it, line.end() );
-}  
-
-CodeType get_code( const string& com ){
-  CodeType result = UnknownCode;
-  if ( compare_nocase( com, "CATEGORY" ) )
-    result = Result;
-  else if ( compare_nocase( com, "ERROR" ) )
-    result = Error;
-  else if ( compare_nocase( com, "OK" ) )
-    result = OK;
-  else if ( compare_nocase( com, "AVAILABLE" ) )
-    result = Echo;
-  else if ( compare_nocase( com, "SELECTED" ) )
-    result = Echo;
-  else if ( compare_nocase( com, "SKIP" ) )
-    result = Skip;
-  else if ( compare_nocase( com, "NEIGHBORS" ) )
-    result = Neighbors;
-  else if ( compare_nocase( com, "ENDNEIGHBORS" ) )
-    result = EndNeighbors;
-  else if ( compare_nocase( com, "STATUS" ) )
-    result = Status;
-  else if ( compare_nocase( com, "ENDSTATUS" ) )
-    result = EndStatus;
-  return result;
-}
-
-
-void RunClient( istream& Input, ostream& Output, 
-		const string& NODE, const string& TCP_PORT, 
-		bool classify_mode, const string& base ){
-  bool Stop_C_Flag = false;
-  cout << "Starting Client on node:" << NODE << ", port:" 
-       << TCP_PORT << endl;
-  ClientSocket client;
-  if ( client.connect(NODE, TCP_PORT) ){
-    string TestLine, ResultLine;
-    string Code, Rest;
-    if ( client.read( ResultLine ) ){
-      cout << ResultLine << endl;
-      cout << "Start entering commands please:" << endl;
-      if ( !base.empty() ){
-	client.write( "base " + base + "\n" );
-      }
-      while( !Stop_C_Flag &&
-	     getline( Input, TestLine ) ){ 
-	if ( classify_mode )
-	  client.write( "c " );
-	if ( client.write( TestLine + "\n" ) ){
-	repeat:
-	  if ( client.read( ResultLine ) ){
-	    if ( ResultLine == "" ) goto repeat;
-	    Split( ResultLine, Code, Rest );
-	    switch ( get_code( Code ) ){
-	    case OK:
-	      Output << "OK" << endl;
-	      break;
-	    case Echo:
-	      Output << ResultLine << endl;
-	      break;
-	    case Skip:
-	      Output << "Skipped " << Rest << endl;
-	      break;
-	    case Error:
-	      Output << ResultLine << endl;
-	      break;
-	    case Result: {
-	      bool also_neighbors = check_for_neigbors( ResultLine );
-	      if ( classify_mode )
-		Output << TestLine << " --> ";
-	      Output << ResultLine << endl;
-	      if ( also_neighbors )
-		while ( client.read( ResultLine ) ){
-		  Split( ResultLine, Code, Rest );
-		  Output << ResultLine << endl;
-		  if ( get_code( Code ) == EndNeighbors )
-		    break;
-		}
-	      break;
-	    }
-	    case Status:
-	      Output << ResultLine << endl;
-	      while ( client.read( ResultLine ) ){
-		Split( ResultLine, Code, Rest );
-		Output << ResultLine << endl;
-		if ( get_code( Code ) == EndStatus )
-		  break;
-	      }
-	      break;
-	    default:
-	      Output << "Client is confused?? " << ResultLine << endl;
-	      Output << "Code was '" << Code << "'" << endl;
-	      break;
-	    }
-	  }
-	  else
-	    Stop_C_Flag = true;
-	}
-	else 
-	  Stop_C_Flag = true;
-      }
-    }
-  }
-  else {
-    cerr << "connection failed: " + client.getMessage() << endl;
-  }
-}
-
 int main(int argc, char *argv[] ){
   // the following trick makes it possible to parse lines from cin
   // as well from a user supplied file.
@@ -192,7 +68,6 @@ int main(int argc, char *argv[] ){
   string port;
   TimblOpts opts( argc, argv );
   string value;
-  bool testNew = false;
 
   if ( opts.Find( "i", value ) ){
     if ( (input_file.open( value.c_str(), ios::in ), !input_file.good() ) ){
@@ -222,40 +97,29 @@ int main(int argc, char *argv[] ){
   if ( opts.Find( "b", value ) ){
     base = value;
   }
-  if ( opts.Find( "NEW", value ) ){
-    testNew = true;
-  }
   if ( !node.empty() && !port.empty() ){
-    if ( testNew ){
-      TimblServer::ClientClass client;
-      if ( !client.connect( node, port ) ){
-	cerr << "connection failed " << endl;
-	exit(EXIT_FAILURE);      
-      }
-      if ( !base.empty() ){
-	if ( !client.setBase( base ) ){
-	  cerr << "setbase failed" << endl;
-	  exit(EXIT_FAILURE);
-	}
-      }
-      string result;
-      if ( !client.classify( "=,=,=,=,+,k,u,=,-,bl,u,m,E" ) ){
-	cerr << "classification failed" << endl;
+    TimblServer::ClientClass client;
+    if ( !client.connect( node, port ) ){
+      cerr << "connection failed " << endl;
+      exit(EXIT_FAILURE);      
+    }
+    if ( !base.empty() ){
+      if ( !client.setBase( base ) ){
+	cerr << "setbase failed";
 	exit(EXIT_FAILURE);
       }
-      else {
-	cout << "classification gave class=" << client.getClass() << endl;
-	cout << "classification gave distance=" << client.getDistance() << endl;
-	cout << "classification gave distribution=" << client.getDistribution() << endl;
-	vector<string> nb = client.getNeighbors();
-	cout << "classification gave neighbors:" << endl;
-	for ( size_t i=0; i < nb.size(); ++i ){
-	  cout << nb[i] << endl;
-	}
+    }
+    if ( c_mode ){
+      if ( !client.classifyFile( *Input, *Output ) ){
+	cerr << "classification failed." << endl;
+	exit(EXIT_FAILURE);
       }
     }
     else {
-      RunClient( *Input, *Output, node, port, c_mode, base );
+      if ( !client.runScript( *Input, *Output ) ){
+	cerr << "running script failed." << endl;
+	exit(EXIT_FAILURE);
+      }
     }
     exit(EXIT_SUCCESS);
   }
