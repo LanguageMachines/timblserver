@@ -1,6 +1,6 @@
 /*
-  $Id: $
-  $URL: $
+  $Id$
+  $URL$
 
   Copyright (c) 1998 - 2011
   ILK   - Tilburg University
@@ -256,91 +256,100 @@ namespace TimblServer {
   }
 
   bool ClientClass::classifyFile( istream& is, ostream& os ){  
-    string line;
-    while( getline( is, line) ){ 
-      //      cerr << "Test line " << line << endl;
-      if ( classify( line ) ){
-	os << line << " --> CATEGORY {" << Class << "}";
-	if ( !distribution.empty() )
-	  os << " DISTRIBUTION " << distribution;
-	if ( !distance.empty() )
-	  os << " DISTANCE {" << distance << "}";
-	if ( neighbors.size() > 0 ){
-	  os << " NEIGHBORS " << endl;
-	  for ( size_t i=0; i < neighbors.size(); ++i ){
-	    os << neighbors[i] << endl;
+    if ( client.isValid() ) {
+      string line;
+      while( getline( is, line) ){ 
+	//      cerr << "Test line " << line << endl;
+	if ( classify( line ) ){
+	  os << line << " --> CATEGORY {" << Class << "}";
+	  if ( !distribution.empty() )
+	    os << " DISTRIBUTION " << distribution;
+	  if ( !distance.empty() )
+	    os << " DISTANCE {" << distance << "}";
+	  if ( neighbors.size() > 0 ){
+	    os << " NEIGHBORS " << endl;
+	    for ( size_t i=0; i < neighbors.size(); ++i ){
+	      os << neighbors[i] << endl;
+	    }
+	    os << "ENDNEIGHBORS ";
 	  }
-	  os << "ENDNEIGHBORS ";
+	  os << endl;
 	}
-	os << endl;
+	else {
+	  os << line << " ==> ERROR" << endl;
+	}
       }
-      else {
-	os << line << " ==> ERROR" << endl;
-      }
+      return true;
     }
-    return true;
+    else {
+      return false;
+    }
   }
 
   bool ClientClass::runScript( istream& is, ostream& os ){  
-    string request;
-    while( getline( is, request ) ){ 
-      //      cerr << "script line " << request << endl;
-      if ( client.write( request + "\n" ) ){
-	string response;
-	bool more = true;
-	while ( more && client.read( response ) ){
-	  //	  cerr << "response line " << response << endl;
-	  if ( response.empty() ){
-	    continue;
-	  }
-	  more = false;
-	  string rest;
-	  code_t code = Split( response, rest );
-	  switch ( code ) {
-	  case OK:
-	    os << "OK" << endl;
-	    break;
-	  case Echo:
-	    os << response << endl;
-	    break;
-	  case Skip:
-	    os << "Skipped " << rest << endl;
-	    break;
-	  case Err:
-	    os << response << endl;
-	    break;
-	  case Result: {
-	    bool also_neighbors = (response.find( "NEIGHBORS" ) != string::npos );
-	    os << response << endl;
-	    if ( also_neighbors )
+    if ( client.isValid() ) {
+      string request;
+      while( getline( is, request ) ){ 
+	//      cerr << "script line " << request << endl;
+	if ( client.write( request + "\n" ) ){
+	  string response;
+	  bool more = true;
+	  while ( more && client.read( response ) ){
+	    //	  cerr << "response line " << response << endl;
+	    if ( response.empty() ){
+	      continue;
+	    }
+	    more = false;
+	    string rest;
+	    code_t code = Split( response, rest );
+	    switch ( code ) {
+	    case OK:
+	      os << "OK" << endl;
+	      break;
+	    case Echo:
+	      os << response << endl;
+	      break;
+	    case Skip:
+	      os << "Skipped " << rest << endl;
+	      break;
+	    case Err:
+	      os << response << endl;
+	      break;
+	    case Result: {
+	      bool also_neighbors = (response.find( "NEIGHBORS" ) != string::npos );
+	      os << response << endl;
+	      if ( also_neighbors )
+		while ( client.read( response ) ){
+		  code = Split( response, rest );
+		  os << response << endl;
+		  if ( code == EndNeighbors )
+		    break;
+		}
+	      break;
+	    }
+	    case Status:
+	      os << response << endl;
 	      while ( client.read( response ) ){
 		code = Split( response, rest );
 		os << response << endl;
-		if ( code == EndNeighbors )
+		if ( code == EndStatus )
 		  break;
 	      }
-	    break;
-	  }
-	  case Status:
-	    os << response << endl;
-	    while ( client.read( response ) ){
-	      code = Split( response, rest );
-	      os << response << endl;
-	      if ( code == EndStatus )
-		break;
+	      break;
+	    default:
+	      os << "Client is confused?? " << response << endl;
+	      os << "Code was '" << code << "'" << endl;
+	      break;
 	    }
-	    break;
-	  default:
-	    os << "Client is confused?? " << response << endl;
-	    os << "Code was '" << code << "'" << endl;
-	    break;
 	  }
 	}
+	else
+	  return false;
       }
-      else
-	return false;
-    }
-    return true;
-  }  
-  
+      return true;
+    } 
+    else
+      return false;
+  }
+
 }
