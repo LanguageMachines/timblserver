@@ -58,7 +58,7 @@ namespace Sockets {
     tv.tv_sec = div.quot;               // seconds
     tv.tv_nsec = div.rem * 1000000;     // nanoseconds
     while ( nanosleep( &tv, &tv ) < 0 ){
-      // continue when interupted
+      // continue when interrupted
     }
   }
 
@@ -381,7 +381,7 @@ namespace Sockets {
     int newsock = ::accept( sock, (struct sockaddr *)&cli_addr, &clilen );
     if( newsock < 0 ){
       if ( errno == EINTR )
-	mess = string("server-accept interupted." );
+	mess = string("server-accept interrupted." );
       else
 	mess = string("server-accept failed: (") + strerror(errno) + ")";
       return false;
@@ -505,7 +505,7 @@ namespace Sockets {
     int newsock = ::accept( sock, (struct sockaddr *)&cli_addr, &clilen );
     if( newsock < 0 ){
       if ( errno == EINTR )
-	mess = string("server-accept interupted." );
+	mess = string("server-accept interrupted." );
       else
 	mess = string("server-accept failed: (") + strerror(errno) + ")";
       return false;

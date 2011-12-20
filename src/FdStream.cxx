@@ -45,7 +45,7 @@ void milli_wait( int m_secs ){
   tv.tv_sec = div.quot;               // seconds
   tv.tv_nsec = div.rem * 1000000;     // nanoseconds
   while ( nanosleep( &tv, &tv ) < 0 ){
-    // continue when interupted
+    // continue when interrupted
   }
 }
 
