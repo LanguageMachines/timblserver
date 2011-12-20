@@ -32,6 +32,7 @@
 #endif
 #include <string>
 #include <cerrno>
+#include <cstring>
 #include <cstdlib>
 #include <csignal>
 #include "timbl/TimblAPI.h"
@@ -394,7 +395,7 @@ namespace TimblServer {
       // report connection to the server terminal
       //
       char line[256];
-      sprintf( line, "Thread %lu, on Socket %d", (uintptr_t)pthread_self(),
+      sprintf( line, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
 	       sockId );
       *Log(theServer->myLog) << line << ", started." << endl;  
     }
@@ -436,7 +437,7 @@ namespace TimblServer {
 	    // report connection to the server terminal
 	    //
 	    char line[256];
-	    sprintf( line, "Thread %lu, on Socket %d", 
+	    sprintf( line, "Thread %zd, on Socket %d", 
 		     (uintptr_t)pthread_self(), sockId );
 	    *Log(theServer->myLog) << line << ", started." << endl;  
 	  }
@@ -731,7 +732,7 @@ namespace TimblServer {
       // report connection to the server terminal
       //
       char logLine[256];
-      sprintf( logLine, "Thread %lu, on Socket %d", (uintptr_t)pthread_self(),
+      sprintf( logLine, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
 	       sockId );
       *Log(theServer->myLog) << logLine << ", started." << endl;  
       signal( SIGPIPE, BrokenPipeChildFun );
