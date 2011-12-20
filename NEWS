@@ -1,12 +1,12 @@
 # $Id$
 # $URL$
 
-1.4 - 2011-**-**
+1.4 - 2011-12-20
 [ Ko van de Sloot]
   * small code change to satisfy '-pedantic'
   * small code change to remove warning on 32 bits systems. (makes -pedantic
     complain again, though )
-  * made timblserver.in use Libs.Private:
+  * made timblserver.pc use Requires.private:
 
 1.3 - 2011-10-20
 [ Ko van de Sloot]
