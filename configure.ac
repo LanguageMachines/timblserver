@@ -42,94 +42,22 @@ if test x"$acx_pthread_ok" = xyes; then
    CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
 fi
 
-AX_OPENMP(
-  [AC_MSG_NOTICE( we have Open MP )
-   CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],
-  [AC_MSG_NOTICE( We don't seem to have Open MP )] )
-
-AM_CONDITIONAL( WANT_OMP, test "$OPENMP_CXXFLAGS" != "" )
-
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h sys/time.h sys/timeb.h unistd.h,fcntl.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h sys/socket.h unistd.h ])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_INLINE
-AC_C_CONST
-AC_FUNC_FORK
-AC_FUNC_STRFTIME
-AC_HEADER_TIME
-AC_STRUCT_TM
-AC_TYPE_SIGNAL
 AC_TYPE_SSIZE_T
 AC_TYPE_SIZE_T
 AC_TYPE_PID_T
 
 # Checks for library functions.
-AC_FUNC_MALLOC
-AC_CHECK_FUNCS([floor getaddrinfo gethostbyaddr gethostbyname gettimeofday inet_ntoa localtime_r memset pow rint socket sqrt strchr strerror daemon dup2 memmove])
-dnl
-dnl ----- Sockets
-checkBoth=0
-AC_CHECK_FUNC(connect)
-if test "$ac_cv_func_connect" = "no"; then
-    AC_CHECK_LIB(socket, main, LIBS="$LIBS -lsocket", checkBoth=1)
-fi
-if test "$checkBoth" = "1"; then
-    oldLibs=$LIBS
-    LIBS="$LIBS -lsocket -lnsl"
-    AC_CHECK_FUNC(accept, , [LIBS=$oldLibs])
-fi
+AC_FUNC_FORK
+AC_CHECK_FUNCS([getaddrinfo gethostbyaddr gethostbyname inet_ntoa memset socket strerror dup2 memmove])
 
-dnl ------ socklen_t
-dnl We check for socklen_t by making prototypes with the
-dnl various types. First socklen_t, then size_t, finally int.
-dnl If the prototype succeeds, we are probably safe.
-dnl That works if accept is not preprocessor defined (such sa AIX)
-AC_MSG_CHECKING([for socklen_t])
-AC_CACHE_VAL(ac_cv_check_socklen_t,[ac_cv_check_socklen_t=''
-        AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-#ifdef __cplusplus
-extern "C" {
-#endif
-#define try 1
-#ifdef AIX
-#if AIX >= 51
-#define try 0
-#endif
-#endif
-#if try
-extern int accept(int, struct sockaddr *, socklen_t *);
-#endif
-#ifdef __cplusplus
-}
-#endif
-        ],,[ac_cv_check_socklen_t=socklen_t],[
-                AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-#ifdef __cplusplus
-extern "C" {
-#endif
-#define try 1
-#ifdef AIX
-#if AIX >= 42
-#define try 0
-#endif
-#endif
-#if try
-extern int accept(int, struct sockaddr *, size_t t *);
-#endif
-#ifdef __cplusplus
-}
-#endif
-],,[ac_cv_check_socklen_t=size_t],[ac_cv_check_socklen_t=int])
-                ])
-        ])
-AC_MSG_RESULT($ac_cv_check_socklen_t)
-AC_DEFINE_UNQUOTED(TIMBL_SOCKLEN_T,$ac_cv_check_socklen_t, "sock_len" )
+AX_LIB_SOCKET_NSL
+AX_TYPE_SOCKLEN_T
 
 # Checks for timbl library.
 PKG_PROG_PKG_CONFIG
@@ -149,6 +77,13 @@ AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
 PKG_CHECK_MODULES([timbl], [timbl >= 6.4.2] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$LIBS $timbl_LIBS"
+
+AX_OPENMP(
+  [AC_MSG_NOTICE( we have Open MP )
+   CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],
+  [AC_MSG_NOTICE( We don't seem to have Open MP )] )
+
+AM_CONDITIONAL( WANT_OMP, test "$OPENMP_CXXFLAGS" != "" )
 
 AC_CONFIG_FILES([
   Makefile
