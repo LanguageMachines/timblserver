@@ -388,7 +388,7 @@ namespace TimblServer {
     string baseName;
     *os << "Welcome to the Timbl server." << endl;
     if ( args->experiments->empty() ){
-      baseName == "default";
+      baseName = "default";
       *Dbg(theServer->myLog) << " Voor Create Default Client " << endl;
       Chld = createClient( theServer->theExp(), sock );
       *Dbg(theServer->myLog) << " Na Create Client " << endl;
