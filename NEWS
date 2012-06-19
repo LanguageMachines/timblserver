@@ -1,6 +1,12 @@
 # $Id$
 # $URL$
 
+1.5 - 2012-06-19
+[Ko van der Sloot]
+  * Some typos edited
+  * Small bug fixes
+  * configue.ac modernized
+
 1.4 - 2011-12-20
 [ Ko van de Sloot]
   * small code change to satisfy '-pedantic'
