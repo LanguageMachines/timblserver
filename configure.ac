@@ -78,6 +78,17 @@ PKG_CHECK_MODULES([timbl], [timbl >= 6.4.2] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$LIBS $timbl_LIBS"
 
+AC_ARG_WITH(ticcutils,
+       [  --with-ticcutils=DIR      use libticcutils installed in <DIR>; 
+               note that you can install libticcutils in a non-default directory with
+               ./configure --prefix=<DIR> in the libticutils installation directory],
+       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
+       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
+AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.1] )
+CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
+LIBS="$LIBS $ticcutils_LIBS"
+
 AX_OPENMP(
   [AC_MSG_NOTICE( we have Open MP )
    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],
