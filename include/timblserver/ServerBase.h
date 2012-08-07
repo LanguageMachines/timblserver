@@ -31,7 +31,7 @@
 #define SERVERBASE_H
 
 #include "timbl/TimblAPI.h"
-#include "timbl/LogStream.h"
+#include "ticcutils/LogStream.h"
 #include "timblserver/SocketBasics.h"
 
 namespace TimblServer {
