@@ -42,6 +42,7 @@
 #include "timblserver/ServerBase.h"
 
 using namespace std;
+using namespace TiCC;
 using namespace Timbl;
 
 namespace TimblServer {

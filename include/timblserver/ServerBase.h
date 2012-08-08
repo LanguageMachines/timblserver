@@ -41,7 +41,7 @@ namespace TimblServer {
     friend ServerClass *CreateServerPimpl( Timbl::AlgorithmType, 
 					   Timbl::GetOptClass * );
   public:
-    LogStream myLog;
+    TiCC::LogStream myLog;
     bool doDebug() { return debug; };
     bool doSetOptions( Timbl::TimblExperiment *, const std::string&  );
     bool classifyOneLine( Timbl::TimblExperiment *, const std::string& );
