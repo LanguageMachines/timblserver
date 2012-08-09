@@ -58,10 +58,10 @@ namespace TimblServer {
       string names = line.substr( 17 );
       //      cerr << "step 1 '" << names << "'" << endl;
       vector<string> name;
-      if ( Timbl::split_at( names, name, " " ) > 0 ){
+      if ( TiCC::split_at( names, name, " " ) > 0 ){
 	for ( size_t i=0; i < name.size(); ++i ){
 	  //	  cerr << "step 2 i= " << i << " '" << name[i] << "'" << endl;
-	  bases.insert( Timbl::compress(name[i]) );
+	  bases.insert( TiCC::trim(name[i]) );
 	}
 	return true;
       }

@@ -287,7 +287,7 @@ bool get_file_names( TimblOpts& Opts ){
     if ( !string_to( value, W ) ){
       // No valid weighting, so assume it also has a filename
       vector<string> parts;
-      size_t num = split_at( value, parts, ":" );
+      size_t num = TiCC::split_at( value, parts, ":" );
       if ( num == 2 ){
 	if ( !string_to( parts[1], W ) ){
 	  cerr << "invalid weighting option: " << value << endl;
