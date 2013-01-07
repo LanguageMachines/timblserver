@@ -2,7 +2,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 1998 - 2012
+  Copyright (c) 1998 - 2013
   ILK   - Tilburg University
   CLiPS - University of Antwerp
  
@@ -328,7 +328,7 @@ int main(int argc, char *argv[]){
     // Start.
     //
     cerr << "TiMBL Server " << TimblServer::Version()
-	 << " (c) ILK 1998 - 2012.\n" 
+	 << " (c) ILK 1998 - 2013.\n" 
 	 << "Tilburg Memory Based Learner\n"
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
 	 << "CLiPS Computational Linguistics Group, University of Antwerp\n" 
