@@ -536,7 +536,7 @@ namespace TimblServer {
   void ServerClass::RunClassicServer(){
     if ( !pidFile.empty() ){
       // check validity of pidfile
-      if ( pidFile[0] != '/' ) // make sure the path is absolute
+      if ( doDaemon && pidFile[0] != '/' ) // make sure the path is absolute
 	pidFile = '/' + pidFile;
       unlink( pidFile.c_str() ) ;
       ofstream pid_file( pidFile.c_str() ) ;
@@ -548,7 +548,7 @@ namespace TimblServer {
     }
     ostream *logS = 0;
     if ( !logFile.empty() ){
-      if ( logFile[0] != '/' ) // make sure the path is absolute
+      if ( doDaemon && logFile[0] != '/' ) // make sure the path is absolute
 	logFile = '/' + logFile;
       logS = new ofstream( logFile.c_str() );
       if ( logS && logS->good() ){
