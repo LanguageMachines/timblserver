@@ -38,13 +38,14 @@
 #include <climits>
 #include <fcntl.h>
 
-#include "timbl/Types.h"
+//#include "timbl/Types.h"
 
 #include "config.h"
 #include "timblserver/SocketBasics.h"
+#include "ticcutils/StringOps.h"
 
 using namespace std;
-using namespace Timbl;
+//using namespace Timbl;
 
 namespace Sockets {
 
@@ -168,8 +169,8 @@ namespace Sockets {
 	str += this_write;
       }
       if ( bytes_sent < count ) {
-	mess = "write: failed to sent " + Timbl::toString(count - bytes_sent) +
-	  " bytes out of " + Timbl::toString(count);
+	mess = "write: failed to sent " + TiCC::toString(count - bytes_sent) +
+	  " bytes out of " + TiCC::toString(count);
 	return false;
       }
     }
@@ -204,8 +205,8 @@ namespace Sockets {
 	}
       }
       if ( bytes_sent < count ) {
-	mess = "write: failed to sent " + Timbl::toString(count - bytes_sent) +
-	  " bytes out of " + Timbl::toString(count);
+	mess = "write: failed to sent " + TiCC::toString(count - bytes_sent) +
+	  " bytes out of " + TiCC::toString(count);
 	return false;
       }
     }
@@ -215,7 +216,7 @@ namespace Sockets {
   string Socket::getMessage() const{
     string m;
     if ( isValid() )
-      m = "socket " + Timbl::toString(sock);
+      m = "socket " + TiCC::toString(sock);
     else
       m = "invalid socket ";
     if ( !mess.empty() )
@@ -326,7 +327,7 @@ namespace Sockets {
 	  close( sock );
 	  sock = -1;
 	  mess = string( "ClientSocket: Connection on ") + hostString + ":"
-	    + Timbl::toString(sock) + " failed (" + strerror(errno) + ")";
+	    + TiCC::toString(sock) + " failed (" + strerror(errno) + ")";
 	}
       }
       freeaddrinfo( res ); // and delete all addr_info stuff

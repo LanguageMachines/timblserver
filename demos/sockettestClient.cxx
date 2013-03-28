@@ -28,7 +28,7 @@
 #include <string>
 #include <signal.h>
 #include <iostream>
-#include "timbl/Types.h"
+#include "ticcutils/StringOps.h"
 #include "timblserver/SocketBasics.h"
 
 using namespace std;
@@ -142,7 +142,7 @@ int main( int argc, const char *argv[] ){
   if ( argc > 2 )
     tos = argv[2];
   int timeOut;
-  if ( !Timbl::stringTo<int>( tos, timeOut ) ){
+  if ( !TiCC::stringTo<int>( tos, timeOut ) ){
     cerr << "invalid timeout" << endl;
     cerr << "usage: " << argv[0] << " <port> <timeout>" << endl;
     return 1;

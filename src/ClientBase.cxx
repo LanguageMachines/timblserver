@@ -32,6 +32,7 @@
 #include <cstdlib>
 #include <csignal>
 #include "timbl/TimblAPI.h"
+#include "ticcutils/StringOps.h"
 #include "timblserver/FdStream.h"
 #include "timblserver/ClientBase.h"
 
@@ -75,7 +76,7 @@ namespace TimblServer {
 	 << port << endl;
     string line;
     if ( client.connect( node, port) ){
-      serverPort = Timbl::stringTo<int>( port );
+      serverPort = TiCC::stringTo<int>( port );
       serverName = node;
       if ( client.read( line ) ){
 	//	cout << "read line " << line << endl;

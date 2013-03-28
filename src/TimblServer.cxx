@@ -190,7 +190,7 @@ void Preset_Values( TimblOpts& Opts ){
     }
     else {
       Do_Server = true;
-      ServerPort = stringTo<int>( value );
+      ServerPort = TiCC::stringTo<int>( value );
       if ( ServerPort < 1 || ServerPort > 100000 ){
 	cerr << "-S option, portnumber invalid: " << ServerPort << endl;
 	throw( softExit() );
@@ -212,7 +212,7 @@ void Preset_Values( TimblOpts& Opts ){
       cerr << "-C option invalid without -S" << endl;
       throw( softExit() );
     }
-    Max_Connections = stringTo<int>( value );
+    Max_Connections = TiCC::stringTo<int>( value );
     if ( Max_Connections < 1 || Max_Connections > 1000 ){
       cerr << "-C options, max number of connection invalid: " 
 	   << Max_Connections << endl;
