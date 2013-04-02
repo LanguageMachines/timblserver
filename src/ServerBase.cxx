@@ -823,11 +823,11 @@ namespace TimblServer {
 		      while ( it != range.second ){
 			if ( it->second == "settings" ){
 			  xmlNode *tmp = api->settingsToXML();
-			  XmlAddChild( root, tmp );
+			  xmlAddChild( root, tmp );
 			}
 			else if ( it->second == "weights" ){
 			  xmlNode *tmp = api->weightsToXML();
-			  XmlAddChild( root, tmp );
+			  xmlAddChild( root, tmp );
 			}
 			else 
 			  LS << "don't know how to SHOW: " 
@@ -881,7 +881,7 @@ namespace TimblServer {
 			  }
 			  if ( api->Verbosity(NEAR_N) ){
 			    xmlNode *nb = api->bestNeighborsToXML();
-			    XmlAddChild( cl, nb );
+			    xmlAddChild( cl, nb );
 			  }
 			}
 			else {
