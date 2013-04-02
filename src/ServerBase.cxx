@@ -870,13 +870,13 @@ namespace TimblServer {
 			       << endl;
 			  
 			  xmlNode *cl = XmlNewChild( root, "classification" );
-			  XmlNewChild( cl, "input", params );
-			  XmlNewChild( cl, "category", answer );
+			  XmlNewTextChild( cl, "input", params );
+			  XmlNewTextChild( cl, "category", answer );
 			  if ( api->Verbosity(DISTRIB) ){
-			    XmlNewChild( cl, "distribution", distrib );
+			    XmlNewTextChild( cl, "distribution", distrib );
 			  }
 			  if ( api->Verbosity(DISTANCE) ){
-			    XmlNewChild( cl, "distance",
+			    XmlNewTextChild( cl, "distance",
 					 toString<double>(distance) );
 			  }
 			  if ( api->Verbosity(NEAR_N) ){
