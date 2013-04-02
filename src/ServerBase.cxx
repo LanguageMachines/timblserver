@@ -40,6 +40,7 @@
 #include "config.h"
 #include "timblserver/FdStream.h"
 #include "timblserver/ServerBase.h"
+#include "ticcutils/Timer.h"
 
 using namespace std;
 using namespace TiCC;
