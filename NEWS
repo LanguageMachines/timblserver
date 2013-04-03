@@ -1,6 +1,10 @@
 # $Id$
 # $URL$
 
+1.7 - 2013-04-03
+  * use more ticcutils stuff
+  * fixed problem with pid and logfile paths when --deamonize=no
+
 1.6 - 2012-10-11
 [Ko van der Sloot]
   * This version is build on ticcutils too
