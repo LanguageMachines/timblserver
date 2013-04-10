@@ -49,20 +49,9 @@ using namespace Timbl;
 namespace TimblServer {
 
   string Version() { return VERSION; }
-  string VersionName() { return PACKAGE_STRING; }
-    
-  static void ShowVersionInfo( std::ostream& os, bool full ){
-    os << VERSION;
-    if ( full )
-      os << ", compiled on " << __DATE__ << ", " << __TIME__;
-  }
-  
-  string ServerClass::VersionInfo( bool full ){
-    string result;
-    ostringstream oss;
-    ShowVersionInfo( oss, full );
-    result = oss.str();
-    return result; 
+  string VersionName() { return PACKAGE_STRING; }      
+  string BuildInfo(){
+    return Version() + ", compiled on " + __DATE__ + ", " + __TIME__;
   }
 
   ServerClass::ServerClass(): myLog("TimblServer"){

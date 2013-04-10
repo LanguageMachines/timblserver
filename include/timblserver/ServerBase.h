@@ -36,6 +36,10 @@
 
 namespace TimblServer {
 
+  std::string Version();
+  std::string VersionName();
+  std::string BuildInfo();
+
   class ServerClass : public Timbl::MsgClass {
     friend class TimblServerAPI;
     friend ServerClass *CreateServerPimpl( Timbl::AlgorithmType, 
@@ -47,7 +51,6 @@ namespace TimblServer {
     bool classifyOneLine( Timbl::TimblExperiment *, const std::string& );
     Timbl::TimblExperiment *theExp(){ return exp; };
     virtual ~ServerClass();
-    static std::string VersionInfo( bool );
     static int daemonize( int , int );
   protected:
     ServerClass();

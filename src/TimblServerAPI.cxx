@@ -261,7 +261,7 @@ namespace TimblServer {
   }
   
   string TimblServerAPI::VersionInfo( bool full ){
-    return ServerClass::VersionInfo( full );
+    return BuildInfo();
   }
 
   int daemonize( int noDC, int noClose ){
