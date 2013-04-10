@@ -150,8 +150,8 @@ void Preset_Values( TimblOpts& Opts ){
     throw( softExit() );
   }
   if ( Opts.Find( 'V', value, mood ) ){
-    cerr << "TiMBL server " << TimblServerAPI::VersionInfo( true ) << endl;
-    cerr << "Based on TiMBL " << TimblAPI::VersionInfo( true ) << endl;
+    cerr << "TiMBL server " << TimblServer::BuildInfo() << endl;
+    cerr << "Based on TiMBL " << Timbl::Version() << endl;
     throw( softExit() );
   }
   if ( Opts.Find( 'a', value, mood ) ){
