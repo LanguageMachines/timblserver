@@ -178,6 +178,10 @@ void Preset_Values( TimblOpts& Opts ){
   }
   Opts.Add( 'v', "F", true );
   Opts.Add( 'v', "S", false );
+  if ( Opts.Find( "debug", value, mood ) ){
+    Opts.Delete( "debug" );
+    Opts.Add( 'v', "CD", true );
+  }
   if ( Opts.Find( "config", value, mood ) ){
     ServerConfigFile = correct_path( value, I_Path, true );
     Opts.Delete( "config" );
