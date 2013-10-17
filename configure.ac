@@ -22,15 +22,10 @@ fi
 
 # Checks for programs.
 AC_PROG_CXX( [g++] )
-AC_PROG_RANLIB
 
 # libtool stuff
-# unfortunately, a lot of old libtools hang around.
-# so LT_INIT and LT_PREREQ cannot be used for now
-#LT_PREREQ([2.2.0])
-#LT_INIT
 AC_PROG_LIBTOOL
-AC_SUBST([LIBTOOL_DEPS])
+LT_INIT
 
 # when running tests, use CXX
 AC_LANG([C++])
@@ -68,7 +63,7 @@ if test "x$PKG_CONFIG_PATH" = x; then
     export PKG_CONFIG_PATH=""
 fi
 AC_ARG_WITH(timbl,
-       [  --with-timbl=DIR       use timbl installed in <DIR>; 
+       [  --with-timbl=DIR       use timbl installed in <DIR>;
                note that you can install timbl in a non-default directory with
                ./configure --prefix=<DIR> in the timbl installation directory],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
@@ -79,7 +74,7 @@ CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$LIBS $timbl_LIBS"
 
 AC_ARG_WITH(ticcutils,
-       [  --with-ticcutils=DIR      use libticcutils installed in <DIR>; 
+       [  --with-ticcutils=DIR      use libticcutils installed in <DIR>;
                note that you can install libticcutils in a non-default directory with
                ./configure --prefix=<DIR> in the libticutils installation directory],
        [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
