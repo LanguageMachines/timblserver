@@ -1,11 +1,11 @@
-/* 
+/*
   $Id$
   $URL$
 
   Copyright (c) 1998 - 2013
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -73,7 +73,7 @@ namespace TimblServer {
   TimblServerAPI::TimblServerAPI( ):
     pimpl( 0 ), i_am_fine(false) {
   }
-  
+
   TimblServerAPI::TimblServerAPI( TimblOpts *T_Opts ):
     pimpl(), i_am_fine(false) {
     if ( T_Opts ){
@@ -89,15 +89,15 @@ namespace TimblServer {
     }
     i_am_fine = (pimpl != NULL);
   }
-  
-  TimblServerAPI::~TimblServerAPI(){ 
-    delete pimpl; 
+
+  TimblServerAPI::~TimblServerAPI(){
+    delete pimpl;
   }
-  
+
   bool TimblServerAPI::Valid() const {
     return i_am_fine && pimpl && pimpl->exp && !pimpl->exp->ExpInvalid();
-  }  
-  
+  }
+
   inline Weighting WT_to_W( WeightType wt ){
     Weighting w;
     switch ( wt ){
@@ -118,7 +118,7 @@ namespace TimblServer {
     }
     return w;
   }
-  
+
   Algorithm TimblServerAPI::Algo() const {
     Algorithm result = UNKNOWN_ALG;
     if ( pimpl ){
@@ -151,21 +151,21 @@ namespace TimblServer {
     }
     return result;
   }
-  
+
   bool TimblServerAPI::Learn( const string& s ){
     if ( Valid() )
       return pimpl->exp->Learn( s );
-    else 
+    else
       return false;
   }
-  
+
   bool TimblServerAPI::Prepare( const string& s ){
     if ( Valid() )
       return pimpl->exp->Prepare( s );
     else
       return false;
   }
-  
+
   bool TimblServerAPI::initExperiment( ){
     if ( Valid() ){
       pimpl->exp->initExperiment( true );
@@ -174,14 +174,14 @@ namespace TimblServer {
     else
       return false;
   }
-  
+
   InputFormatType TimblServerAPI::getInputFormat() const {
     if ( Valid() )
       return pimpl->exp->InputFormat();
     else
       return UnknownInputFormat;
   }
-  
+
   bool TimblServerAPI::GetWeights( const string& f, Weighting w ){
     if ( Valid() ){
       WeightType tmp;
@@ -203,17 +203,17 @@ namespace TimblServer {
       }
       return pimpl->exp->GetWeights( f, tmp );
     }
-  else 
+  else
     return false;
   }
-  
+
   Weighting TimblServerAPI::CurrentWeighting() const{
     if ( Valid() )
       return WT_to_W( pimpl->exp->CurrentWeighting() );
     else
       return UNKNOWN_W;
   }
-  
+
   Weighting TimblServerAPI::GetCurrentWeights( std::vector<double>& res ) const {
     res.clear();
     if ( Valid() ){
@@ -222,14 +222,14 @@ namespace TimblServer {
     }
     return UNKNOWN_W;
   }
-  
+
   string TimblServerAPI::ExpName() const {
     if ( pimpl && pimpl->exp ) // return the name, even when !Valid()
       return pimpl->exp->ExpName();
     else
       return "ERROR";
   }
-  
+
   bool TimblServerAPI::GetInstanceBase( const string& f ){
     if ( Valid() ){
       if ( !pimpl->exp->ReadInstanceBase( f ) )
@@ -239,7 +239,7 @@ namespace TimblServer {
     else
       return false;
   }
-  
+
   bool TimblServerAPI::GetArrays( const string& f ){
     if ( Valid() ){
       return pimpl->exp->GetArrays( f );
@@ -247,25 +247,25 @@ namespace TimblServer {
     else
       return false;
   }
-  
+
   bool TimblServerAPI::GetMatrices( const string& f ){
     return Valid() && pimpl->exp->GetMatrices( f );
   }
-  
+
   bool TimblServerAPI::StartServer( const int port, const int max_c ){
     return Valid() && pimpl->startClassicServer( port, max_c );
   }
-  
+
   bool TimblServerAPI::StartMultiServer( const string& config ){
     return Valid() && pimpl->startMultiServer( config );
   }
-  
-  string TimblServerAPI::VersionInfo( bool full ){
+
+  string TimblServerAPI::VersionInfo( bool ){
     return BuildInfo();
   }
 
   int daemonize( int noDC, int noClose ){
     return ServerClass::daemonize( noDC, noClose );
   }
-  
+
 }
