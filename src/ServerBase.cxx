@@ -5,7 +5,7 @@
   Copyright (c) 1998 - 2013
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -49,7 +49,7 @@ using namespace Timbl;
 namespace TimblServer {
 
   string Version() { return VERSION; }
-  string VersionName() { return PACKAGE_STRING; }      
+  string VersionName() { return PACKAGE_STRING; }
   string BuildInfo(){
     return Version() + ", compiled on " + __DATE__ + ", " + __TIME__;
   }
@@ -61,7 +61,7 @@ namespace TimblServer {
     exp = 0;
     tcp_socket = 0;
     doDaemon = true;
-  }  
+  }
 
   ServerClass::~ServerClass(){
     delete exp;
@@ -119,7 +119,7 @@ namespace TimblServer {
 	      if ( rest[0] == '"' )
 		spos = 1;
 	      string::size_type epos = rest.length()-1;
-	      if ( rest[epos] == '"' ) 
+	      if ( rest[epos] == '"' )
 		--epos;
 	      serverConfig[base] = rest.substr( spos, epos-spos+1 );
 	    }
@@ -182,11 +182,11 @@ namespace TimblServer {
 	  run->initExperiment();
 	  experiments[it->first] = run->grabAndDisconnectExp();
 	  delete run;
-	  cerr << "started experiment " << it->first 
+	  cerr << "started experiment " << it->first
 	       << " with parameters: " << it->second << endl;
 	}
 	else {
-	  cerr << "FAILED to start experiment " << it->first 
+	  cerr << "FAILED to start experiment " << it->first
 	       << " with parameters: " << it->second << endl;
 	}
       }
@@ -214,7 +214,7 @@ namespace TimblServer {
       sleep(10); // give children some spare time...
     }
   }
-  
+
   void AfterDaemonFun( int Signal ){
     cerr << "AfterDaemonFun caught a signal " << Signal << endl;
     if ( Signal == SIGCHLD ){
@@ -229,9 +229,9 @@ namespace TimblServer {
     }
   }
 
-  enum CommandType { UnknownCommand, Classify, Base, 
+  enum CommandType { UnknownCommand, Classify, Base,
 		     Query, Set, Exit, Comment };
-  
+
   CommandType check_command( const string& com ){
     CommandType result = UnknownCommand;
     if ( compare_nocase_n( com, "CLASSIFY" ) )
@@ -257,7 +257,7 @@ namespace TimblServer {
     com = string( b_it, m_it );
     while ( m_it != line.end() && isspace( *m_it) ) ++m_it;
     rest = string( m_it, line.end() );
-  }  
+  }
 
   bool ServerClass::doSetOptions( TimblExperiment *Exp, const string& Line ){
     if ( Exp->SetOptions( Line ) ){
@@ -275,7 +275,7 @@ namespace TimblServer {
     return true;
   }
 
-  bool ServerClass::classifyOneLine( TimblExperiment *Exp, 
+  bool ServerClass::classifyOneLine( TimblExperiment *Exp,
 				     const string& params ){
     double Distance;
     string Distrib;
@@ -283,8 +283,8 @@ namespace TimblServer {
     ostream *os = Exp->sock_os;
     if ( Exp->Classify( params, Answer, Distrib, Distance ) ){
       if ( doDebug() )
-	*Log(myLog) << Exp->ExpName() << ":" << params << " --> " 
-		    << Answer << " " << Distrib 
+	*Log(myLog) << Exp->ExpName() << ":" << params << " --> "
+		    << Answer << " " << Distrib
 		    << " " << Distance << endl;
       *os << "CATEGORY {" << Answer << "}";
       if ( os->good() ){
@@ -296,10 +296,15 @@ namespace TimblServer {
 	    *os << " DISTANCE {" << Distance << "}";
 	  }
 	  if ( os->good() ){
-	    if ( Exp->Verbosity(NEAR_N) ){
-	      *os << " NEIGHBORS" << endl;
-	      Exp->showBestNeighbors( *os );
-	      *os << "ENDNEIGHBORS";
+	    if ( Exp->Verbosity(MATCH_DEPTH) ){
+	      *os << " MATCH_DEPTH {" << Exp->matchDepth() << "}";
+	    }
+	    if ( os->good() ){
+	      if ( Exp->Verbosity(NEAR_N) ){
+		*os << " NEIGHBORS" << endl;
+		Exp->showBestNeighbors( *os );
+		*os << "ENDNEIGHBORS";
+	      }
 	    }
 	  }
 	}
@@ -310,7 +315,7 @@ namespace TimblServer {
     }
     else {
       if ( doDebug())
-	*Log(myLog) << Exp->ExpName() << ": Classify Failed on '" 
+	*Log(myLog) << Exp->ExpName() << ": Classify Failed on '"
 		    << params << "'" << endl;
       return false;
     }
@@ -321,7 +326,7 @@ namespace TimblServer {
     return daemon( noCD, noClose );
   }
 #else
-  
+
   int ServerClass::daemonize( int noCD , int noClose ){
     switch (fork()) {
     case -1:
@@ -344,7 +349,7 @@ namespace TimblServer {
 	   << strerror(errno) << endl;
       return -1;
     }
-    
+
     if ( !noCD ){
       if ( chdir("/") < 0 ){
 	cerr << "daemon cd failed: " << strerror(errno) << endl;
@@ -364,9 +369,9 @@ namespace TimblServer {
     }
     return 0;
   }
-#endif // HAVE_DAEMON 
-  
-  int runFromSocket( childArgs *args ){ 
+#endif // HAVE_DAEMON
+
+  int runFromSocket( childArgs *args ){
     string Line;
     Sockets::ServerSocket *sock = args->socket;
     int sockId = sock->getSockId();
@@ -388,7 +393,7 @@ namespace TimblServer {
       char line[256];
       sprintf( line, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
 	       sockId );
-      *Log(theServer->myLog) << line << ", started." << endl;  
+      *Log(theServer->myLog) << line << ", started." << endl;
     }
     else {
       *os << "available bases: ";
@@ -405,7 +410,7 @@ namespace TimblServer {
       int result = 0;
       bool go_on = true;
       *Dbg(theServer->myLog) << "running FromSocket: " << sockId << endl;
-      
+
       do {
 	string::size_type pos = Line.find('\r');
 	if ( pos != string::npos )
@@ -414,23 +419,23 @@ namespace TimblServer {
 	Split( Line, Command, Param );
 	switch ( check_command(Command) ){
 	case Base:{
-	  map<string,TimblExperiment*>::const_iterator it 
+	  map<string,TimblExperiment*>::const_iterator it
 	    = args->experiments->find(Param);
 	  if ( it != args->experiments->end() ){
 	    baseName = Param;
 	    *os << "selected base: '" << Param << "'" << endl;
 	    if ( Chld )
 	      delete Chld;
-	    *Dbg(theServer->myLog) 
+	    *Dbg(theServer->myLog)
 	      << " Voor Create Default Client " << endl;
 	    Chld = createClient( it->second, sock );
 	    *Dbg(theServer->myLog) << " Na Create Client " << endl;
 	    // report connection to the server terminal
 	    //
 	    char line[256];
-	    sprintf( line, "Thread %zd, on Socket %d", 
+	    sprintf( line, "Thread %zd, on Socket %d",
 		     (uintptr_t)pthread_self(), sockId );
-	    *Log(theServer->myLog) << line << ", started." << endl;  
+	    *Log(theServer->myLog) << line << ", started." << endl;
 	  }
 	  else {
 	    *os << "ERROR { Unknown basename: " << Param << "}" << endl;
@@ -473,9 +478,9 @@ namespace TimblServer {
 	  break;
 	default:
 	  if ( theServer->doDebug() )
-	    *Log(theServer->myLog) << sockId << ": Don't understand '" 
+	    *Log(theServer->myLog) << sockId << ": Don't understand '"
 				   << Line << "'" << endl;
-	  *os << "ERROR { Illegal instruction:'" << Command << "' in line:" 
+	  *os << "ERROR { Illegal instruction:'" << Command << "' in line:"
 	      << Line << "}" << endl;
 	  break;
 	}
@@ -488,7 +493,7 @@ namespace TimblServer {
     }
     return 0;
   }
- 
+
   // ***** This is the routine that is executed from a new TCP thread *******
   void *socketChild( void *arg ){
     childArgs *args = (childArgs *)arg;
@@ -508,8 +513,8 @@ namespace TimblServer {
       ++service_count;
       pthread_mutex_unlock( &my_lock );
       int nw = runFromSocket( args );
-      *Log(theServer->myLog) << "Thread " << (uintptr_t)pthread_self() 
-			     << " terminated, " << nw 
+      *Log(theServer->myLog) << "Thread " << (uintptr_t)pthread_self()
+			     << " terminated, " << nw
 			     << " instances processed " << endl;
       //
       pthread_mutex_lock(&my_lock);
@@ -542,11 +547,11 @@ namespace TimblServer {
 	logFile = '/' + logFile;
       logS = new ofstream( logFile.c_str() );
       if ( logS && logS->good() ){
-	*Log(myLog) << "switching logging to file " 
+	*Log(myLog) << "switching logging to file "
 			       << logFile << endl;
 	myLog.associate( *logS );
-	*Log(myLog)  << "Started logging " << endl;	
-	*Log(myLog)  << "debugging is " << (doDebug()?"on":"off") << endl;	
+	*Log(myLog)  << "Started logging " << endl;
+	*Log(myLog)  << "debugging is " << (doDebug()?"on":"off") << endl;
       }
       else {
 	delete logS;
@@ -585,7 +590,7 @@ namespace TimblServer {
 	pid_file << pid << endl;
       }
     }
-    // set the attributes 
+    // set the attributes
     pthread_attr_t attr;
     if ( pthread_attr_init(&attr) ||
 	 pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED ) ){
@@ -608,7 +613,7 @@ namespace TimblServer {
       *Log(myLog) << server.getMessage() << endl;
       exit(0);
     }
-    
+
     int failcount = 0;
     struct sigaction act;
     sigaction( SIGTERM, NULL, &act ); // get current action
@@ -628,17 +633,17 @@ namespace TimblServer {
 	  exit(EXIT_FAILURE);
 	}
 	else {
-	  continue;  
+	  continue;
 	}
       }
       else {
 	if ( !keepGoing ) break;
 	failcount = 0;
-	*Log(myLog) << "Accepting Connection #" 
+	*Log(myLog) << "Accepting Connection #"
 		    << newSocket->getSockId()
-		    << " from remote host: " 
+		    << " from remote host: "
 		    << newSocket->getClientName() << endl;
-	// create a new thread to process the incoming request 
+	// create a new thread to process the incoming request
 	// (The thread will terminate itself when done processing
 	// and release its socket handle)
 	//
@@ -650,11 +655,11 @@ namespace TimblServer {
 	*Dbg(myLog) << "voor pthread_create " << endl;
 	pthread_create( &chld_thr, &attr, socketChild, (void *)args );
       }
-      // the server is now free to accept another socket request 
+      // the server is now free to accept another socket request
     }
     // cleanup
     pthread_attr_destroy(&attr);
-    //    delete logS; Don't destroy the egg before the chicken 
+    //    delete logS; Don't destroy the egg before the chicken
     //                 This leaks 512 bytes at program termination
     map<string, TimblExperiment*>::iterator it = experiments.begin();
     while( it != experiments.end() ){
@@ -667,7 +672,7 @@ namespace TimblServer {
 #define IS_HEX(x) ((IS_DIGIT(x)) || (((x) >= 'a') && ((x) <= 'f')) || \
             (((x) >= 'A') && ((x) <= 'F')))
 
-  
+
   string urlDecode( const string& s ) {
     int cc;
     string result;
@@ -676,7 +681,7 @@ namespace TimblServer {
       cc=s[i];
       if (cc == '+') {
 	result += ' ';
-      } 
+      }
       else if ( cc == '%' &&
 		( i < len-2 &&
 		  ( IS_HEX(s[i+1]) ) &&
@@ -700,7 +705,7 @@ namespace TimblServer {
     childArgs *args = (childArgs *)arg;
     ServerClass *theServer = args->Mother;
     args->socket->setNonBlocking();
-    int sockId = args->socket->getSockId(); 
+    int sockId = args->socket->getSockId();
     fdistream is(sockId);
     fdostream os(sockId);
     map<string, TimblExperiment*> *experiments = args->experiments;
@@ -725,7 +730,7 @@ namespace TimblServer {
       char logLine[256];
       sprintf( logLine, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
 	       sockId );
-      *Log(theServer->myLog) << logLine << ", started." << endl;  
+      *Log(theServer->myLog) << logLine << ", started." << endl;
       signal( SIGPIPE, BrokenPipeChildFun );
       string Line;
       int timeout = 1;
@@ -800,9 +805,9 @@ namespace TimblServer {
 			  }
 			}
 			else {
-			  LS << ": Don't understand set='" 
+			  LS << ": Don't understand set='"
 			     << opt << "'" << endl;
-			  os << ": Don't understand set='" 
+			  os << ": Don't understand set='"
 			     << it->second << "'" << endl;
 			}
 			++it;
@@ -818,10 +823,10 @@ namespace TimblServer {
 			  xmlNode *tmp = api->weightsToXML();
 			  xmlAddChild( root, tmp );
 			}
-			else 
-			  LS << "don't know how to SHOW: " 
+			else
+			  LS << "don't know how to SHOW: "
 			     << it->second << endl;
-			
+
 			++it;
 		      }
 		      range = acts.equal_range( "classify" );
@@ -832,32 +837,32 @@ namespace TimblServer {
 			int len = params.length();
 			if ( len > 2 ){
 			  DS << "params=" << params << endl
-			     << "params[0]='" 
+			     << "params[0]='"
 			     << params[0] << "'" << endl
-			     << "params[len-1]='" 
-			     << params[len-1] << "'" 
+			     << "params[len-1]='"
+			     << params[len-1] << "'"
 			     << endl;
-			  
+
 			  if ( ( params[0] == '"' && params[len-1] == '"' )
 			       || ( params[0] == '\'' && params[len-1] == '\'' ) )
 			    params = params.substr( 1, len-2 );
 			}
 			DS << "base='" << basename << "'"
 			   << endl
-			   << "command='classify'" 
+			   << "command='classify'"
 			   << endl;
-			string distrib, answer; 
+			string distrib, answer;
 			double distance;
 			if ( theServer->doDebug() )
 			  LS << "Classify(" << params << ")" << endl;
 			if ( api->Classify( params, answer, distrib, distance ) ){
-			  
+
 			  if ( theServer->doDebug() )
-			    LS << "resultaat: " << answer 
+			    LS << "resultaat: " << answer
 			       << ", distrib: " << distrib
 			       << ", distance " << distance
 			       << endl;
-			  
+
 			  xmlNode *cl = XmlNewChild( root, "classification" );
 			  XmlNewTextChild( cl, "input", params );
 			  XmlNewTextChild( cl, "category", answer );
@@ -867,6 +872,10 @@ namespace TimblServer {
 			  if ( api->Verbosity(DISTANCE) ){
 			    XmlNewTextChild( cl, "distance",
 					 toString<double>(distance) );
+			  }
+			  if ( api->Verbosity(MATCH_DEPTH) ){
+			    XmlNewTextChild( cl, "match_depth",
+					     toString<double>( api->matchDepth()) );
 			  }
 			  if ( api->Verbosity(NEAR_N) ){
 			    xmlNode *nb = api->bestNeighborsToXML();
@@ -887,18 +896,18 @@ namespace TimblServer {
 		  }
 		}
 		else {
-		  *Dbg(theServer->myLog) << "invalid BASE! '" << basename 
+		  *Dbg(theServer->myLog) << "invalid BASE! '" << basename
 					 << "'" << endl;
 		  os << "invalid basename: '" << basename << "'" << endl;
 		}
 		os << endl;
 	      }
-	    } 
+	    }
 	  }
 	}
       }
-      
-      *Log(theServer->myLog) << "Thread " << (uintptr_t)pthread_self() 
+
+      *Log(theServer->myLog) << "Thread " << (uintptr_t)pthread_self()
 			     << ", terminated at: " << Timer::now() << endl;
       os.flush();
       //
@@ -913,7 +922,7 @@ namespace TimblServer {
     }
     return NULL;
   }
-  
+
   void ServerClass::RunHttpServer(){
     if ( !pidFile.empty() ){
       // check validity of pidfile
@@ -933,11 +942,11 @@ namespace TimblServer {
 	logFile = '/' + logFile;
       logS = new ofstream( logFile.c_str() );
       if ( logS && logS->good() ){
-	*Log(myLog) << "switching logging to file " 
+	*Log(myLog) << "switching logging to file "
 		    << logFile << endl;
 	myLog.associate( *logS );
-	*Log(myLog)  << "Started logging " << endl;	
-	*Log(myLog)  << "debugging is " << (doDebug()?"on":"off") << endl;	
+	*Log(myLog)  << "Started logging " << endl;
+	*Log(myLog)  << "debugging is " << (doDebug()?"on":"off") << endl;
       }
       else {
 	delete logS;
@@ -973,7 +982,7 @@ namespace TimblServer {
 	pid_file << pid << endl;
       }
     }
-    // set the attributes 
+    // set the attributes
     pthread_attr_t attr;
     if ( pthread_attr_init(&attr) ||
 	 pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED ) ){
@@ -996,11 +1005,11 @@ namespace TimblServer {
       *Log(myLog) << server.getMessage() << endl;
       exit(0);
     }
-    
+
     int failcount = 0;
     struct sigaction act;
     sigaction( SIGTERM, NULL, &act ); // get current action
-    act.sa_handler = KillServerFun; 
+    act.sa_handler = KillServerFun;
     act.sa_flags &= ~SA_RESTART;      // do not continue after SIGTERM
     sigaction( SIGTERM, &act, NULL );
     while( keepGoing ){ // waiting for connections loop
@@ -1016,17 +1025,17 @@ namespace TimblServer {
 	  exit(EXIT_FAILURE);
 	}
 	else {
-	  continue;  
+	  continue;
 	}
       }
       else {
 	if ( !keepGoing ) break;
 	failcount = 0;
-	*Log(myLog) << "Accepting Connection #" 
+	*Log(myLog) << "Accepting Connection #"
 		    << newSocket->getSockId()
-		    << " from remote host: " 
+		    << " from remote host: "
 		    << newSocket->getClientName() << endl;
-	// create a new thread to process the incoming request 
+	// create a new thread to process the incoming request
 	// (The thread will terminate itself when done processing
 	// and release its socket handle)
 	//
@@ -1037,11 +1046,11 @@ namespace TimblServer {
 	args->experiments = &experiments;
 	pthread_create( &chld_thr, &attr, httpChild, (void *)args );
       }
-      // the server is now free to accept another socket request 
+      // the server is now free to accept another socket request
     }
     // some cleanup
-    pthread_attr_destroy(&attr); 
-    //    delete logS; Don't destroy the egg before the chicken 
+    pthread_attr_destroy(&attr);
+    //    delete logS; Don't destroy the egg before the chicken
     //                 This leaks 512 bytes at program termination
     map<string, TimblExperiment*>::iterator it = experiments.begin();
     while( it != experiments.end() ){
@@ -1049,8 +1058,8 @@ namespace TimblServer {
       ++it;
     }
   }
-  
-  
+
+
   bool ServerClass::startClassicServer( int port , int maxC ){
     serverPort = port;
     if ( maxC > 0 )
@@ -1108,7 +1117,7 @@ namespace TimblServer {
     }
     return false;
   }
-      
+
 
   IB1_Server::IB1_Server( GetOptClass *opt ){
     exp = new IB1_Experiment( opt->MaxFeatures() );
