@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 1998 - 2013
+  Copyright (c) 1998 - 2014
   ILK  -  Tilburg University
   CNTS -  University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -54,7 +54,7 @@ bool runClient( const string& sock, int id ){
 	if ( client.write( testLine + "\n" ) ){
 	  cerr << "Client " << id << " wrote():\t\t\t\t" << testLine << endl;
 	  if ( client.read( resultLine ) ){
-	    if ( resultLine == "" ) 
+	    if ( resultLine == "" )
 	      continue;
 	    cerr << "Client " << id << " read() \t\t\t\t" << resultLine << endl;
 	  }
@@ -109,7 +109,7 @@ bool runToClient( const string& sock, int id ){
 	  cerr << "client " << id << " sleeps " << snorr << " seconds" << endl;
 	  sleep( snorr);
 	  if ( client.read( resultLine, timeOut ) ){
-	    if ( resultLine == "" ) 
+	    if ( resultLine == "" )
 	      continue;
 	    cerr << "Client " << id << " read() \t\t\t\t" << resultLine << endl;
 	  }

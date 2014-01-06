@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 1998 - 2013
+  Copyright (c) 1998 - 2014
   ILK  -  Tilburg University
   CNTS -  University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -49,14 +49,14 @@ void *do_child( void *arg ){
   // process the test material
   //
   char line[256];
-  sprintf( line, "Server: Thread %lu, on Socket %d", 
+  sprintf( line, "Server: Thread %lu, on Socket %d",
 	   (uintptr_t)pthread_self(),
 	   mysock->getSockId() );
   cerr << line << ", started" << endl;
   string buf;
   while( mysock->read( buf ) ){
     cerr << "Server: read()" << buf << endl;
-    string answer = string( "echo: " ) + buf + "\n"; 
+    string answer = string( "echo: " ) + buf + "\n";
     mysock->write( answer );
     cerr << "Server: wrote()" << answer << endl;
   }
@@ -85,14 +85,14 @@ void *do_to_child( void *arg ){
   // process the test material
   //
   char line[256];
-  sprintf( line, "ToServer: Thread %lu, on Socket %d", 
+  sprintf( line, "ToServer: Thread %lu, on Socket %d",
 	   (uintptr_t)pthread_self(),
 	   mysock->getSockId() );
   cerr << line << ", started" << endl;
   string buf;
   while( mysock->read( buf, timeOut ) ){
     cerr << "ToServer: read()" << buf << endl;
-    string answer = string( "echo: " ) + buf + "\n"; 
+    string answer = string( "echo: " ) + buf + "\n";
     int snorr = randomSecs();
     cerr << "Server sleeps " << snorr << " seconds" << endl;
     sleep( snorr);
@@ -117,13 +117,13 @@ bool startServer( const string& portString ){
     cerr << "failed to start Server: " << server.getMessage() << endl;
     return false;
   }
-  
+
   if ( !server.listen( 5 ) ) {
     // maximum of 5 pending requests
     cerr << server.getMessage() << endl;
     return false;
   }
-  
+
   cerr << "Started Server on port:" << portString << endl;
   int failcount = 0;
   while( true ){ // waiting for connections loop
@@ -137,14 +137,14 @@ bool startServer( const string& portString ){
 	return false;
 	}
       else {
-	continue;  
+	continue;
       }
     }
     else {
       failcount = 0;
       cerr  << "Server: Accepting Connection #" << newSocket->getSockId()
 	    << " from remote host: " << newSocket->getClientName() << endl;
-      // create a new thread to process the incoming request 
+      // create a new thread to process the incoming request
       // (The thread will terminate itself when done processing
       // and release its socket handle)
       //
@@ -156,9 +156,9 @@ bool startServer( const string& portString ){
       else
 	pthread_create( &chld_thr, &attr, do_child, (void *)newSocket );
     }
-    // the server is now free to accept another socket request 
+    // the server is now free to accept another socket request
   }
-  pthread_attr_destroy(&attr); 
+  pthread_attr_destroy(&attr);
   return true;
 }
 

@@ -2,10 +2,10 @@
   $Id$
   $URL$
 
-  Copyright (c) 1998 - 2013
+  Copyright (c) 1998 - 2014
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -72,9 +72,9 @@ inline void usage_full(void){
   cerr << "for an overwiew of all TiMBLoptions, use 'timbl -h'" << endl;
   cerr << endl;
   cerr << "Server options" << endl;
-  cerr << "--config=<f> read server settings from file <f>" << endl; 
-  cerr << "--pidfile=<f> store pid in file <f>" << endl; 
-  cerr << "--logfile=<f> log server activity in file <f>" << endl; 
+  cerr << "--config=<f> read server settings from file <f>" << endl;
+  cerr << "--pidfile=<f> store pid in file <f>" << endl;
+  cerr << "--logfile=<f> log server activity in file <f>" << endl;
   cerr << "--daemonize=[yes|no] (default yes)" << endl << endl;
   cerr << "-S <port> : run as a server on <port>" << endl;
   cerr << "-C <num>  : accept a maximum of 'num' parallel connections (default 10)" << endl;
@@ -92,9 +92,9 @@ inline void usage(void){
 
 void get_command_lines( const string& value, list<string>& result ){
   result.clear();
-  ifstream ind( value.c_str()+1 ); // skip @ 
+  ifstream ind( value.c_str()+1 ); // skip @
   if ( ind.bad() ){
-    cerr << "Problem reading command-lines from file '" 
+    cerr << "Problem reading command-lines from file '"
 	 << value << "'" << endl;
     throw( "command line failure" );
   }
@@ -108,12 +108,12 @@ void get_command_lines( const string& value, list<string>& result ){
 
 string correct_path( const string& filename,
 		     const string& path,
-		     bool keep_origpath ){  
+		     bool keep_origpath ){
   // if filename contains pathinformation, it is replaced with path, except
-  // when keep_origpath is true. 
+  // when keep_origpath is true.
   // if filename contains NO pathinformation, path is always appended.
   // of course we don't append if the filename is empty or just '-' !
-  
+
   if ( path != "" && filename != "" && filename[0] != '-' ){
     bool add_slash = path[path.length()] != '/';
     string tmp;
@@ -124,14 +124,14 @@ string correct_path( const string& filename,
 	tmp += "/";
       tmp += filename;
     }
-    else { 
+    else {
       tmp = path;
       if ( add_slash )
 	tmp += "/";
       if ( !keep_origpath ){
 	tmp += filename.substr( pos+1 );
       }
-      else 
+      else
 	tmp += filename;
     }
     return tmp;
@@ -218,7 +218,7 @@ void Preset_Values( TimblOpts& Opts ){
     }
     Max_Connections = TiCC::stringTo<int>( value );
     if ( Max_Connections < 1 || Max_Connections > 1000 ){
-      cerr << "-C options, max number of connection invalid: " 
+      cerr << "-C options, max number of connection invalid: "
 	   << Max_Connections << endl;
     }
     Opts.Delete( 'C' );
@@ -304,7 +304,7 @@ bool get_file_names( TimblOpts& Opts ){
       else if ( num == 1 ){
 	WgtInFile = correct_path( value, I_Path, true );
 	Opts.Delete( 'w' );
-      } 
+      }
       else {
 	cerr << "invalid weighting option: " << value << endl;
 	return false;
@@ -332,10 +332,10 @@ int main(int argc, char *argv[]){
     // Start.
     //
     cerr << "TiMBL Server " << TimblServer::Version()
-	 << " (c) ILK 1998 - 2013.\n" 
+	 << " (c) ILK 1998 - 2014.\n"
 	 << "Tilburg Memory Based Learner\n"
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
-	 << "CLiPS Computational Linguistics Group, University of Antwerp\n" 
+	 << "CLiPS Computational Linguistics Group, University of Antwerp\n"
 	 << "based on " << Timbl::VersionName() << endl;
     time(&Time);
     curtime = localtime(&Time);
@@ -414,15 +414,15 @@ int main(int argc, char *argv[]){
   }
   catch(std::string& what){
     cerr << "an exception was raised: '" << what << "'" << endl;
-    cerr << "timblserver terminated, Sorry for that" << endl; 
+    cerr << "timblserver terminated, Sorry for that" << endl;
   }
   catch(std::exception& e){
     cerr << "a standard exception was raised: '" << e.what() << "'" << endl;
-    cerr << "timblserver terminated, Sorry for that" << endl; 
+    cerr << "timblserver terminated, Sorry for that" << endl;
   }
   catch(...){
     cerr << "some exception was raised" << endl;
-    cerr << "timblserver terminated, Sorry for that" << endl; 
+    cerr << "timblserver terminated, Sorry for that" << endl;
   }
   return 0;
 }
