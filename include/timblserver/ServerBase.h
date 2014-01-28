@@ -2,7 +2,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 1998 - 2014
+  Copyright (c) 1998 - 2013
   ILK   - Tilburg University
   CLiPS - University of Antwerp
  
@@ -30,74 +30,86 @@
 #ifndef SERVERBASE_H
 #define SERVERBASE_H
 
-#include "timbl/TimblAPI.h"
 #include "ticcutils/LogStream.h"
+#include "ticcutils/Configuration.h"
 #include "timblserver/SocketBasics.h"
 
 namespace TimblServer {
 
-  std::string Version();
-  std::string VersionName();
-  std::string BuildInfo();
+  class childArgs;
 
-  class ServerClass : public Timbl::MsgClass {
-    friend class TimblServerAPI;
-    friend ServerClass *CreateServerPimpl( Timbl::AlgorithmType, 
-					   Timbl::GetOptClass * );
+  class ServerBase {
   public:
-    TiCC::LogStream myLog;
     bool doDebug() { return debug; };
-    bool doSetOptions( Timbl::TimblExperiment *, const std::string&  );
-    bool classifyOneLine( Timbl::TimblExperiment *, const std::string& );
-    Timbl::TimblExperiment *theExp(){ return exp; };
-    virtual ~ServerClass();
+    virtual ~ServerBase(){};
+    static std::string VersionInfo( bool );
     static int daemonize( int , int );
-  protected:
-    ServerClass();
-    bool getConfig( const std::string& );
-    bool startClassicServer( int, int=0 );
-    bool startMultiServer( const std::string& );
-    void RunClassicServer();
-    void RunHttpServer();
-    Timbl::TimblExperiment *splitChild() const;
+    int maxConn() const { return _maxConn; };
+    ServerBase( const TiCC::Configuration * );
     void setDebug( bool d ){ debug = d; };
     Sockets::ServerSocket *TcpSocket() const { return tcp_socket; };
-    Timbl::TimblExperiment *exp;
+    static void *callChild( void * ); 
+    int Run();
+    virtual void socketChild( childArgs * );
+    virtual void callback( childArgs* ) = 0;
+    TiCC::LogStream myLog;
     std::string logFile;
     std::string pidFile;
+    std::string name;
     bool doDaemon;
-  private:
     bool debug;
-    int maxConn;
+    int _maxConn;
     int serverPort;
+    void *callback_data;
     Sockets::ServerSocket *tcp_socket;
     std::string serverProtocol;
     std::string serverConfigFile;
+    const TiCC::Configuration *config;
     std::map<std::string, std::string> serverConfig;
   };
 
-  Timbl::TimblExperiment *createClient( const Timbl::TimblExperiment *,
-					Sockets::ServerSocket* );
+  class childArgs {
+  public:
+    childArgs( ServerBase *, Sockets::ServerSocket * );
+    ~childArgs();
+    int id() const { return _id; };
+    fdostream& os() { return _os; };
+    fdistream& is() { return _is; };
+    ServerBase *mother() const { return _mother; };
+    TiCC::LogStream& logstream() { return _mother->myLog; }
+    Sockets::ServerSocket *socket() const { return _socket; };
+    bool debug() const { return _mother->doDebug(); };
+  private:
+    ServerBase *_mother;
+    Sockets::ServerSocket *_socket;
+    int _id;
+    fdistream _is;
+    fdostream _os;
+  };
+  
+  void *ServerBase::callChild( void *a ) { 
+    childArgs* ca = (childArgs*)a;
+    ca->mother()->socketChild( ca );
+    return 0;
+  }
+  
+  class TcpServerBase : public ServerBase {
+  public:
+  TcpServerBase( const TiCC::Configuration *c ):ServerBase( c ){};
+  };
+  
+  class HttpServerBase : public ServerBase {
+  public:
+    void socketChild( childArgs * );
+  HttpServerBase( const TiCC::Configuration *c ): ServerBase( c ){};
+  };
 
-  class IB1_Server: public ServerClass {
-  public:
-    IB1_Server( Timbl::GetOptClass * );
-  };
-  
-  class IG_Server: public ServerClass {
-  public:
-    IG_Server( Timbl::GetOptClass * );
-  };
- 
-  class TRIBL_Server: public ServerClass {
-  public:
-    TRIBL_Server( Timbl::GetOptClass * );
-  };
-  
-  class TRIBL2_Server: public ServerClass {
-  public:
-    TRIBL2_Server( Timbl::GetOptClass * );
-  };
+  std::string Version();
+  std::string VersionName();
+
+  int daemonize( int noCD , int noClose ){
+    return ServerBase::daemonize( noCD, noClose);
+  }
 
 }
 #endif // SERVERBASE_H

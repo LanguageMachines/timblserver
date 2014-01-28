@@ -5,7 +5,7 @@
   Copyright (c) 1998 - 2014
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -31,13 +31,11 @@
 #include <cerrno>
 #include <cstdlib>
 #include <csignal>
-#include "timbl/TimblAPI.h"
 #include "ticcutils/StringOps.h"
 #include "timblserver/FdStream.h"
 #include "timblserver/ClientBase.h"
 
 using namespace std;
-using namespace Timbl;
 
 namespace TimblServer {
 
@@ -45,11 +43,11 @@ namespace TimblServer {
 
   enum code_t { UnknownCode, Result, Err, OK, Echo, Skip,
 		Neighbors, EndNeighbors, Status, EndStatus };
-  
+
   ClientClass::ClientClass() {
     serverPort = -1;
-  }  
-    
+  }
+
   ClientClass::~ClientClass(){
   }
 
@@ -72,7 +70,7 @@ namespace TimblServer {
   }
 
   bool ClientClass::connect( const string& node,  const string& port ){
-    cout << "Starting Client on node:" << node << ", port:" 
+    cout << "Starting Client on node:" << node << ", port:"
 	 << port << endl;
     string line;
     if ( client.connect( node, port) ){
@@ -130,31 +128,32 @@ namespace TimblServer {
     return false;
   }
 
-  code_t toCode( const string& com ){
+  code_t toCode( const string& command ){
+    string com = TiCC::uppercase( command );
     code_t result = UnknownCode;
-    if ( compare_nocase( com, "CATEGORY" ) )
+    if ( com == "CATEGORY" )
       result = Result;
-    else if ( compare_nocase( com, "ERROR" ) )
+    else if ( com == "ERROR" )
       result = Err;
-    else if ( compare_nocase( com, "OK" ) )
+    else if ( com == "OK" )
       result = OK;
-    else if ( compare_nocase( com, "AVAILABLE" ) )
+    else if ( com == "AVAILABLE" )
       result = Echo;
-    else if ( compare_nocase( com, "SELECTED" ) )
+    else if ( com == "SELECTED" )
       result = Echo;
-    else if ( compare_nocase( com, "SKIP" ) )
+    else if ( com == "SKIP" )
       result = Skip;
-    else if ( compare_nocase( com, "NEIGHBORS" ) )
+    else if ( com == "NEIGHBORS" )
       result = Neighbors;
-    else if ( compare_nocase( com, "ENDNEIGHBORS" ) )
+    else if ( com == "ENDNEIGHBORS" )
       result = EndNeighbors;
-    else if ( compare_nocase( com, "STATUS" ) )
+    else if ( com == "STATUS" )
       result = Status;
-    else if ( compare_nocase( com, "ENDSTATUS" ) )
+    else if ( com == "ENDSTATUS" )
       result = EndStatus;
     return result;
   }
-  
+
   code_t Split( const string& line, string& rest ){
     string code;
     string::const_iterator b_it = line.begin();
@@ -166,7 +165,7 @@ namespace TimblServer {
     rest = string( m_it, line.end() );
     return toCode( code );
   }
-  
+
   bool ClientClass::extractResult( const string& line ){
     string cls;
     string dist;
@@ -176,7 +175,7 @@ namespace TimblServer {
       string::size_type pos2 = line.find( "}", pos1 );
       if ( pos2 != string::npos ){
 	cls = line.substr( pos1+1, pos2 - pos1 -1 );
-	pos1 = line.find( "DISTRIBUTION" );	
+	pos1 = line.find( "DISTRIBUTION" );
 	if ( pos1 != string::npos ) {
 	  pos1 = line.find( "{", pos1 + 13 );
 	  if ( pos1 != string::npos ) {
@@ -190,7 +189,7 @@ namespace TimblServer {
 	  else
 	    return false;
 	}
-	pos1 = line.find( "DISTANCE" );	
+	pos1 = line.find( "DISTANCE" );
 	if ( pos1 != string::npos ) {
 	  pos1 = line.find( "{", pos1 + 9 );
 	  if ( pos1 != string::npos ) {
@@ -217,7 +216,7 @@ namespace TimblServer {
 	      break;
 	  }
 	}
-	Class = cls;	
+	Class = cls;
 	distribution = db;
 	distance = dist;
 	return true;
@@ -225,7 +224,7 @@ namespace TimblServer {
     }
     return false;
   }
-  
+
   bool ClientClass::classify( const string& line ){
     Class.clear();
     distribution.clear();
@@ -256,10 +255,10 @@ namespace TimblServer {
     return false;
   }
 
-  bool ClientClass::classifyFile( istream& is, ostream& os ){  
+  bool ClientClass::classifyFile( istream& is, ostream& os ){
     if ( client.isValid() ) {
       string line;
-      while( getline( is, line) ){ 
+      while( getline( is, line) ){
 	//      cerr << "Test line " << line << endl;
 	if ( classify( line ) ){
 	  os << line << " --> CATEGORY {" << Class << "}";
@@ -287,10 +286,10 @@ namespace TimblServer {
     }
   }
 
-  bool ClientClass::runScript( istream& is, ostream& os ){  
+  bool ClientClass::runScript( istream& is, ostream& os ){
     if ( client.isValid() ) {
       string request;
-      while( getline( is, request ) ){ 
+      while( getline( is, request ) ){
 	//      cerr << "script line " << request << endl;
 	if ( client.write( request + "\n" ) ){
 	  string response;
@@ -348,7 +347,7 @@ namespace TimblServer {
 	  return false;
       }
       return true;
-    } 
+    }
     else
       return false;
   }

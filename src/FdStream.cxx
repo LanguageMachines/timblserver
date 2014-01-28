@@ -5,7 +5,7 @@
   Copyright (c) 1998 - 2014
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -33,6 +33,7 @@
 #include <csignal>
 #include <iostream>
 #include <streambuf>
+#include <stdexcept>
 #include <unistd.h>
 #include <cstdlib>
 #include "timblserver/FdStream.h"
@@ -49,6 +50,16 @@ void milli_wait( int m_secs ){
   }
 }
 
+fdoutbuf::fdoutbuf(): fd(-1) { }
+fdoutbuf::fdoutbuf( int _fd ): fd(_fd) { }
+
+bool fdoutbuf::connect( int _fd ){
+  if ( fd >= 0 ){
+    throw logic_error( "FDstream: output buffer already connected" );
+  }
+  fd = _fd;
+  return true;
+}
 
 int fdoutbuf::overflow( int c ){
   if ( c != EOF ){
@@ -65,10 +76,24 @@ std::streamsize fdoutbuf::xsputn( const char *s, std::streamsize num ){
 }
 
 
-fdinbuf::fdinbuf( int _fd ): fd(_fd){ 
-  setg( buffer + putbackSize, 
-	buffer + putbackSize, 
+fdinbuf::fdinbuf(): fd(-1) {
+  setg( buffer + putbackSize,
+	buffer + putbackSize,
 	buffer + putbackSize );
+}
+
+fdinbuf::fdinbuf( int _fd ): fd(_fd) {
+  setg( buffer + putbackSize,
+	buffer + putbackSize,
+	buffer + putbackSize );
+}
+
+bool fdinbuf::connect( int _fd ){
+  if ( fd >= 0 ){
+    throw logic_error( "FDstream: input buffer already connected" );
+  }
+  fd = _fd;
+  return true;
 }
 
 int fdinbuf::underflow(){
@@ -79,8 +104,8 @@ int fdinbuf::underflow(){
   if ( numPutBack > putbackSize ) {
     numPutBack = putbackSize;
   }
-  
-  std::memmove( buffer + putbackSize - numPutBack, 
+
+  std::memmove( buffer + putbackSize - numPutBack,
 	       gptr() - numPutBack,
 	       numPutBack );
   int num = read( fd, buffer+putbackSize, bufferSize - putbackSize );
@@ -88,7 +113,7 @@ int fdinbuf::underflow(){
     setg( 0, 0, 0 );
     return traits_type::eof();
   }
-  setg( buffer + putbackSize - numPutBack, 
+  setg( buffer + putbackSize - numPutBack,
 	buffer + putbackSize,
 	buffer + putbackSize + num );
   return traits_type::to_int_type(*gptr());
@@ -99,7 +124,7 @@ int fdinbuf::underflow(){
 bool nb_getline( istream& is, string& result, int& timeout ){
   // a getline for nonblocking connections.
   // retry for a few special cases until timeout reached.
-  // return false except when correctly terminated 
+  // return false except when correctly terminated
   // ( meaning \n or an EOF after at least some input)
   result = "";
   char c;
@@ -137,12 +162,12 @@ bool nb_getline( istream& is, string& result, int& timeout ){
 bool nb_putline( ostream& os, const string& what, int& timeout ){
   // a putline for nonblocking connections.
   // retry for a few special cases until timeout reached.
-  // return false except when correctly terminated 
+  // return false except when correctly terminated
   // Must handle SIGPIPE
   unsigned int i=0;
   int count = 0;
   bool result = true;
-  typedef void (*sig_hndl)(int); 
+  typedef void (*sig_hndl)(int);
   sig_hndl sig;
   // specify that the SIGPIPE signal is to be ignored
   sig=signal(SIGPIPE,SIG_IGN);
@@ -171,4 +196,14 @@ bool nb_putline( ostream& os, const string& what, int& timeout ){
   // restore old handler
   signal( SIGPIPE, sig );
   return result;
+}
+
+bool fdistream::open( int fd ){
+  buf.connect( fd );
+  return true;
+}
+
+bool fdostream::open( int fd ){
+  buf.connect( fd );
+  return true;
 }

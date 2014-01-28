@@ -2,7 +2,7 @@
   $Id$
   $URL$
 
-  Copyright (c) 1998 - 2014
+  Copyright (c) 1998 - 2013
   ILK   - Tilburg University
   CLiPS - University of Antwerp
  
@@ -34,13 +34,14 @@
 #include <streambuf>
 
 class fdoutbuf: public std::streambuf {
- protected:
-  int fd; // file descriptor
  public:
- fdoutbuf( int _fd ): fd(_fd){};
+  fdoutbuf( int _fd );
+  fdoutbuf();
+  bool connect( int );
  protected:
   virtual int overflow( int );
   virtual std::streamsize xsputn( const char *, std::streamsize );
+  int fd; // file descriptor
 };
 
 class fdostream: public std::ostream {
@@ -48,18 +49,21 @@ class fdostream: public std::ostream {
   fdoutbuf buf;
  public:
  fdostream( int fd ): std::ostream(&buf), buf(fd) {};
+ fdostream(): std::ostream(&buf) {};
+  bool open( int fd );
 };
 
 class fdinbuf: public std::streambuf {
+ public:
+  fdinbuf();
+  fdinbuf( int);
+  bool connect( int );
  protected:
+  virtual int underflow();
   int fd; // file descriptor
   static const int putbackSize = 4;
   static const int bufferSize = 512;
   char buffer[bufferSize];
- public:
-  fdinbuf( int _fd );
- protected:
-  virtual int underflow();
 };
 
 class fdistream: public std::istream {
@@ -67,6 +71,8 @@ class fdistream: public std::istream {
   fdinbuf buf;
  public:
  fdistream( int fd ): std::istream(&buf), buf(fd) {};
+ fdistream(): std::istream(&buf) {};
+  bool open( int fd );
 };
 
 bool nb_getline( std::istream&, std::string&, int& );

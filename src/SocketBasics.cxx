@@ -38,14 +38,11 @@
 #include <climits>
 #include <fcntl.h>
 
-//#include "timbl/Types.h"
-
 #include "config.h"
 #include "timblserver/SocketBasics.h"
 #include "ticcutils/StringOps.h"
 
 using namespace std;
-//using namespace Timbl;
 
 namespace Sockets {
 

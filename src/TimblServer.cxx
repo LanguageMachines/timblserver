@@ -28,44 +28,21 @@
 */
 
 #include <exception>
-#include <list>
 #include <vector>
-#include <iosfwd>
 #include <string>
-#include <fstream>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <cctype>
 
 #include "timbl/TimblAPI.h"
-#include "timbl/Options.h"
+#include "timbl/GetOptClass.h"
+#include "timblserver/FdStream.h"
 #include "timblserver/ServerBase.h"
-#include "timblserver/TimblServerAPI.h"
 
 using namespace std;
 using namespace Timbl;
 using namespace TimblServer;
-
-static list<string> ind_lines;
-
-Algorithm algorithm;
+using namespace TiCC;
 
 bool Do_Server = false;
 bool Do_Multi_Server = false;
-int ServerPort = -1;
-int Max_Connections = 10;
-
-string I_Path;
-string Q_value;
-string dataFile;
-string ServerConfigFile;
-string MatrixInFile;
-string TreeInFile;
-string WgtInFile;
-Weighting WgtType = UNKNOWN_W;
-string ProbInFile;
 
 inline void usage_full(void){
   cerr << "usage: timblserver [TiMBLoptions] [ServerOptions]" << endl << endl;
@@ -90,56 +67,6 @@ inline void usage(void){
   cerr << endl;
 }
 
-void get_command_lines( const string& value, list<string>& result ){
-  result.clear();
-  ifstream ind( value.c_str()+1 ); // skip @
-  if ( ind.bad() ){
-    cerr << "Problem reading command-lines from file '"
-	 << value << "'" << endl;
-    throw( "command line failure" );
-  }
-  string Buf;
-  while ( getline( ind, Buf ) ){
-    if ( Buf.empty() )
-      continue;
-    result.push_back( Buf );
-  }
-}
-
-string correct_path( const string& filename,
-		     const string& path,
-		     bool keep_origpath ){
-  // if filename contains pathinformation, it is replaced with path, except
-  // when keep_origpath is true.
-  // if filename contains NO pathinformation, path is always appended.
-  // of course we don't append if the filename is empty or just '-' !
-
-  if ( path != "" && filename != "" && filename[0] != '-' ){
-    bool add_slash = path[path.length()] != '/';
-    string tmp;
-    string::size_type pos = filename.rfind( '/' );
-    if ( pos == string::npos ){
-      tmp = path;
-      if ( add_slash )
-	tmp += "/";
-      tmp += filename;
-    }
-    else {
-      tmp = path;
-      if ( add_slash )
-	tmp += "/";
-      if ( !keep_origpath ){
-	tmp += filename.substr( pos+1 );
-      }
-      else
-	tmp += filename;
-    }
-    return tmp;
-  }
-  else
-    return filename;
-}
-
 class softExit : public exception {};
 
 void Preset_Values( TimblOpts& Opts ){
@@ -150,41 +77,13 @@ void Preset_Values( TimblOpts& Opts ){
     throw( softExit() );
   }
   if ( Opts.Find( 'V', value, mood ) ){
-    cerr << "TiMBL server " << TimblServer::BuildInfo() << endl;
-    cerr << "Based on TiMBL " << Timbl::Version() << endl;
+    cerr << "TiMBL server " << ServerBase::VersionInfo( true ) << endl;
+    cerr << "Based on TiMBL " << TimblAPI::VersionInfo( true ) << endl;
     throw( softExit() );
-  }
-  if ( Opts.Find( 'a', value, mood ) ){
-    // the user gave an algorithm
-    if ( !string_to( value, algorithm ) ){
-      cerr << "illegal -a value: " << value << endl;
-      throw( softExit() ); // no chance to proceed
-    }
-    Opts.Delete( 'a' );
-  }
-  else
-    algorithm = IB1; // general default
-  Opts.Add( 'a', to_string( algorithm ), false );
-  if ( Opts.Find( 'P', value, mood ) ){
-    I_Path = value;
-    Opts.Delete( 'P' );
-  }
-  if ( Opts.Find( 'f', value, mood ) ){
-    dataFile = correct_path( value, I_Path, true );
-    Opts.Delete( 'f' );
-  }
-  if ( Opts.Find( 'q', value, mood ) ){
-    Q_value = value;
   }
   Opts.Add( 'v', "F", true );
   Opts.Add( 'v', "S", false );
-  if ( Opts.Find( "debug", value, mood ) ){
-    Opts.Delete( "debug" );
-    Opts.Add( 'v', "CD", true );
-  }
   if ( Opts.Find( "config", value, mood ) ){
-    ServerConfigFile = correct_path( value, I_Path, true );
-    Opts.Delete( "config" );
     Do_Multi_Server = true;
   }
   if ( Opts.Find( 'S', value, mood ) ){
@@ -194,11 +93,6 @@ void Preset_Values( TimblOpts& Opts ){
     }
     else {
       Do_Server = true;
-      ServerPort = TiCC::stringTo<int>( value );
-      if ( ServerPort < 1 || ServerPort > 100000 ){
-	cerr << "-S option, portnumber invalid: " << ServerPort << endl;
-	throw( softExit() );
-      }
     }
   }
   else {
@@ -207,86 +101,156 @@ void Preset_Values( TimblOpts& Opts ){
       // hack to signal GetOptClass that we are going into server mode
     }
   }
-  if ( Opts.Find( 'C', value, mood ) ){
-    if ( Do_Multi_Server ){
-      cerr << "-C must be specified in the configfile" << endl;
-      throw( softExit() );
-    }
-    if ( !Do_Server ){
-      cerr << "-C option invalid without -S" << endl;
-      throw( softExit() );
-    }
-    Max_Connections = TiCC::stringTo<int>( value );
-    if ( Max_Connections < 1 || Max_Connections > 1000 ){
-      cerr << "-C options, max number of connection invalid: "
-	   << Max_Connections << endl;
-    }
-    Opts.Delete( 'C' );
-  }
-  Weighting W = GR;
-  // default Weighting = GainRatio
-  if ( Opts.Find( 'w', value, mood ) ){
-    // user specified weighting
-    if ( !string_to( value, W ) )
-      // no valid weight, hopefully a filename
-      return;
-    else
-      // valid Weight, but maybe a number, so replace
-      Opts.Delete( 'w' );
-  }
-  Opts.Add( 'w', to_string(W), false );
 }
 
-void Adjust_Default_Values( TimblOpts& Opts ){
-  bool mood;
+void startExperiments( ServerBase *server,
+		       TimblOpts& opts ){
+  map<string,string> allvals;
+  if ( server->config->hasSection("experiments") )
+    allvals = server->config->lookUpAll("experiments");
+  else {
+    allvals = server->config->lookUpAll("global");
+    // old style, everything is global
+    // remove all alreday processed stuff
+    map<string,string>::iterator it = allvals.begin();
+    while ( it != allvals.end() ){
+      if ( it->first == "port" ||
+	   it->first == "protocol" ||
+	   it->first == "logfile" ||
+	   it->first == "debug" ||
+	   it->first == "pidfile" ||
+	   it->first == "daemonize" ||
+	   it->first == "maxconn" ){
+	allvals.erase(it++);
+      }
+      else {
+	++it;
+      }
+    }
+  }
+  map<string, TimblExperiment*> *experiments = new map<string, TimblExperiment*>();
+  server->callback_data = experiments;
+
+  if ( allvals.empty() ){
+    cerr << "opts" << opts << endl;
+    // old style stuff
+    string treeName;
+    string trainName;
+    bool mood;
+    if ( opts.Find( 'f', trainName, mood ) )
+      opts.Delete( 'f' );
+    else if ( opts.Find( 'i', treeName, mood ) )
+      opts.Delete( 'i' );
+    if ( !( treeName.empty() && trainName.empty() ) ){
+      TimblAPI *run = new TimblAPI( &opts );
+      bool result = false;
+      if ( run && run->Valid() ){
+	if ( treeName.empty() ){
+	  server->myLog << "trainName = " << trainName << endl;
+	  result = run->Learn( trainName );
+	}
+	else {
+	  server->myLog << "treeName = " << treeName << endl;
+	  result = run->GetInstanceBase( treeName );
+	}
+      }
+      if ( result ){
+	run->initExperiment();
+	(*experiments)["default"] = run->grabAndDisconnectExp();
+	server->myLog << "started classic experiment " << endl;
+      }
+      else {
+	server->myLog << "FAILED to start classic experiment " << endl;
+      }
+    }
+    else {
+      server->myLog << "missing '-i' or '-f' option on command line" << endl;
+    }
+  }
+  else {
+    map<string,string>::iterator it = allvals.begin();
+    while ( it != allvals.end() ){
+      cerr << "OPTS: " << it->second << endl;
+      TimblOpts opts( it->second );
+      string treeName;
+      string trainName;
+      bool mood;
+      if ( opts.Find( 'f', trainName, mood ) )
+	opts.Delete( 'f' );
+      else if ( opts.Find( 'i', treeName, mood ) )
+	opts.Delete( 'i' );
+      if ( !( treeName.empty() && trainName.empty() ) ){
+	TimblAPI *run = new TimblAPI( &opts, it->first );
+	bool result = false;
+	if ( run && run->Valid() ){
+	  if ( treeName.empty() ){
+	    server->myLog << "trainName = " << trainName << endl;
+	    result = run->Learn( trainName );
+	  }
+	  else {
+	    server->myLog << "treeName = " << treeName << endl;
+	    result = run->GetInstanceBase( treeName );
+	  }
+	}
+	if ( result ){
+	  run->initExperiment();
+	  (*experiments)[it->first] = run->grabAndDisconnectExp();
+	  delete run;
+	  server->myLog << "started experiment " << it->first
+			<< " with parameters: " << it->second << endl;
+	}
+	else {
+	  server->myLog << "FAILED to start experiment " << it->first
+			<< " with parameters: " << it->second << endl;
+	}
+      }
+      else {
+	server->myLog << "missing '-i' or '-f' option in serverconfig file" << endl;
+      }
+      ++it;
+    }
+  }
+}
+
+void startClassicExperiment( ServerBase *server,
+			     TimblOpts& opts ){
+  string treeName;
+  string trainName;
+  string MatrixInFile = "";
+  string TreeInFile = "";
+  string WgtInFile = "";
+  Weighting WgtType = GR;
+  Algorithm algorithm = IB1;
+  string ProbInFile = "";
   string value;
-  if ( !Opts.Find( 'm', value, mood ) ){
-    Opts.Add( 'm', "O", false );
-    // Default Metric = Overlap
-  }
-}
-
-bool next_test( string& line ){
-  bool result = false;
-  line = "";
-  if ( !ind_lines.empty() ){
-    line = ind_lines.front();
-    ind_lines.pop_front();
-    result = true;
-  }
-  return result;
-}
-
-bool get_file_names( TimblOpts& Opts ){
-  MatrixInFile = "";
-  TreeInFile = "";
-  WgtInFile = "";
-  WgtType = UNKNOWN_W;
-  ProbInFile = "";
-  string value;
   bool mood;
-  if ( Opts.Find( 'P', value, mood ) ||
-       Opts.Find( 'f', value, mood ) ){
+  if ( opts.Find( 'a', value, mood ) ){
+    // the user gave an algorithm
+    if ( !string_to( value, algorithm ) ){
+      cerr << "illegal -a value: " << value << endl;
+      exit(1);
+    }
+  }
+  if ( opts.Find( 'f', trainName, mood ) )
+    opts.Delete( 'f' );
+  if ( opts.Find( 'P', value, mood ) ){
     cerr << "illegal option, value = " << value << endl;
-    return false;
+    exit(1);
   }
-  if ( Opts.Find( "matrixin", value, mood ) ){
-    MatrixInFile = correct_path( value, I_Path, true );
-    Opts.Delete( "matrixin" );
+  if ( opts.Find( "matrixin", MatrixInFile, mood ) ){
+    opts.Delete( "matrixin" );
   }
-  if ( Opts.Find( 'i', value, mood ) ){
-    TreeInFile = correct_path( value, I_Path, true );
-    Opts.Delete( 'i' );
+  if ( opts.Find( 'i', TreeInFile, mood ) ){
+    opts.Delete( 'i' );
   }
-  if ( Opts.Find( 'u', value, mood ) ){
+  if ( opts.Find( 'u', ProbInFile, mood ) ){
     if ( algorithm == IGTREE ){
       cerr << "-u option is useless for IGtree" << endl;
-      return false;
+      exit(1);
     }
-    ProbInFile = correct_path( value, I_Path, true );
-    Opts.Delete( 'u' );
+    opts.Delete( 'u' );
   }
-  if ( Opts.Find( 'w', value, mood ) ){
+  if ( opts.Find( 'w', value, mood ) ){
     Weighting W;
     if ( !string_to( value, W ) ){
       // No valid weighting, so assume it also has a filename
@@ -295,34 +259,597 @@ bool get_file_names( TimblOpts& Opts ){
       if ( num == 2 ){
 	if ( !string_to( parts[1], W ) ){
 	  cerr << "invalid weighting option: " << value << endl;
-	  return false;
+	  exit(1);
 	}
-	WgtInFile = correct_path( parts[0], I_Path, true );
+	WgtInFile = parts[0];
 	WgtType = W;
-	Opts.Delete( 'w' );
       }
       else if ( num == 1 ){
-	WgtInFile = correct_path( value, I_Path, true );
-	Opts.Delete( 'w' );
+	WgtInFile = value;
       }
       else {
 	cerr << "invalid weighting option: " << value << endl;
-	return false;
+	exit(1);
+      }
+      opts.Delete( 'w' );
+    }
+  }
+  if ( !( treeName.empty() && trainName.empty() ) ){
+    TimblAPI *run = new TimblAPI( &opts, "default" );
+    bool result = false;
+    if ( run && run->Valid() ){
+      if ( treeName.empty() ){
+	cerr << "trainName = " << trainName << endl;
+	result = run->Learn( trainName );
+      }
+      else {
+	cerr << "treeName = " << treeName << endl;
+	result = run->GetInstanceBase( treeName );
+      }
+      if ( result && WgtInFile != "" ) {
+	result = run->GetWeights( WgtInFile, WgtType );
+      }
+      if ( result && ProbInFile != "" )
+	result = run->GetArrays( ProbInFile );
+      if ( result && MatrixInFile != "" ) {
+	result = run->GetMatrices( MatrixInFile );
       }
     }
+    if ( result ){
+      run->initExperiment();
+      map<string, TimblExperiment*> *experiments = new map<string, TimblExperiment*>();
+      server->callback_data = experiments;
+      (*experiments)["default"] = run->grabAndDisconnectExp();
+      delete run;
+      cerr << "started classic experiment " << endl;
+    }
+    else {
+      cerr << "FAILED to start experiment " << endl;
+    }
+  }
+  else {
+    cerr << "missing '-i' or '-f' option on the command line " << endl;
+  }
+}
+
+class TcpServer : public TcpServerBase {
+public:
+  void callback( childArgs* );
+  TcpServer( const TiCC::Configuration *c ): TcpServerBase( c ){};
+};
+
+class HttpServer : public HttpServerBase {
+public:
+  void callback( childArgs* );
+  HttpServer( const TiCC::Configuration *c ): HttpServerBase( c ){};
+};
+
+TimblExperiment *createClient( const TimblExperiment *exp,
+			       childArgs *args ){
+  TimblExperiment *result = exp->clone();
+  *result = *exp;
+  if ( !result->connectToSocket( &(args->os() ) ) ){
+    cerr << "unable to create working client" << endl;
+    return 0;
+  }
+  if ( exp->getOptParams() ){
+    result->setOptParams( exp->getOptParams()->Clone( &(args->os() ) ) );
+  }
+  result->setExpName(string("exp-")+toString( args->id() ) );
+  return result;
+}
+
+  enum CommandType { UnknownCommand, Classify, Base,
+		     Query, Set, Exit, Comment };
+
+  CommandType check_command( const string& com ){
+    CommandType result = UnknownCommand;
+    if ( compare_nocase_n( com, "CLASSIFY" ) )
+      result = Classify;
+    else if ( compare_nocase_n( com, "QUERY" ) )
+      result = Query;
+    else if ( compare_nocase_n( com, "BASE") )
+      result = Base;
+    else if ( compare_nocase_n( com, "SET") )
+      result = Set;
+    else if ( compare_nocase_n( com, "EXIT" ) )
+      result = Exit;
+    else if ( com[0] == '#' )
+      result = Comment;
+    return result;
+  }
+
+inline void Split( const string& line, string& com, string& rest ){
+  string::size_type pos = line.find_first_of(" \t");
+  if ( pos != string::npos ){
+    com = line.substr(0,pos);
+    rest = line.substr(pos+1);
+  }
+  else {
+    com = line;
+    rest = "";
+  }
+}
+
+class TimblClient {
+public:
+  TimblClient( TimblExperiment *, childArgs * );
+  bool classifyLine( const string& );
+  void showSettings(){ _exp->ShowSettings( os ); };
+  bool setOptions( const string& param );
+private:
+  LogStream& myLog;
+  bool doDebug;
+  TimblExperiment *_exp;
+  ostream& os;
+  istream& is;
+};
+
+TimblClient::TimblClient( TimblExperiment *exp,
+		      childArgs* args ):
+  myLog(args->logstream()),
+  doDebug(args->debug()),
+  os(args->os()),
+  is(args->is())
+{
+  _exp = exp->clone();
+  *_exp = *exp;
+  if ( !_exp->connectToSocket( &(args->os() ) ) ){
+    throw logic_error( "unable to create working client" );
+  }
+  if ( exp->getOptParams() ){
+    _exp->setOptParams( exp->getOptParams()->Clone( &(args->os() ) ) );
+  }
+  _exp->setExpName(string("exp-")+toString( args->id() ) );
+}
+
+bool TimblClient::setOptions( const string& param ){
+  if ( _exp->SetOptions( param ) ){
+    if ( doDebug )
+      *Log(myLog) << "setOptions: " << param << endl;
+    if ( _exp->ConfirmOptions() )
+      os << "OK" << endl;
+    else
+      os << "ERROR { set options failed: " << param << "}" << endl;
+  }
+  else {
+    if ( doDebug )
+      *Log(myLog) << ": Don't understand '" << param << "'" << endl;
   }
   return true;
 }
 
-bool checkInputFile( const string& name ){
-  if ( !name.empty() ){
-    ifstream is( name.c_str() );
-    if ( !is.good() ){
-      cerr << "unable to find or use input file '" << name << "'" << endl;
-      return false;
+bool TimblClient::classifyLine( const string& params ){
+  double Distance;
+  string Distrib;
+  string Answer;
+  if ( _exp->Classify( params, Answer, Distrib, Distance ) ){
+    if ( doDebug )
+      *Log(myLog) << _exp->ExpName() << ":" << params << " --> "
+		  << Answer << " " << Distrib
+		  << " " << Distance << endl;
+    os << "CATEGORY {" << Answer << "}";
+    if ( os.good() ){
+      if ( _exp->Verbosity(DISTRIB) ){
+	os << " DISTRIBUTION " <<Distrib;
+      }
+      if ( os.good() ){
+	if ( _exp->Verbosity(DISTANCE) ){
+	  os << " DISTANCE {" << Distance << "}";
+	}
+	if ( os.good() ){
+	  if ( _exp->Verbosity(MATCH_DEPTH) ){
+	    os << " MATCH_DEPTH {" << _exp->matchDepth() << "}";
+	  }
+	  if ( os.good() ){
+	    if ( _exp->Verbosity(NEAR_N) ){
+	      os << " NEIGHBORS" << endl;
+	      _exp->showBestNeighbors( os );
+	      os << "ENDNEIGHBORS";
+	    }
+	  }
+	}
+      }
+    }
+    if ( os.good() )
+      os << endl;
+    return os.good();
+  }
+  else {
+    if ( doDebug )
+      *Log(myLog) << _exp->ExpName() << ": Classify Failed on '"
+		  << params << "'" << endl;
+    return false;
+  }
+}
+
+
+void TcpServer::callback( childArgs *args ){
+  string Line;
+  int sockId = args->id();
+  TimblClient *client = 0;
+  map<string, TimblExperiment*> *experiments =
+    static_cast<map<string, TimblExperiment*> *>(callback_data);
+
+  int result = 0;
+  string baseName;
+  args->os() << "Welcome to the Timbl server." << endl;
+  if ( experiments->size() == 1
+       && experiments->find("default") != experiments->end() ){
+    baseName = "default";
+    *Dbg(myLog) << " Voor Create Default Client " << endl;
+    client = new TimblClient( (*experiments)[baseName], args );
+    *Dbg(myLog) << " Na Create Client " << endl;
+    // report connection to the server terminal
+    //
+    char line[256];
+    sprintf( line, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
+	     sockId );
+    *Log(myLog) << line << ", started." << endl;
+  }
+  else {
+    args->os() << "available bases: ";
+    map<string,TimblExperiment*>::const_iterator it = experiments->begin();
+    while ( it != experiments->end() ){
+      args->os() << it->first << " ";
+      ++it;
+    }
+    args->os() << endl;
+  }
+  if ( getline( args->is(), Line ) ){
+    *Dbg(myLog) << "FirstLine='" << Line << "'" << endl;
+    string Command, Param;
+    bool go_on = true;
+    *Dbg(myLog) << "running FromSocket: " << sockId << endl;
+
+    do {
+      Line = trim( Line );
+      *Dbg(myLog) << "Line='" << Line << "'" << endl;
+      Split( Line, Command, Param );
+      *Dbg(myLog) << "Command='" << Command << "'" << endl;
+      *Dbg(myLog) << "Param='" << Param << "'" << endl;
+      switch ( check_command(Command) ){
+      case Base:{
+	map<string,TimblExperiment*>::const_iterator it
+	  = experiments->find(Param);
+	if ( it != experiments->end() ){
+	  baseName = Param;
+	  args->os() << "selected base: '" << Param << "'" << endl;
+	  if ( client )
+	    delete client;
+	  *Dbg(myLog) << " Voor Create Default Client " << endl;
+	  client = new TimblClient( it->second, args );
+	  *Dbg(myLog) << " Na Create Client " << endl;
+	  // report connection to the server terminal
+	  //
+	  char line[256];
+	  sprintf( line, "Thread %zd, on Socket %d",
+		   (uintptr_t)pthread_self(), sockId );
+	  *Log(myLog) << line << ", started." << endl;
+	}
+	else {
+	  args->os() << "ERROR { Unknown basename: " << Param << "}" << endl;
+	}
+      }
+	break;
+      case Set:
+	if ( !client )
+	  args->os() << "you haven't selected a base yet!" << endl;
+	else {
+	  client->setOptions( Param );
+	}
+	break;
+      case Query:
+	if ( !client )
+	  args->os() << "you haven't selected a base yet!" << endl;
+	else {
+	  args->os() << "STATUS" << endl;
+	  client->showSettings( );
+	  args->os() << "ENDSTATUS" << endl;
+	}
+	break;
+      case Exit:
+	args->os() << "OK Closing" << endl;
+	go_on = false;
+	break;
+      case Classify:
+	if ( !client ){
+	  args->os() << "you haven't selected a base yet!" << endl;
+	}
+	else {
+	  if ( client->classifyLine( Param ) ){
+	    result++;
+	  }
+	  go_on = true; // HACK?
+	}
+	break;
+      case Comment:
+	args->os() << "SKIP '" << Line << "'" << endl;
+	break;
+      default:
+	if ( doDebug() )
+	  *Log(myLog) << sockId << ": Don't understand '"
+		      << Line << "'" << endl;
+	args->os() << "ERROR { Illegal instruction:'" << Command
+		   << "' in line:" << Line << "}" << endl;
+	break;
+      }
+    }
+    while ( go_on && getline( args->is(), Line ) );
+    delete client;
+  }
+  *Log(myLog) << "Thread " << (uintptr_t)pthread_self()
+	      << " terminated, " << result
+	      << " instances processed " << endl;
+}
+
+#define IS_DIGIT(x) (((x) >= '0') && ((x) <= '9'))
+#define IS_HEX(x) ((IS_DIGIT(x)) || (((x) >= 'a') && ((x) <= 'f')) || \
+            (((x) >= 'A') && ((x) <= 'F')))
+
+
+  string urlDecode( const string& s ) {
+    int cc;
+    string result;
+    int len=s.size();
+    for (int i=0; i<len ; ++i ) {
+      cc=s[i];
+      if (cc == '+') {
+	result += ' ';
+      }
+      else if ( cc == '%' &&
+		( i < len-2 &&
+		  ( IS_HEX(s[i+1]) ) &&
+		  ( IS_HEX(s[i+2]) ) ) ){
+	std::istringstream ss( "0x"+s.substr(i+1,2) );
+	int tmp;
+	ss >> std::showbase >> std::hex;
+	ss >> tmp;
+      result = result + (char)tmp;
+      i += 2;
+      }
+      else {
+	result += cc;
+      }
+    }
+    return result;
+  }
+
+
+void HttpServer::callback( childArgs *args ){
+  // process the test material
+  // report connection to the server terminal
+  //
+  args->socket()->setNonBlocking();
+  map<string, TimblExperiment*> *experiments =
+    static_cast<map<string, TimblExperiment*> *>(callback_data);
+  char logLine[256];
+  sprintf( logLine, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
+	   args->id() );
+  *Log(myLog) << logLine << ", started." << endl;
+  string Line;
+  int timeout = 1;
+  if ( nb_getline( args->is(), Line, timeout ) ){
+    *Dbg(myLog) << "FirstLine='" << Line << "'" << endl;
+    if ( Line.find( "HTTP" ) != string::npos ){
+      // skip HTTP header
+      string tmp;
+      timeout = 1;
+      while ( ( nb_getline( args->is(), tmp, timeout ), !tmp.empty()) ){
+	//	    cerr << "skip: read:'" << tmp << "'" << endl;;
+      }
+      string::size_type spos = Line.find( "GET" );
+      if ( spos != string::npos ){
+	string::size_type epos = Line.find( " HTTP" );
+	string line = Line.substr( spos+3, epos - spos - 3 );
+	*Dbg(myLog) << "Line='" << line << "'" << endl;
+	epos = line.find( "?" );
+	string basename;
+	if ( epos != string::npos ){
+	  basename = line.substr( 0, epos );
+	  string qstring = line.substr( epos+1 );
+	  epos = basename.find( "/" );
+	  if ( epos != string::npos ){
+	    basename = basename.substr( epos+1 );
+	    map<string,TimblExperiment*>::const_iterator it= experiments->find(basename);
+	    if ( it != experiments->end() ){
+	      TimblExperiment *api = createClient( it->second, args );
+	      if ( api ){
+		LogStream LS( &myLog );
+		LogStream DS( &myLog );
+		DS.message(logLine);
+		LS.message(logLine);
+		DS.setstamp( StampBoth );
+		LS.setstamp( StampBoth );
+		XmlDoc doc( "TiMblResult" );
+		xmlNode *root = doc.getRoot();
+		XmlSetAttribute( root, "algorithm", toString(api->Algorithm()) );
+		vector<string> avs;
+		int avNum = split_at( qstring, avs, "&" );
+		if ( avNum > 0 ){
+		  multimap<string,string> acts;
+		  for ( int i=0; i < avNum; ++i ){
+		    vector<string> parts;
+		    int num = split_at( avs[i], parts, "=" );
+		    if ( num == 2 ){
+		      acts.insert( make_pair(parts[0], parts[1]) );
+		    }
+		    else if ( num > 2 ){
+		      string tmp = parts[1];
+		      for( int i=2; i < num; ++i )
+			tmp += string("=")+parts[i];
+		      acts.insert( make_pair(parts[0], tmp ) );
+		    }
+		    else {
+		      LS << "unknown word in query "
+			 << avs[i] << endl;
+		    }
+		  }
+		  typedef multimap<string,string>::const_iterator mmit;
+		  pair<mmit,mmit> range = acts.equal_range( "set" );
+		  mmit it = range.first;
+		  while ( it != range.second ){
+		    string opt = it->second;
+		    if ( !opt.empty() && opt[0] != '-' && opt[0] != '+' )
+		      opt = string("-") + opt;
+		    if ( doDebug() )
+		      DS << "set :" << opt << endl;
+		    if ( api->SetOptions( opt ) ){
+		      if ( !api->ConfirmOptions() ){
+			args->os() << "set " << opt << " failed" << endl;
+		      }
+		    }
+		    else {
+		      LS << ": Don't understand set='"
+			 << opt << "'" << endl;
+		      args->os() << ": Don't understand set='"
+			 << it->second << "'" << endl;
+		    }
+		    ++it;
+		  }
+		  range = acts.equal_range( "show" );
+		  it = range.first;
+		  while ( it != range.second ){
+		    if ( it->second == "settings" ){
+		      xmlNode *tmp = api->settingsToXML();
+		      xmlAddChild( root, tmp );
+		    }
+		    else if ( it->second == "weights" ){
+		      xmlNode *tmp = api->weightsToXML();
+		      xmlAddChild( root, tmp );
+		    }
+		    else
+		      LS << "don't know how to SHOW: "
+			 << it->second << endl;
+
+		    ++it;
+		  }
+		  range = acts.equal_range( "classify" );
+		  it = range.first;
+		  while ( it != range.second ){
+		    string params = it->second;
+		    params = urlDecode(params);
+		    int len = params.length();
+		    if ( len > 2 ){
+		      DS << "params=" << params << endl
+			 << "params[0]='"
+			 << params[0] << "'" << endl
+			 << "params[len-1]='"
+			 << params[len-1] << "'"
+			 << endl;
+
+		      if ( ( params[0] == '"' && params[len-1] == '"' )
+			   || ( params[0] == '\'' && params[len-1] == '\'' ) )
+			params = params.substr( 1, len-2 );
+		    }
+		    DS << "base='" << basename << "'"
+		       << endl
+		       << "command='classify'"
+		       << endl;
+		    string distrib, answer;
+		    double distance;
+		    if ( doDebug() )
+		      LS << "Classify(" << params << ")" << endl;
+		    if ( api->Classify( params, answer, distrib, distance ) ){
+
+		      if ( doDebug() )
+			LS << "resultaat: " << answer
+			   << ", distrib: " << distrib
+			   << ", distance " << distance
+			   << endl;
+
+		      xmlNode *cl = XmlNewChild( root, "classification" );
+		      XmlNewTextChild( cl, "input", params );
+		      XmlNewTextChild( cl, "category", answer );
+		      if ( api->Verbosity(DISTRIB) ){
+			XmlNewTextChild( cl, "distribution", distrib );
+		      }
+		      if ( api->Verbosity(DISTANCE) ){
+			XmlNewTextChild( cl, "distance",
+					 toString<double>(distance) );
+		      }
+		      if ( api->Verbosity(MATCH_DEPTH) ){
+			XmlNewTextChild( cl, "match_depth",
+					 toString<double>( api->matchDepth()) );
+		      }
+		      if ( api->Verbosity(NEAR_N) ){
+			xmlNode *nb = api->bestNeighborsToXML();
+			xmlAddChild( cl, nb );
+		      }
+		    }
+		    else {
+		      DS << "classification failed" << endl;
+		    }
+		    ++it;
+		  }
+		}
+		string tmp = doc.toString();
+		// cerr << "THE DOCUMENT for sending!" << endl << tmp << endl;
+		int timeout=10;
+		nb_putline( args->os(), tmp , timeout );
+		delete api;
+	      }
+	    }
+	    else {
+	      *Dbg(myLog) << "invalid BASE! '" << basename
+			  << "'" << endl;
+	      args->os() << "invalid basename: '" << basename << "'" << endl;
+	    }
+	    args->os() << endl;
+	  }
+	}
+      }
     }
   }
-  return true;
+}
+
+
+ServerBase *startServer( TimblOpts& opts ){
+  bool mood;
+  string value;
+  Configuration *config = new Configuration();
+  bool old = false;
+  if ( !opts.Find( "config", value, mood ) ){
+    if ( opts.Find( 'S', value, mood ) ){
+      config->setatt( "port", value );
+      old = true;
+      if ( opts.Find( 'C', value, mood ) ){
+	config->setatt( "maxconn", value );
+      }
+    }
+    if ( !old ){
+      cerr << "missing --config option" << endl;
+      return 0;
+    }
+  }
+  else if ( !config->fill( value ) ){
+    cerr << "unable to read a configuration from " << value << endl;
+    return 0;
+  }
+  if ( opts.Find( "pidfile", value, mood ) ){
+    config->setatt( "pidfile", value );
+  }
+  if ( opts.Find( "logfile", value, mood ) ){
+    config->setatt( "logfile", value );
+  }
+  if ( opts.Find( "daemonize", value, mood ) ){
+    config->setatt( "daemonize", value );
+  }
+  if ( opts.Find( "debug", value, mood ) ){
+    config->setatt( "debug", value );
+    opts.Delete( "debug" );
+  }
+  string protocol = config->lookUp( "protocol" );
+  if ( protocol.empty() )
+    protocol = "tcp";
+  if ( protocol == "tcp" )
+    return new TcpServer( config );
+  else if ( protocol == "http" )
+    return new HttpServer( config );
+  else {
+    cerr << "unknown protocol " << protocol << endl;
+    return 0;
+  }
 }
 
 int main(int argc, char *argv[]){
@@ -331,7 +858,7 @@ int main(int argc, char *argv[]){
     time_t Time;
     // Start.
     //
-    cerr << "TiMBL Server " << TimblServer::Version()
+    cerr << "TiMBL Server " << TimblServer::Version() << "-NT"
 	 << " (c) ILK 1998 - 2014.\n"
 	 << "Tilburg Memory Based Learner\n"
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
@@ -346,64 +873,15 @@ int main(int argc, char *argv[]){
     }
     TimblOpts Opts( argc, argv );
     Preset_Values( Opts );
-    Adjust_Default_Values( Opts );
-    if ( !get_file_names( Opts ) )
-      return 2;
-    TimblServerAPI *Run = new TimblServerAPI( &Opts );
-    if ( !Run->Valid() ){
-      delete Run;
-      usage();
-      return 3;
-    }
+    ServerBase *server = startServer( Opts );
     if ( Do_Server ){
       // Special case:   running a classic Server
-      if ( !checkInputFile( TreeInFile ) ||
-	   !checkInputFile( dataFile ) ||
-	   !checkInputFile( WgtInFile ) ||
-	   !checkInputFile( MatrixInFile ) ||
-	   !checkInputFile( ProbInFile ) ){
-	delete Run;
-	return 3;
-      }
-      if ( TreeInFile != "" ){
-	if ( !Run->GetInstanceBase( TreeInFile ) ){
-	  delete Run;
-	  return 3;
-	}
-      }
-      else {
-	if ( !Run->Learn( dataFile ) ){
-	  delete Run;
-	  return 3;
-	}
-      }
-      if ( WgtInFile != "" ) {
-	Run->GetWeights( WgtInFile, WgtType );
-      }
-      if ( ProbInFile != "" )
-	Run->GetArrays( ProbInFile );
-      if ( MatrixInFile != "" ) {
-	Run->GetMatrices( MatrixInFile );
-      }
-      if ( Run->StartServer( ServerPort, Max_Connections ) ){
-	delete Run;
-	return 0;
-      }
-      else
-	cerr << "starting a server failed" << endl;
+      startClassicExperiment( server, Opts );
     }
     else if ( Do_Multi_Server ){
-      if ( !checkInputFile( ServerConfigFile ) ){
-	delete Run;
-	return 3;
-      }
-      if ( !Run->StartMultiServer( ServerConfigFile ) ){
-	cerr << "starting a MultiServer failed" << endl;
-      }
-      else
-	delete Run;
+      startExperiments( server, Opts );
     }
-    return 0;
+    return server->Run(); // returns EXIT_SUCCESS or EXIT_FAIL
   }
   catch(std::bad_alloc){
     cerr << "ran out of memory somewhere" << endl;
