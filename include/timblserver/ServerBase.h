@@ -5,7 +5,7 @@
   Copyright (c) 1998 - 2013
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -48,10 +48,11 @@ namespace TimblServer {
     ServerBase( const TiCC::Configuration * );
     void setDebug( bool d ){ debug = d; };
     Sockets::ServerSocket *TcpSocket() const { return tcp_socket; };
-    static void *callChild( void * ); 
+    static void *callChild( void * );
     int Run();
     virtual void socketChild( childArgs * );
     virtual void callback( childArgs* ) = 0;
+    virtual void sendReject( std::ostream& os ) const;
     TiCC::LogStream myLog;
     std::string logFile;
     std::string pidFile;
@@ -86,21 +87,22 @@ namespace TimblServer {
     fdistream _is;
     fdostream _os;
   };
-  
-  void *ServerBase::callChild( void *a ) { 
+
+  void *ServerBase::callChild( void *a ) {
     childArgs* ca = (childArgs*)a;
     ca->mother()->socketChild( ca );
     return 0;
   }
-  
+
   class TcpServerBase : public ServerBase {
   public:
   TcpServerBase( const TiCC::Configuration *c ):ServerBase( c ){};
   };
-  
+
   class HttpServerBase : public ServerBase {
   public:
     void socketChild( childArgs * );
+    virtual void sendReject( std::ostream& os ) const;
   HttpServerBase( const TiCC::Configuration *c ): ServerBase( c ){};
   };
 

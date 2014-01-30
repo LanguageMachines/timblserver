@@ -5,7 +5,7 @@
   Copyright (c) 1998 - 2014
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -48,7 +48,7 @@ namespace TimblServer {
 
   string Version() { return VERSION; }
   string VersionName() { return PACKAGE_STRING; }
-  
+
   childArgs::childArgs( ServerBase *server, Sockets::ServerSocket *sock ):
     _mother(server),_socket(sock){
     _id = _socket->getSockId();
@@ -60,7 +60,7 @@ namespace TimblServer {
     _os.flush();
     delete _socket;
   }
-    
+
   string ServerBase::VersionInfo( bool full ){
     string result;
     ostringstream oss;
@@ -68,10 +68,10 @@ namespace TimblServer {
     if ( full )
       oss << ", compiled on " << __DATE__ << ", " << __TIME__;
     result = oss.str();
-    return result; 
+    return result;
   }
-  
-  ServerBase::ServerBase( const Configuration *c ): 
+
+  ServerBase::ServerBase( const Configuration *c ):
     myLog("BasicServer"),
     config(c)
   {
@@ -142,8 +142,8 @@ namespace TimblServer {
       }
     }
     tcp_socket = 0;
-  }  
-  
+  }
+
   string getProtocol( const string& serverConfigFile ){
     string result = "tcp";
     ifstream is( serverConfigFile.c_str() );
@@ -158,7 +158,7 @@ namespace TimblServer {
 	  continue;
 	string::size_type ispos = line.find('=');
 	if ( ispos == string::npos ){
-	  cerr << "invalid entry in: " << serverConfigFile 
+	  cerr << "invalid entry in: " << serverConfigFile
 	       << "offending line: '" << line << "'" << endl;
 	  return result;
 	}
@@ -185,7 +185,7 @@ namespace TimblServer {
   }
 
   static bool keepGoing = true;
-  
+
   void KillServerFun( int Signal ){
     if ( Signal == SIGTERM ){
       cerr << "KillServerFun caught a signal SIGTERM" << endl;
@@ -194,7 +194,7 @@ namespace TimblServer {
       sleep(10); // give children some spare time...
     }
   }
-  
+
   void AfterDaemonFun( int Signal ){
     cerr << "AfterDaemonFun caught a signal " << Signal << endl;
     if ( Signal == SIGCHLD ){
@@ -215,7 +215,7 @@ namespace TimblServer {
     return daemon( noCD, noClose );
   }
 #else
-  
+
   int ServerBase::daemonize( int noCD , int noClose ){
     switch (fork()) {
     case -1:
@@ -238,7 +238,7 @@ namespace TimblServer {
 	   << strerror(errno) << endl;
       return -1;
     }
-    
+
     if ( !noCD ){
       if ( chdir("/") < 0 ){
 	cerr << "daemon cd failed: " << strerror(errno) << endl;
@@ -258,8 +258,13 @@ namespace TimblServer {
     }
     return 0;
   }
-#endif // HAVE_DAEMON 
-  
+#endif // HAVE_DAEMON
+
+  void ServerBase::sendReject( ostream& os ) const {
+    os << "Maximum connections exceeded." << endl;
+    os << "try again later..." << endl;
+  }
+
   // ***** This is the routine that is executed from a new TCP thread *******
   void ServerBase::socketChild( childArgs *args ){
     signal( SIGPIPE, BrokenPipeChildFun );
@@ -268,10 +273,9 @@ namespace TimblServer {
     pthread_mutex_lock(&my_lock);
     // use a mutex to update the global service counter
     if ( service_count >= maxConn() ){
-      args->os() << "Maximum connections exceeded." << endl;
-      args->os() << "try again later..." << endl;
+      sendReject( args->os() );
       pthread_mutex_unlock( &my_lock );
-      *Log(myLog) << "Thread " << (uintptr_t)pthread_self() 
+      *Log(myLog) << "Thread " << (uintptr_t)pthread_self()
 		  << " refused " << endl;
     }
     else {
@@ -285,18 +289,22 @@ namespace TimblServer {
     }
     // close the socket and exit this thread
     delete args;
-    *Log(myLog) << "Thread " << (uintptr_t)pthread_self() 
+    *Log(myLog) << "Thread " << (uintptr_t)pthread_self()
 		<< ", terminated at: " << Timer::now() << endl;
   }
-  
+
+  void HttpServerBase::sendReject( ostream& os ) const {
+    os << "Status:503 Maximum number of connections exceeded.\n" << endl;
+  }
+
   // ***** This is the routine that is executed from a new HTTP thread *******
   void HttpServerBase::socketChild( childArgs *args ){
     args->socket()->setNonBlocking();
     ServerBase::socketChild( args );
   }
-  
+
   int ServerBase::Run(){
-    *Log(myLog) << "Starting a " << serverProtocol 
+    *Log(myLog) << "Starting a " << serverProtocol
 		<< " server on port " << serverPort << endl;
     if ( !pidFile.empty() ){
       // check validity of pidfile
@@ -318,8 +326,8 @@ namespace TimblServer {
       if ( logS && logS->good() ){
 	*Log(myLog) << "switching logging to file " << logFile << endl;
 	myLog.associate( *logS );
-	*Log(myLog)  << "Started logging " << endl;	
-	*Log(myLog)  << "debugging is " << (doDebug()?"on":"off") << endl;	
+	*Log(myLog)  << "Started logging " << endl;
+	*Log(myLog)  << "debugging is " << (doDebug()?"on":"off") << endl;
       }
       else {
 	delete logS;
@@ -354,7 +362,7 @@ namespace TimblServer {
 	*Log(myLog) << "wrote PID=" << pid << " to " << pidFile << endl;
       }
     }
-    // set the attributes 
+    // set the attributes
     pthread_attr_t attr;
     if ( pthread_attr_init(&attr) ||
 	 pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED ) ){
@@ -371,17 +379,17 @@ namespace TimblServer {
       *Log(myLog) << "failed to start Server: " << server.getMessage() << endl;
       return EXIT_FAILURE;
     }
-    
+
     if ( !server.listen( 5 ) ) {
       // maximum of 5 pending requests
       *Log(myLog) << server.getMessage() << endl;
       return EXIT_FAILURE;
     }
-    
+
     int failcount = 0;
     struct sigaction act;
     sigaction( SIGTERM, NULL, &act ); // get current action
-    act.sa_handler = KillServerFun; 
+    act.sa_handler = KillServerFun;
     act.sa_flags &= ~SA_RESTART;      // do not continue after SIGTERM
     sigaction( SIGTERM, &act, NULL );
     while( keepGoing ){ // waiting for connections loop
@@ -397,28 +405,28 @@ namespace TimblServer {
 	  return EXIT_FAILURE;
 	}
 	else {
-	  continue;  
+	  continue;
 	}
       }
       else {
 	if ( !keepGoing ) break;
 	failcount = 0;
-	*Log(myLog) << "Accepting Connection #" 
+	*Log(myLog) << "Accepting Connection #"
 		    << newSocket->getSockId()
-		    << " from remote host: " 
+		    << " from remote host: "
 		    << newSocket->getClientName() << endl;
-	// create a new thread to process the incoming request 
+	// create a new thread to process the incoming request
 	// (The thread will terminate itself when done processing
 	// and release its socket handle)
 	//
 	childArgs *args = new childArgs( this, newSocket );
 	pthread_create( &chld_thr, &attr, callChild, (void *)args );
       }
-      // the server is now free to accept another socket request 
+      // the server is now free to accept another socket request
     }
     // some cleanup
-    pthread_attr_destroy(&attr); 
-    delete logS; 
+    pthread_attr_destroy(&attr);
+    delete logS;
     return EXIT_SUCCESS;
   }
 
