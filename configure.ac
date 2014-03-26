@@ -57,6 +57,11 @@ AX_TYPE_SOCKLEN_T
 
 # Checks for timbl library.
 PKG_PROG_PKG_CONFIG
+
+PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
+CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
+LIBS="$XML2_LIBS $LIBS"
+
 # inspired by feh-1.3.4/configure.ac.  Tnx Tom Gilbert and feh hackers.
 # ugly hack when PKG_CONFIG_PATH isn't defined.
 # couldn't get it to work otherwise
