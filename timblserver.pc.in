@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: timblserver
 Version: @VERSION@
 Description: Timbl Server library.
-Requires.private: timbl >= 6.4.0
+Requires.private: timbl >= 6.4.0 libxml-2.0
 Libs: -L${libdir} -ltimblserver
 Libs.private: @LIBS@
 Cflags: -I${includedir}
