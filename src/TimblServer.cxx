@@ -577,8 +577,8 @@ void TcpServer::callback( childArgs *args ){
       }
     }
     while ( go_on && getline( args->is(), Line ) );
-    delete client;
   }
+  delete client;
   *Log(myLog) << "Thread " << (uintptr_t)pthread_self()
 	      << " terminated, " << result
 	      << " instances processed " << endl;
