@@ -374,6 +374,7 @@ inline void Split( const string& line, string& com, string& rest ){
 class TimblClient {
 public:
   TimblClient( TimblExperiment *, childArgs * );
+  ~TimblClient(){ delete _exp; };
   bool classifyLine( const string& );
   void showSettings(){ _exp->ShowSettings( os ); };
   bool setOptions( const string& param );
@@ -386,7 +387,7 @@ private:
 };
 
 TimblClient::TimblClient( TimblExperiment *exp,
-		      childArgs* args ):
+			  childArgs* args ):
   myLog(args->logstream()),
   doDebug(args->debug()),
   os(args->os()),
