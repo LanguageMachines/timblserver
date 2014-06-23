@@ -217,7 +217,6 @@ void startClassicExperiment( ServerBase *server,
   string treeName;
   string trainName;
   string MatrixInFile = "";
-  string TreeInFile = "";
   string WgtInFile = "";
   Weighting WgtType = GR;
   Algorithm algorithm = IB1;
@@ -240,7 +239,7 @@ void startClassicExperiment( ServerBase *server,
   if ( opts.Find( "matrixin", MatrixInFile, mood ) ){
     opts.Delete( "matrixin" );
   }
-  if ( opts.Find( 'i', TreeInFile, mood ) ){
+  if ( opts.Find( 'i', treeName, mood ) ){
     opts.Delete( 'i' );
   }
   if ( opts.Find( 'u', ProbInFile, mood ) ){
