@@ -828,12 +828,15 @@ ServerBase *startServer( TimblOpts& opts ){
   }
   if ( opts.Find( "pidfile", value, mood ) ){
     config->setatt( "pidfile", value );
+    opts.Delete( "pidfile" );
   }
   if ( opts.Find( "logfile", value, mood ) ){
     config->setatt( "logfile", value );
+    opts.Delete( "logfile" );
   }
   if ( opts.Find( "daemonize", value, mood ) ){
     config->setatt( "daemonize", value );
+    opts.Delete( "daemonize" );
   }
   if ( opts.Find( "debug", value, mood ) ){
     config->setatt( "debug", value );
@@ -871,6 +874,7 @@ int main(int argc, char *argv[]){
       usage();
       return 1;
     }
+
     TimblOpts Opts( argc, argv );
     Preset_Values( Opts );
     ServerBase *server = startServer( Opts );
