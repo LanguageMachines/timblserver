@@ -1,7 +1,7 @@
 # $Id$
 # $URL$
 
-AM_CPPFLAGS = -I@top_srcdir@/include
+AM_CPPFLAGS = -I@top_srcdir@/include -std=c++0x
 
 LDADD = libtimblserver.la
 
