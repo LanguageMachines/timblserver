@@ -110,7 +110,50 @@ void startExperiments( ServerBase *server,
     // old style stuff
     string treeName;
     string trainName;
+    string MatrixInFile = "";
+    string WgtInFile = "";
+    Weighting WgtType = GR;
+    Algorithm algorithm = IB1;
+    string ProbInFile = "";
+    string value;
     bool mood;
+    if ( opts.is_present( 'a', value, mood ) ){
+      // the user gave an algorithm
+      if ( !string_to( value, algorithm ) ){
+	cerr << "illegal -a value: " << value << endl;
+	exit(EXIT_FAILURE);
+      }
+    }
+    if ( opts.extract( 'u', ProbInFile, mood ) ){
+      if ( algorithm == IGTREE ){
+	cerr << "-u option is useless for IGtree" << endl;
+	exit(EXIT_FAILURE);
+      }
+    }
+    if ( opts.extract( 'w', value, mood ) ){
+      Weighting W;
+      if ( !string_to( value, W ) ){
+	// No valid weighting, so assume it also has a filename
+	vector<string> parts;
+	size_t num = TiCC::split_at( value, parts, ":" );
+	if ( num == 2 ){
+	  if ( !string_to( parts[1], W ) ){
+	    cerr << "invalid weighting option: " << value << endl;
+	    exit(1);
+	  }
+	  WgtInFile = parts[0];
+	  WgtType = W;
+	}
+	else if ( num == 1 ){
+	  WgtInFile = value;
+	}
+	else {
+	  cerr << "invalid weighting option: " << value << endl;
+	  exit(1);
+	}
+      }
+    }
+    opts.extract( "matrixin", MatrixInFile );
     if ( !opts.extract( 'f', trainName, mood ) ){
       opts.extract( 'i', treeName, mood );
     }
@@ -125,6 +168,14 @@ void startExperiments( ServerBase *server,
 	else {
 	  server->myLog << "treeName = " << treeName << endl;
 	  result = run->GetInstanceBase( treeName );
+	}
+	if ( result && WgtInFile != "" ) {
+	  result = run->GetWeights( WgtInFile, WgtType );
+	}
+	if ( result && ProbInFile != "" )
+	  result = run->GetArrays( ProbInFile );
+	if ( result && MatrixInFile != "" ) {
+	  result = run->GetMatrices( MatrixInFile );
 	}
       }
       if ( result ){
@@ -150,9 +201,52 @@ void startExperiments( ServerBase *server,
       opts.init( it->second );
       string treeName;
       string trainName;
+      string MatrixInFile = "";
+      string WgtInFile = "";
+      Weighting WgtType = GR;
+      Algorithm algorithm = IB1;
+      string ProbInFile = "";
+      string value;
       bool mood;
+      if ( opts.is_present( 'a', value, mood ) ){
+	// the user gave an algorithm
+	if ( !string_to( value, algorithm ) ){
+	  cerr << "illegal -a value: " << value << endl;
+	  exit(EXIT_FAILURE);
+	}
+      }
       if ( !opts.extract( 'f', trainName, mood ) )
 	opts.extract( 'i', treeName, mood );
+      if ( opts.extract( 'u', ProbInFile, mood ) ){
+	if ( algorithm == IGTREE ){
+	  cerr << "-u option is useless for IGtree" << endl;
+	  exit(EXIT_FAILURE);
+	}
+      }
+      if ( opts.extract( 'w', value, mood ) ){
+	Weighting W;
+	if ( !string_to( value, W ) ){
+	  // No valid weighting, so assume it also has a filename
+	  vector<string> parts;
+	  size_t num = TiCC::split_at( value, parts, ":" );
+	  if ( num == 2 ){
+	    if ( !string_to( parts[1], W ) ){
+	      cerr << "invalid weighting option: " << value << endl;
+	      exit(1);
+	    }
+	    WgtInFile = parts[0];
+	    WgtType = W;
+	  }
+	  else if ( num == 1 ){
+	    WgtInFile = value;
+	  }
+	  else {
+	    cerr << "invalid weighting option: " << value << endl;
+	    exit(1);
+	  }
+	}
+      }
+      opts.extract( "matrixin", MatrixInFile );
       if ( !( treeName.empty() && trainName.empty() ) ){
 	TimblAPI *run = new TimblAPI( opts, it->first );
 	bool result = false;
@@ -164,6 +258,14 @@ void startExperiments( ServerBase *server,
 	  else {
 	    server->myLog << "treeName = " << treeName << endl;
 	    result = run->GetInstanceBase( treeName );
+	  }
+	  if ( result && WgtInFile != "" ) {
+	    result = run->GetWeights( WgtInFile, WgtType );
+	  }
+	  if ( result && ProbInFile != "" )
+	    result = run->GetArrays( ProbInFile );
+	  if ( result && MatrixInFile != "" ) {
+	    result = run->GetMatrices( MatrixInFile );
 	  }
 	}
 	if ( result ){
@@ -204,9 +306,9 @@ void startClassicExperiment( ServerBase *server,
       exit(EXIT_FAILURE);
     }
   }
-  opts.extract( 'f', trainName, mood );
   opts.extract( "matrixin", MatrixInFile );
-  opts.extract( 'i', treeName, mood );
+  if ( !opts.extract( 'f', trainName, mood ) )
+    opts.extract( 'i', treeName, mood );
   if ( opts.extract( 'u', ProbInFile, mood ) ){
     if ( algorithm == IGTREE ){
       cerr << "-u option is useless for IGtree" << endl;
@@ -871,10 +973,12 @@ int main(int argc, char *argv[]){
       cerr << "missing -S or --config option" << endl;
       exit(EXIT_FAILURE);
     }
+    //    cerr << "timbl server CommandLine: "; opts.dump(cerr) << endl;
     // force some verbosity flags
     opts.insert( 'v', "F", true );
     opts.insert( 'v', "S", false );
     ServerBase *server = startServer( opts );
+    //    cerr << "timbl server CommandLine: NA startServer:"; opts.dump(cerr) << endl;
     if ( Do_Classic_Server ){
       // Special case:   running a classic Server
       startClassicExperiment( server, opts );
