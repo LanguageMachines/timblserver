@@ -30,7 +30,9 @@
 #include <exception>
 #include <vector>
 #include <string>
+#include <cstdlib>
 
+#include "ticcutils/CommandLine.h"
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
 #include "timblserver/FdStream.h"
@@ -41,8 +43,15 @@ using namespace Timbl;
 using namespace TimblServer;
 using namespace TiCC;
 
-bool Do_Server = false;
-bool Do_Multi_Server = false;
+const string timbl_short = "a:b:B:c:C:d:De:F:G:Hk:l:L:m:M:n:"
+  "N:o:O:p:q:QR:st:T:v:w:Wx";
+const string timbl_long = "Beam:,clones:,Diversify,occurrences:,"
+  "sloppy::,Threshold:,Treeorder:";
+// in the future, we want to query Timbl about the supported options
+// an inherit them here.
+const string serv_short = "hVS:f:i:u:";
+const string serv_long =
+  ",pidfile:,logfile:,daemonize::,debug:,config:,matrixin:";
 
 inline void usage_full(void){
   cerr << "usage: timblserver [TiMBLoptions] [ServerOptions]" << endl << endl;
@@ -67,51 +76,16 @@ inline void usage(void){
   cerr << endl;
 }
 
-class softExit : public exception {};
-
-void Preset_Values( TimblOpts& Opts ){
-  bool mood;
-  string value;
-  if ( Opts.Find( 'h', value, mood ) ){
-    usage_full();
-    throw( softExit() );
-  }
-  if ( Opts.Find( 'V', value, mood ) ){
-    cerr << "TiMBL server " << ServerBase::VersionInfo( true ) << endl;
-    cerr << "Based on TiMBL " << TimblAPI::VersionInfo( true ) << endl;
-    throw( softExit() );
-  }
-  Opts.Add( 'v', "F", true );
-  Opts.Add( 'v', "S", false );
-  if ( Opts.Find( "config", value, mood ) ){
-    Do_Multi_Server = true;
-  }
-  if ( Opts.Find( 'S', value, mood ) ){
-    if ( Do_Multi_Server ){
-      cerr << "options -S conflicts with option --config" << endl;
-      throw( softExit() );
-    }
-    else {
-      Do_Server = true;
-    }
-  }
-  else {
-    if ( Do_Multi_Server ){
-      Opts.Add( 'S', "0", true );
-      // hack to signal GetOptClass that we are going into server mode
-    }
-  }
-}
 
 void startExperiments( ServerBase *server,
-		       TimblOpts& opts ){
+		       TiCC::CL_Options& opts ){
   map<string,string> allvals;
   if ( server->config->hasSection("experiments") )
     allvals = server->config->lookUpAll("experiments");
   else {
     allvals = server->config->lookUpAll("global");
     // old style, everything is global
-    // remove all alreday processed stuff
+    // remove all already processed stuff
     map<string,string>::iterator it = allvals.begin();
     while ( it != allvals.end() ){
       if ( it->first == "port" ||
@@ -137,12 +111,11 @@ void startExperiments( ServerBase *server,
     string treeName;
     string trainName;
     bool mood;
-    if ( opts.Find( 'f', trainName, mood ) )
-      opts.Delete( 'f' );
-    else if ( opts.Find( 'i', treeName, mood ) )
-      opts.Delete( 'i' );
+    if ( !opts.extract( 'f', trainName, mood ) ){
+      opts.extract( 'i', treeName, mood );
+    }
     if ( !( treeName.empty() && trainName.empty() ) ){
-      TimblAPI *run = new TimblAPI( &opts );
+      TimblAPI *run = new TimblAPI( opts );
       bool result = false;
       if ( run && run->Valid() ){
 	if ( treeName.empty() ){
@@ -171,16 +144,17 @@ void startExperiments( ServerBase *server,
     map<string,string>::iterator it = allvals.begin();
     while ( it != allvals.end() ){
       cerr << "OPTS: " << it->second << endl;
-      TimblOpts opts( it->second );
+      TiCC::CL_Options opts;
+      opts.set_short_options( timbl_short + serv_short );
+      opts.set_long_options( timbl_long + serv_long );
+      opts.init( it->second );
       string treeName;
       string trainName;
       bool mood;
-      if ( opts.Find( 'f', trainName, mood ) )
-	opts.Delete( 'f' );
-      else if ( opts.Find( 'i', treeName, mood ) )
-	opts.Delete( 'i' );
+      if ( !opts.extract( 'f', trainName, mood ) )
+	opts.extract( 'i', treeName, mood );
       if ( !( treeName.empty() && trainName.empty() ) ){
-	TimblAPI *run = new TimblAPI( &opts, it->first );
+	TimblAPI *run = new TimblAPI( opts, it->first );
 	bool result = false;
 	if ( run && run->Valid() ){
 	  if ( treeName.empty() ){
@@ -213,7 +187,7 @@ void startExperiments( ServerBase *server,
 }
 
 void startClassicExperiment( ServerBase *server,
-			     TimblOpts& opts ){
+			     TiCC::CL_Options& opts ){
   string treeName;
   string trainName;
   string MatrixInFile = "";
@@ -223,33 +197,23 @@ void startClassicExperiment( ServerBase *server,
   string ProbInFile = "";
   string value;
   bool mood;
-  if ( opts.Find( 'a', value, mood ) ){
+  if ( opts.is_present( 'a', value, mood ) ){
     // the user gave an algorithm
     if ( !string_to( value, algorithm ) ){
       cerr << "illegal -a value: " << value << endl;
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   }
-  if ( opts.Find( 'f', trainName, mood ) )
-    opts.Delete( 'f' );
-  if ( opts.Find( 'P', value, mood ) ){
-    cerr << "illegal option, value = " << value << endl;
-    exit(1);
-  }
-  if ( opts.Find( "matrixin", MatrixInFile, mood ) ){
-    opts.Delete( "matrixin" );
-  }
-  if ( opts.Find( 'i', treeName, mood ) ){
-    opts.Delete( 'i' );
-  }
-  if ( opts.Find( 'u', ProbInFile, mood ) ){
+  opts.extract( 'f', trainName, mood );
+  opts.extract( "matrixin", MatrixInFile );
+  opts.extract( 'i', treeName, mood );
+  if ( opts.extract( 'u', ProbInFile, mood ) ){
     if ( algorithm == IGTREE ){
       cerr << "-u option is useless for IGtree" << endl;
-      exit(1);
+      exit(EXIT_FAILURE);
     }
-    opts.Delete( 'u' );
   }
-  if ( opts.Find( 'w', value, mood ) ){
+  if ( opts.extract( 'w', value, mood ) ){
     Weighting W;
     if ( !string_to( value, W ) ){
       // No valid weighting, so assume it also has a filename
@@ -270,11 +234,10 @@ void startClassicExperiment( ServerBase *server,
 	cerr << "invalid weighting option: " << value << endl;
 	exit(1);
       }
-      opts.Delete( 'w' );
     }
   }
   if ( !( treeName.empty() && trainName.empty() ) ){
-    TimblAPI *run = new TimblAPI( &opts, "default" );
+    TimblAPI *run = new TimblAPI( opts, "default" );
     bool result = false;
     if ( run && run->Valid() ){
       if ( treeName.empty() ){
@@ -804,16 +767,16 @@ void HttpServer::callback( childArgs *args ){
 }
 
 
-ServerBase *startServer( TimblOpts& opts ){
+ServerBase *startServer( TiCC::CL_Options& opts ){
   bool mood;
   string value;
   Configuration *config = new Configuration();
   bool old = false;
-  if ( !opts.Find( "config", value, mood ) ){
-    if ( opts.Find( 'S', value, mood ) ){
+  if ( !opts.extract( "config", value ) ){
+    if ( opts.extract( 'S', value, mood ) ){
       config->setatt( "port", value );
       old = true;
-      if ( opts.Find( 'C', value, mood ) ){
+      if ( opts.extract( 'C', value, mood ) ){
 	config->setatt( "maxconn", value );
       }
     }
@@ -826,21 +789,19 @@ ServerBase *startServer( TimblOpts& opts ){
     cerr << "unable to read a configuration from " << value << endl;
     return 0;
   }
-  if ( opts.Find( "pidfile", value, mood ) ){
+  if ( opts.extract( "pidfile", value ) ){
     config->setatt( "pidfile", value );
-    opts.Delete( "pidfile" );
   }
-  if ( opts.Find( "logfile", value, mood ) ){
+  if ( opts.extract( "logfile", value ) ){
     config->setatt( "logfile", value );
-    opts.Delete( "logfile" );
   }
-  if ( opts.Find( "daemonize", value, mood ) ){
+  if ( opts.extract( "daemonize", value ) ){
+    if ( value.empty() )
+      value = "true";
     config->setatt( "daemonize", value );
-    opts.Delete( "daemonize" );
   }
-  if ( opts.Find( "debug", value, mood ) ){
+  if ( opts.extract( "debug", value ) ){
     config->setatt( "debug", value );
-    opts.Delete( "debug" );
   }
   string protocol = config->lookUp( "protocol" );
   if ( protocol.empty() )
@@ -875,24 +836,57 @@ int main(int argc, char *argv[]){
       return 1;
     }
 
-    TimblOpts Opts( argc, argv );
-    Preset_Values( Opts );
-    ServerBase *server = startServer( Opts );
-    if ( Do_Server ){
-      // Special case:   running a classic Server
-      startClassicExperiment( server, Opts );
+    TiCC::CL_Options opts;
+    // in the future, we want to query Timbl about the supported options
+    // an inherit them here.
+    opts.set_short_options( timbl_short + serv_short );
+    opts.set_long_options( timbl_long + serv_long );
+    opts.init( argc, argv );
+    bool mood;
+    string value;
+    if ( opts.is_present( 'h', value, mood ) ){
+      usage_full();
+      exit(EXIT_SUCCESS);
     }
-    else if ( Do_Multi_Server ){
-      startExperiments( server, Opts );
+    if ( opts.is_present( 'V', value, mood ) ){
+      cerr << "TiMBL server " << ServerBase::VersionInfo( true ) << endl;
+      cerr << "Based on TiMBL " << TimblAPI::VersionInfo( true ) << endl;
+      exit(EXIT_SUCCESS);
+    }
+    bool Do_Classic_Server = false;
+    bool Do_Modern_Server = false;
+    if ( opts.is_present( "config", value ) ){
+      Do_Modern_Server = true;
+    }
+    if ( opts.is_present( 'S', value, mood ) ){
+      if ( Do_Modern_Server ){
+	cerr << "options -S conflicts with option --config" << endl;
+	exit(EXIT_FAILURE);
+      }
+      else {
+	Do_Classic_Server = true;
+      }
+    }
+    else if ( !Do_Modern_Server ){
+      cerr << "missing -S or --config option" << endl;
+      exit(EXIT_FAILURE);
+    }
+    // force some verbosity flags
+    opts.insert( 'v', "F", true );
+    opts.insert( 'v', "S", false );
+    ServerBase *server = startServer( opts );
+    if ( Do_Classic_Server ){
+      // Special case:   running a classic Server
+      startClassicExperiment( server, opts );
+    }
+    else if ( Do_Modern_Server ){
+      startExperiments( server, opts );
     }
     return server->Run(); // returns EXIT_SUCCESS or EXIT_FAIL
   }
   catch(std::bad_alloc){
     cerr << "ran out of memory somewhere" << endl;
     cerr << "timblserver terminated, Sorry for that" << endl;
-  }
-  catch( softExit& e ){
-    return 0;
   }
   catch(std::string& what){
     cerr << "an exception was raised: '" << what << "'" << endl;
