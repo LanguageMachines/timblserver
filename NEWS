@@ -1,12 +1,14 @@
 # $Id$
 # $URL$
 
-1.8 - 2014-06-xx
+1.8 - 2014-09-16
   * major rework:
      basic server stuff no longer depends on Timbl.
      in the long run that can be moved to ticcutils
   * +vmd option added
-
+  * uses TiCC::CommandLine now
+  * fixed a leak
+  *
 1.7 - 2013-04-03
   * use more ticcutils stuff
   * fixed problem with pid and logfile paths when --deamonize=no
