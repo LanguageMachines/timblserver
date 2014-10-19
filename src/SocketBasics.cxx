@@ -358,7 +358,7 @@ namespace Sockets {
 	    val = 1;
 	    if ( setsockopt( sock, IPPROTO_TCP, TCP_NODELAY, 
 			     (void *)&val, sizeof(val) ) == 0 ){
-	      if ( bind( sock, res->ai_addr, res->ai_addrlen ) == 0 ){
+	      if ( ::bind( sock, res->ai_addr, res->ai_addrlen ) == 0 ){
 		break;
 	      }
 	    }
