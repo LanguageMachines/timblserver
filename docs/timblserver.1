@@ -1,17 +1,17 @@
-.TH timblserver 1 "2011 march 21"
+.TH timblserver 1 "2014 december 2"
 
 .SH NAME
-timblserver - Tilburg Memory Based Learner Server
+timblserver \- Tilburg Memory Based Learner Server
 .SH SYNOPSYS
 timblserver [TiMBL options] [Server options]
 
-timblserver --config=configfile [--pidfile=pfile] [--logfile=lfile] [--daemonize=val]
+timblserver \-\-config=configfile [\-\-pidfile=pfile] [\-\-logfile=lfile] [\-\-daemonize=val]
 
 .SH DESCRIPTION
-timblserver extends 
+timblserver extends
 .B timbl
 with a server layer. It provides the possibility to access one timbl instance
-from multiple sessions. It also allows running and accessing different timbl 
+from multiple sessions. It also allows running and accessing different timbl
 instances in parallel.
 
 .SH OPTIONS
@@ -20,34 +20,34 @@ The
 options are
 .TP
 
-.BR --config =file
+.BR \-\-config =file
 .RS
 read server settings from file
 .RE
 
-.BR --pidfile =file
+.BR \-\-pidfile =file
 .RS
 store the pid of the main server process in 'file'. A full path must me given for 'file' otherwise the file will end up in '/'.
 .RE
 
-.BR --logfile =file
+.BR \-\-logfile =file
 
 .RS
 log server actions to 'file'. A full path must me given for 'file' otherwise the file will end up in '/'.
 .RE
 
-.BR --daemonize =[yes|no]
+.BR \-\-daemonize =[yes|no]
 .RS
 run the server as a daemon. Default is yes.
 .RE
 
-.B -S
+.B \-S
 <port>
 .RS
-run the server on 'port' (deprecated) 
+run the server on 'port' (deprecated)
 .RE
 
-.B -C
+.B \-C
 <num>
 .RS
 set maximum number of parallel connections to 'num' (deprecated)
