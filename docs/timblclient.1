@@ -1,57 +1,57 @@
-.TH timblclient 1 "2011 march 28"
+.TH timblclient 1 "2014 december 2"
 
 .SH NAME
-timblclient - a simple client to access the Tilburg Memory Based Learner Server
+timblclient \- a simple client to access the Tilburg Memory Based Learner Server
 .SH SYNOPSYS
-timblclient -h host -p port [-i inputfile] [-i outputfile] [--batch] [-b basename]
+timblclient \-h host \-p port [\-i inputfile] [\-i outputfile] [\-\-batch] [\-b basename]
 
 .SH DESCRIPTION
-timblclient connects to a TimblServer on 'host':'port' and sends it the normal 
+timblclient connects to a TimblServer on 'host':'port' and sends it the normal
 instructions. (see
 .B timblserver
 )
 
 .SH OPTIONS
 The
-.B timblclient 
+.B timblclient
 options are
 .TP
 
-.BR -i " inputfile"
+.BR \-i " inputfile"
 .RS
 a series of timblserver commands.
 
-When BATCH is specified, inputfile is supposed to be a 'normal' 
+When BATCH is specified, inputfile is supposed to be a 'normal'
 .B Timbl
 testfile. Every line is send to the timblserver as a 'classify' command.
 Default is stdin.
 .RE
 
-.BR -o " outputfile"
+.BR \-o " outputfile"
 .RS
 Where to put the results. Default is stdout.
 .RE
 
-.BR --batch
+.BR \-\-batch
 .RS
-When 
-.B --batch
-is specified, the input from 'inputfile' is not interpreted as 
+When
+.B \-\-batch
+is specified, the input from 'inputfile' is not interpreted as
 timblserver commands, but as instances that will be send 'as is' prepended by
 a classify instruction.
 .RE
 
-.BR -h " host"
+.BR \-h " host"
 .RS
 connect to the server on 'host'
 .RE
 
-.BR -p " port"
+.BR \-p " port"
 .RS
-connect to 'port' on 'host' 
+connect to 'port' on 'host'
 .RE
 
-.BR -b " basename"
+.BR \-b " basename"
 .RS
 set the base in TimblServer to 'base'
 .RE
