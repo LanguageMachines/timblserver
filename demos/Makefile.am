@@ -2,6 +2,7 @@
 # $URL: $
 
 AM_CPPFLAGS = -I@top_srcdir@/include
+AM_CXXFLAGS = -std=c++0x
 
 if WANT_OMP
 noinst_PROGRAMS = sockettestServer sockettestClient
@@ -17,5 +18,3 @@ sockettestServer_SOURCES = sockettestServer.cxx
 endif
 
 exdir = $(datadir)/doc/@PACKAGE@/examples
-
-
