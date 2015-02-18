@@ -5,7 +5,7 @@
   Copyright (c) 1998 - 2015
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -46,8 +46,8 @@ using namespace std;
 
 namespace Sockets {
 
-  Socket::~Socket() { 
-    if ( sock >= 0 ) ::close(sock); 
+  Socket::~Socket() {
+    if ( sock >= 0 ) ::close(sock);
   }
 
   void milli_wait( int m_secs ){
@@ -72,7 +72,7 @@ namespace Sockets {
     while ( last_read != 10 ) { // read 1 character at a time upto \lf
       bytes_read = ::read( sock, &last_read, 1 );
       if ( bytes_read <= 0) {
-	// The other side may have closed unexpectedly 
+	// The other side may have closed unexpectedly
 	break;
       }
       if ( ( last_read != 10 ) && ( last_read !=13 ) ) {
@@ -97,7 +97,7 @@ namespace Sockets {
   bool Socket::read( string& result, unsigned int timeout ) {
     // a getline for nonblocking connections.
     // retry for a few special cases until timeout reached.
-    // return false except when correctly terminated 
+    // return false except when correctly terminated
     // ( meaning \n or an EOF after at least some input)
     result = "";
     if ( !nonBlocking ){
@@ -173,7 +173,7 @@ namespace Sockets {
     }
     return true;
   }
-  
+
   bool Socket::write( const string& line, unsigned int timeout ){
     if ( !isValid() ){
       mess = "write: socket invalid";
@@ -209,7 +209,7 @@ namespace Sockets {
     }
     return true;
   }
-  
+
   string Socket::getMessage() const{
     string m;
     if ( isValid() )
@@ -218,7 +218,7 @@ namespace Sockets {
       m = "invalid socket ";
     if ( !mess.empty() )
       m += ": " + mess;
-    return mess; 
+    return mess;
   }
 
   bool Socket::setBlocking( ) {
@@ -339,7 +339,7 @@ namespace Sockets {
     hints.ai_flags    = AI_PASSIVE;
     hints.ai_family   = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    
+
     struct addrinfo *res;
     int status = getaddrinfo( 0, port.c_str(), &hints, &res);
     if ( status != 0) {
@@ -348,15 +348,15 @@ namespace Sockets {
     else {
       struct addrinfo *resSave = res;
       // try to start up server
-      // 
+      //
       while ( res ){
 	sock = socket( res->ai_family, res->ai_socktype, res->ai_protocol );
 	if ( sock >= 0 ){
 	  int val = 1;
-	  if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, 
+	  if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR,
 			   (void *)&val, sizeof(val) ) == 0 ){
 	    val = 1;
-	    if ( setsockopt( sock, IPPROTO_TCP, TCP_NODELAY, 
+	    if ( setsockopt( sock, IPPROTO_TCP, TCP_NODELAY,
 			     (void *)&val, sizeof(val) ) == 0 ){
 	      if ( ::bind( sock, res->ai_addr, res->ai_addrlen ) == 0 ){
 		break;
@@ -417,16 +417,17 @@ namespace Sockets {
 
   // Converts ascii text to in_addr struct.
   // NULL is returned if the address can not be found.
-  struct in_addr *atoaddr( const char *address){
+  struct in_addr *atoaddr( const string& address ){
     struct hostent *host;
     static struct in_addr saddr;
-    
+
     /* First try it as aaa.bbb.ccc.ddd. */
-    saddr.s_addr = inet_addr(address);
+    cons char *add = address.c_str();
+    saddr.s_addr = inet_addr(add);
     if (saddr.s_addr != (unsigned int)-1) {
       return &saddr;
     }
-    host = gethostbyname(address);
+    host = gethostbyname(add);
     if (host != NULL) {
       return (struct in_addr *) *host->h_addr_list;
     }
@@ -439,12 +440,12 @@ namespace Sockets {
       mess = "ClientSocket connect: invalid port number";
       return false;
     }
-    struct in_addr *addr = atoaddr( host.c_str() );
+    struct in_addr *addr = atoaddr( host );
     if (addr == NULL) {
       mess = "ClientSocket connect:  Invalid host.";
       return false;
     }
-    
+
     struct sockaddr_in address;
     memset((char *) &address, 0, sizeof(address));
     address.sin_family = AF_INET;
@@ -468,7 +469,7 @@ namespace Sockets {
     }
     return isValid();
   }
-  
+
   bool ServerSocket::connect( const string& port ){
     sock = -1;
     sock = socket( AF_INET, SOCK_STREAM, 0 );
@@ -533,7 +534,7 @@ namespace Sockets {
     return newSocket.isValid();
   }
 
-#endif 
+#endif
 
   bool ServerSocket::listen( unsigned int num ){
     if ( ::listen( sock, num) < 0 ) {
