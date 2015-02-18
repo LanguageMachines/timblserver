@@ -146,7 +146,7 @@ namespace TimblServer {
 
   string getProtocol( const string& serverConfigFile ){
     string result = "tcp";
-    ifstream is( serverConfigFile.c_str() );
+    ifstream is( serverConfigFile );
     if ( !is ){
       cerr << "problem reading " << serverConfigFile << endl;
       return result;
@@ -311,7 +311,7 @@ namespace TimblServer {
       if ( doDaemon && pidFile[0] != '/' ) // make sure the path is absolute
 	pidFile = '/' + pidFile;
       unlink( pidFile.c_str() ) ;
-      ofstream pid_file( pidFile.c_str() ) ;
+      ofstream pid_file( pidFile ) ;
       if ( !pid_file ){
 	*Log(myLog)<< "unable to create pidfile:"<< pidFile << endl;
 	*Log(myLog)<< "not Started" << endl;
@@ -322,7 +322,7 @@ namespace TimblServer {
     if ( !logFile.empty() ){
       if ( doDaemon && logFile[0] != '/' ) // make sure the path is absolute
 	logFile = '/' + logFile;
-      logS = new ofstream( logFile.c_str() );
+      logS = new ofstream( logFile );
       if ( logS && logS->good() ){
 	*Log(myLog) << "switching logging to file " << logFile << endl;
 	myLog.associate( *logS );
@@ -350,7 +350,7 @@ namespace TimblServer {
     if ( !pidFile.empty() ){
       // we have a liftoff!
       // signal it to the world
-      ofstream pid_file( pidFile.c_str() ) ;
+      ofstream pid_file( pidFile ) ;
       if ( !pid_file ){
 	*Log(myLog) << "unable to create pidfile:"<< pidFile << endl;
 	*Log(myLog) << "server NOT Started" << endl;

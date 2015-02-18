@@ -5,7 +5,7 @@
   Copyright (c) 1998 - 2015
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -70,7 +70,7 @@ int main(int argc, char *argv[] ){
   string value;
 
   if ( opts.Find( "i", value ) ){
-    if ( (input_file.open( value.c_str(), ios::in ), !input_file.good() ) ){
+    if ( (input_file.open( value, ios::in ), !input_file.good() ) ){
       cerr << argv[0] << " - couldn't open inputfile " << value << endl;
       exit(EXIT_FAILURE);
     }
@@ -78,7 +78,7 @@ int main(int argc, char *argv[] ){
     Input = &input_file;
   }
   if ( opts.Find( "o", value ) ){
-    if ( (output_file.open( value.c_str(), ios::out ), !output_file.good() ) ){
+    if ( (output_file.open( value, ios::out ), !output_file.good() ) ){
       cerr << argv[0] << " - couldn't open outputfile " << value << endl;
       exit(EXIT_FAILURE);
     }
@@ -101,7 +101,7 @@ int main(int argc, char *argv[] ){
     TimblServer::ClientClass client;
     if ( !client.connect( node, port ) ){
       cerr << "connection failed " << endl;
-      exit(EXIT_FAILURE);      
+      exit(EXIT_FAILURE);
     }
     if ( !base.empty() ){
       if ( !client.setBase( base ) ){
