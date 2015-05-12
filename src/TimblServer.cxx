@@ -868,56 +868,6 @@ void HttpServer::callback( childArgs *args ){
   }
 }
 
-
-ServerBase *startServer( TiCC::CL_Options& opts ){
-  bool mood;
-  string value;
-  Configuration *config = new Configuration();
-  bool old = false;
-  if ( !opts.extract( "config", value ) ){
-    if ( opts.extract( 'S', value, mood ) ){
-      config->setatt( "port", value );
-      old = true;
-      if ( opts.extract( 'C', value, mood ) ){
-	config->setatt( "maxconn", value );
-      }
-    }
-    if ( !old ){
-      cerr << "missing --config option" << endl;
-      return 0;
-    }
-  }
-  else if ( !config->fill( value ) ){
-    cerr << "unable to read a configuration from " << value << endl;
-    return 0;
-  }
-  if ( opts.extract( "pidfile", value ) ){
-    config->setatt( "pidfile", value );
-  }
-  if ( opts.extract( "logfile", value ) ){
-    config->setatt( "logfile", value );
-  }
-  if ( opts.extract( "daemonize", value ) ){
-    if ( value.empty() )
-      value = "true";
-    config->setatt( "daemonize", value );
-  }
-  if ( opts.extract( "debug", value ) ){
-    config->setatt( "debug", value );
-  }
-  string protocol = config->lookUp( "protocol" );
-  if ( protocol.empty() )
-    protocol = "tcp";
-  if ( protocol == "tcp" )
-    return new TcpServer( config );
-  else if ( protocol == "http" )
-    return new HttpServer( config );
-  else {
-    cerr << "unknown protocol " << protocol << endl;
-    return 0;
-  }
-}
-
 int main(int argc, char *argv[]){
   try {
     struct tm *curtime;
@@ -977,7 +927,21 @@ int main(int argc, char *argv[]){
     // force some verbosity flags
     opts.insert( 'v', "F", true );
     opts.insert( 'v', "S", false );
-    ServerBase *server = startServer( opts );
+
+    Configuration *config = initServerConfig( opts );
+    ServerBase *server = 0;
+    string protocol = config->lookUp( "protocol" );
+    if ( protocol.empty() )
+      protocol = "tcp";
+    if ( protocol == "tcp" )
+      server = new TcpServer( config );
+    else if ( protocol == "http" )
+      server = new HttpServer( config );
+    else {
+      cerr << "unknown protocol " << protocol << endl;
+      exit(EXIT_FAILURE);
+    }
+
     //    cerr << "timbl server CommandLine: NA startServer:"; opts.dump(cerr) << endl;
     if ( Do_Classic_Server ){
       // Special case:   running a classic Server

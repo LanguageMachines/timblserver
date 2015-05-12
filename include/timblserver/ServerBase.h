@@ -32,6 +32,7 @@
 
 #include "ticcutils/LogStream.h"
 #include "ticcutils/Configuration.h"
+#include "ticcutils/CommandLine.h"
 #include "timblserver/SocketBasics.h"
 
 namespace TimblServer {
@@ -112,6 +113,8 @@ namespace TimblServer {
   int daemonize( int noCD , int noClose ){
     return ServerBase::daemonize( noCD, noClose);
   }
+
+  TiCC::Configuration *initServerConfig( TiCC::CL_Options& );
 
 }
 #endif // SERVERBASE_H

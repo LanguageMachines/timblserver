@@ -144,6 +144,44 @@ namespace TimblServer {
     tcp_socket = 0;
   }
 
+  Configuration *initServerConfig( TiCC::CL_Options& opts ){
+    Configuration *config = new Configuration();
+    bool old = false;
+    string value;
+    if ( !opts.extract( "config", value ) ){
+      if ( opts.extract( 'S', value ) ){
+	config->setatt( "port", value );
+	old = true;
+	if ( opts.extract( 'C', value ) ){
+	  config->setatt( "maxconn", value );
+	}
+      }
+      if ( !old ){
+	cerr << "missing --config option" << endl;
+	return 0;
+      }
+    }
+    else if ( !config->fill( value ) ){
+      cerr << "unable to read a configuration from " << value << endl;
+      return 0;
+    }
+    if ( opts.extract( "pidfile", value ) ){
+      config->setatt( "pidfile", value );
+    }
+    if ( opts.extract( "logfile", value ) ){
+      config->setatt( "logfile", value );
+    }
+    if ( opts.extract( "daemonize", value ) ){
+      if ( value.empty() )
+	value = "true";
+      config->setatt( "daemonize", value );
+    }
+    if ( opts.extract( "debug", value ) ){
+      config->setatt( "debug", value );
+    }
+    return config;
+  }
+
   string getProtocol( const string& serverConfigFile ){
     string result = "tcp";
     ifstream is( serverConfigFile );
