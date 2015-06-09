@@ -116,21 +116,20 @@ void startExperiments( ServerBase *server,
     Algorithm algorithm = IB1;
     string ProbInFile = "";
     string value;
-    bool mood;
-    if ( opts.is_present( 'a', value, mood ) ){
+    if ( opts.is_present( 'a', value ) ){
       // the user gave an algorithm
       if ( !string_to( value, algorithm ) ){
 	cerr << "illegal -a value: " << value << endl;
 	exit(EXIT_FAILURE);
       }
     }
-    if ( opts.extract( 'u', ProbInFile, mood ) ){
+    if ( opts.extract( 'u', ProbInFile ) ){
       if ( algorithm == IGTREE ){
 	cerr << "-u option is useless for IGtree" << endl;
 	exit(EXIT_FAILURE);
       }
     }
-    if ( opts.extract( 'w', value, mood ) ){
+    if ( opts.extract( 'w', value ) ){
       Weighting W;
       if ( !string_to( value, W ) ){
 	// No valid weighting, so assume it also has a filename
@@ -154,8 +153,8 @@ void startExperiments( ServerBase *server,
       }
     }
     opts.extract( "matrixin", MatrixInFile );
-    if ( !opts.extract( 'f', trainName, mood ) ){
-      opts.extract( 'i', treeName, mood );
+    if ( !opts.extract( 'f', trainName ) ){
+      opts.extract( 'i', treeName );
     }
     if ( !( treeName.empty() && trainName.empty() ) ){
       TimblAPI *run = new TimblAPI( opts );
@@ -207,23 +206,22 @@ void startExperiments( ServerBase *server,
       Algorithm algorithm = IB1;
       string ProbInFile = "";
       string value;
-      bool mood;
-      if ( opts.is_present( 'a', value, mood ) ){
+      if ( opts.is_present( 'a', value ) ){
 	// the user gave an algorithm
 	if ( !string_to( value, algorithm ) ){
 	  cerr << "illegal -a value: " << value << endl;
 	  exit(EXIT_FAILURE);
 	}
       }
-      if ( !opts.extract( 'f', trainName, mood ) )
-	opts.extract( 'i', treeName, mood );
-      if ( opts.extract( 'u', ProbInFile, mood ) ){
+      if ( !opts.extract( 'f', trainName ) )
+	opts.extract( 'i', treeName );
+      if ( opts.extract( 'u', ProbInFile ) ){
 	if ( algorithm == IGTREE ){
 	  cerr << "-u option is useless for IGtree" << endl;
 	  exit(EXIT_FAILURE);
 	}
       }
-      if ( opts.extract( 'w', value, mood ) ){
+      if ( opts.extract( 'w', value ) ){
 	Weighting W;
 	if ( !string_to( value, W ) ){
 	  // No valid weighting, so assume it also has a filename
@@ -298,8 +296,7 @@ void startClassicExperiment( ServerBase *server,
   Algorithm algorithm = IB1;
   string ProbInFile = "";
   string value;
-  bool mood;
-  if ( opts.is_present( 'a', value, mood ) ){
+  if ( opts.is_present( 'a', value ) ){
     // the user gave an algorithm
     if ( !string_to( value, algorithm ) ){
       cerr << "illegal -a value: " << value << endl;
@@ -307,15 +304,15 @@ void startClassicExperiment( ServerBase *server,
     }
   }
   opts.extract( "matrixin", MatrixInFile );
-  if ( !opts.extract( 'f', trainName, mood ) )
-    opts.extract( 'i', treeName, mood );
-  if ( opts.extract( 'u', ProbInFile, mood ) ){
+  if ( !opts.extract( 'f', trainName ) )
+    opts.extract( 'i', treeName );
+  if ( opts.extract( 'u', ProbInFile ) ){
     if ( algorithm == IGTREE ){
       cerr << "-u option is useless for IGtree" << endl;
       exit(EXIT_FAILURE);
     }
   }
-  if ( opts.extract( 'w', value, mood ) ){
+  if ( opts.extract( 'w', value ) ){
     Weighting W;
     if ( !string_to( value, W ) ){
       // No valid weighting, so assume it also has a filename
@@ -894,13 +891,12 @@ int main(int argc, char *argv[]){
     opts.set_short_options( timbl_short + serv_short );
     opts.set_long_options( timbl_long + serv_long );
     opts.init( argc, argv );
-    bool mood;
     string value;
-    if ( opts.is_present( 'h', value, mood ) ){
+    if ( opts.is_present( 'h', value ) ){
       usage_full();
       exit(EXIT_SUCCESS);
     }
-    if ( opts.is_present( 'V', value, mood ) ){
+    if ( opts.is_present( 'V', value ) ){
       cerr << "TiMBL server " << ServerBase::VersionInfo( true ) << endl;
       cerr << "Based on TiMBL " << TimblAPI::VersionInfo( true ) << endl;
       exit(EXIT_SUCCESS);
@@ -910,7 +906,7 @@ int main(int argc, char *argv[]){
     if ( opts.is_present( "config", value ) ){
       Do_Modern_Server = true;
     }
-    if ( opts.is_present( 'S', value, mood ) ){
+    if ( opts.is_present( 'S', value ) ){
       if ( Do_Modern_Server ){
 	cerr << "options -S conflicts with option --config" << endl;
 	exit(EXIT_FAILURE);
