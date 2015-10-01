@@ -38,6 +38,9 @@ if test x"$acx_pthread_ok" = xyes; then
    CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
 fi
 
+AC_OPENMP
+AM_CONDITIONAL( WANT_OMP, [test "x$ac_cv_prog_cxx_openmp" != "xunsupported"] )
+
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h sys/socket.h unistd.h ])
 
@@ -55,7 +58,6 @@ AC_CHECK_FUNCS([getaddrinfo gethostbyaddr gethostbyname inet_ntoa memset socket 
 AX_LIB_SOCKET_NSL
 AX_TYPE_SOCKLEN_T
 
-# Checks for timbl library.
 PKG_PROG_PKG_CONFIG
 
 PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
@@ -89,13 +91,6 @@ AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
 PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.6] )
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$LIBS $ticcutils_LIBS"
-
-AX_OPENMP(
-  [AC_MSG_NOTICE( we have Open MP )
-   CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"],
-  [AC_MSG_NOTICE( We don't seem to have Open MP )] )
-
-AM_CONDITIONAL( WANT_OMP, test "$OPENMP_CXXFLAGS" != "" )
 
 AC_CONFIG_FILES([
   Makefile
