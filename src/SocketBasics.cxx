@@ -292,7 +292,7 @@ namespace Sockets {
     struct addrinfo *res, *aip;
     struct addrinfo hints;
     memset( &hints, 0, sizeof(hints) );
-    hints.ai_flags = PF_UNSPEC;
+    hints.ai_flags = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     int eno;
     sock = -1;
@@ -321,10 +321,10 @@ namespace Sockets {
 	val = 1;
 	setsockopt( sock, IPPROTO_TCP, TCP_NODELAY, (void *)&val, sizeof(val) );
 	if ( ::connect( sock, aip->ai_addr, aip->ai_addrlen ) < 0 ){
-	  close( sock );
-	  sock = -1;
 	  mess = string( "ClientSocket: Connection on ") + hostString + ":"
 	    + TiCC::toString(sock) + " failed (" + strerror(errno) + ")";
+	  close( sock );
+	  sock = -1;
 	}
       }
       freeaddrinfo( res ); // and delete all addr_info stuff
