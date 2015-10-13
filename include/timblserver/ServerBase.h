@@ -104,7 +104,7 @@ namespace TimblServer {
   std::string Version();
   std::string VersionName();
 
-  int daemonize( int noCD , int noClose ){
+  inline int daemonize( int noCD , int noClose ){
     return ServerBase::daemonize( noCD, noClose);
   }
 
