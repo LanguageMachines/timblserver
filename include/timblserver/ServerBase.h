@@ -89,12 +89,6 @@ namespace TimblServer {
     fdostream _os;
   };
 
-  void *ServerBase::callChild( void *a ) {
-    childArgs* ca = (childArgs*)a;
-    ca->mother()->socketChild( ca );
-    return 0;
-  }
-
   class TcpServerBase : public ServerBase {
   public:
   TcpServerBase( const TiCC::Configuration *c ):ServerBase( c ){};

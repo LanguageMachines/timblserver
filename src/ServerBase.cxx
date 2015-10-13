@@ -222,6 +222,12 @@ namespace TimblServer {
     return result;
   }
 
+  void *ServerBase::callChild( void *a ) {
+    childArgs* ca = (childArgs*)a;
+    ca->mother()->socketChild( ca );
+    return 0;
+  }
+
   static bool keepGoing = true;
 
   void KillServerFun( int Signal ){
