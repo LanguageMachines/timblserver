@@ -29,7 +29,7 @@
 #include <signal.h>
 #include <iostream>
 #include "ticcutils/StringOps.h"
-#include "timblserver/SocketBasics.h"
+#include "ticcutils/SocketBasics.h"
 
 using namespace std;
 
