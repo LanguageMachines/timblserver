@@ -128,7 +128,7 @@ namespace TimblServer {
     if ( !value.empty() )
       name = value;
     else
-      name = "timblserver";
+      name = serverProtocol + "-server";
     myLog.message( name );
     value = config->lookUp( "debug" );
     if ( !value.empty() ){
@@ -178,6 +178,10 @@ namespace TimblServer {
     }
     if ( opts.extract( "debug", value ) ){
       config->setatt( "debug", value );
+    }
+    if ( old ){
+      string rest = opts.toString();
+      config->setatt( "default", rest );
     }
     return config;
   }
@@ -312,6 +316,8 @@ namespace TimblServer {
   // ***** This is the routine that is executed from a new TCP thread *******
   void ServerBase::socketChild( childArgs *args ){
     signal( SIGPIPE, BrokenPipeChildFun );
+    *Log(myLog) << "Thread " << (uintptr_t)pthread_self() << " on socket "
+		<< args->id() << ", started at: " << Timer::now();
     static int service_count=0;
     static pthread_mutex_t my_lock = PTHREAD_MUTEX_INITIALIZER;
     pthread_mutex_lock(&my_lock);
@@ -332,9 +338,9 @@ namespace TimblServer {
       pthread_mutex_unlock(&my_lock);
     }
     // close the socket and exit this thread
-    delete args;
     *Log(myLog) << "Thread " << (uintptr_t)pthread_self()
-		<< ", terminated at: " << Timer::now() << endl;
+		<< ", terminated at: " << Timer::now();
+    delete args;
   }
 
   void HttpServerBase::sendReject( ostream& os ) const {

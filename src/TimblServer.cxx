@@ -33,6 +33,7 @@
 #include <cstdlib>
 
 #include "ticcutils/CommandLine.h"
+#include "ticcutils/Timer.h"
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
 #include "timblserver/FdStream.h"
@@ -106,7 +107,6 @@ void startExperiments( ServerBase *server,
   server->callback_data = experiments;
 
   if ( allvals.empty() ){
-    cerr << "opts" << opts << endl;
     // old style stuff
     string treeName;
     string trainName;
@@ -193,7 +193,6 @@ void startExperiments( ServerBase *server,
   else {
     map<string,string>::iterator it = allvals.begin();
     while ( it != allvals.end() ){
-      cerr << "OPTS: " << it->second << endl;
       TiCC::CL_Options opts;
       opts.set_short_options( timbl_short + serv_short );
       opts.set_long_options( timbl_long + serv_long );
@@ -283,93 +282,6 @@ void startExperiments( ServerBase *server,
       }
       ++it;
     }
-  }
-}
-
-void startClassicExperiment( ServerBase *server,
-			     TiCC::CL_Options& opts ){
-  string treeName;
-  string trainName;
-  string MatrixInFile = "";
-  string WgtInFile = "";
-  Weighting WgtType = GR;
-  Algorithm algorithm = IB1;
-  string ProbInFile = "";
-  string value;
-  if ( opts.is_present( 'a', value ) ){
-    // the user gave an algorithm
-    if ( !string_to( value, algorithm ) ){
-      cerr << "illegal -a value: " << value << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
-  opts.extract( "matrixin", MatrixInFile );
-  if ( !opts.extract( 'f', trainName ) )
-    opts.extract( 'i', treeName );
-  if ( opts.extract( 'u', ProbInFile ) ){
-    if ( algorithm == IGTREE ){
-      cerr << "-u option is useless for IGtree" << endl;
-      exit(EXIT_FAILURE);
-    }
-  }
-  if ( opts.extract( 'w', value ) ){
-    Weighting W;
-    if ( !string_to( value, W ) ){
-      // No valid weighting, so assume it also has a filename
-      vector<string> parts;
-      size_t num = TiCC::split_at( value, parts, ":" );
-      if ( num == 2 ){
-	if ( !string_to( parts[1], W ) ){
-	  cerr << "invalid weighting option: " << value << endl;
-	  exit(1);
-	}
-	WgtInFile = parts[0];
-	WgtType = W;
-      }
-      else if ( num == 1 ){
-	WgtInFile = value;
-      }
-      else {
-	cerr << "invalid weighting option: " << value << endl;
-	exit(1);
-      }
-    }
-  }
-  if ( !( treeName.empty() && trainName.empty() ) ){
-    TimblAPI *run = new TimblAPI( opts, "default" );
-    bool result = false;
-    if ( run && run->Valid() ){
-      if ( treeName.empty() ){
-	cerr << "trainName = " << trainName << endl;
-	result = run->Learn( trainName );
-      }
-      else {
-	cerr << "treeName = " << treeName << endl;
-	result = run->GetInstanceBase( treeName );
-      }
-      if ( result && WgtInFile != "" ) {
-	result = run->GetWeights( WgtInFile, WgtType );
-      }
-      if ( result && ProbInFile != "" )
-	result = run->GetArrays( ProbInFile );
-      if ( result && MatrixInFile != "" ) {
-	result = run->GetMatrices( MatrixInFile );
-      }
-    }
-    if ( result ){
-      run->initExperiment();
-      map<string, TimblExperiment*> *experiments = new map<string, TimblExperiment*>();
-      server->callback_data = experiments;
-      (*experiments)["default"] = run->grabAndDisconnectExp();
-      delete run;
-      cerr << "started classic experiment " << endl;
-    }
-    else {
-      cerr << "FAILED to start experiment " << endl;
-    }
-  }
-  else {
-    cerr << "missing '-i' or '-f' option on the command line " << endl;
   }
 }
 
@@ -544,10 +456,6 @@ void TcpServer::callback( childArgs *args ){
     *Dbg(myLog) << " Na Create Client " << endl;
     // report connection to the server terminal
     //
-    char line[256];
-    sprintf( line, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
-	     sockId );
-    *Log(myLog) << line << ", started." << endl;
   }
   else {
     args->os() << "available bases: ";
@@ -867,19 +775,15 @@ void HttpServer::callback( childArgs *args ){
 
 int main(int argc, char *argv[]){
   try {
-    struct tm *curtime;
-    time_t Time;
     // Start.
     //
-    cerr << "TiMBL Server " << TimblServer::Version() << "-NT"
+    cerr << "TiMBL Server " << TimblServer::Version()
 	 << " (c) ILK 1998 - 2015.\n"
 	 << "Tilburg Memory Based Learner\n"
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
 	 << "CLiPS Computational Linguistics Group, University of Antwerp\n"
 	 << "based on " << Timbl::VersionName() << endl;
-    time(&Time);
-    curtime = localtime(&Time);
-    cerr << asctime(curtime) << endl;
+    cerr << Timer::now();
     if ( argc <= 1 ){
       usage();
       return 1;
@@ -901,30 +805,11 @@ int main(int argc, char *argv[]){
       cerr << "Based on TiMBL " << TimblAPI::VersionInfo( true ) << endl;
       exit(EXIT_SUCCESS);
     }
-    bool Do_Classic_Server = false;
-    bool Do_Modern_Server = false;
-    if ( opts.is_present( "config", value ) ){
-      Do_Modern_Server = true;
-    }
-    if ( opts.is_present( 'S', value ) ){
-      if ( Do_Modern_Server ){
-	cerr << "options -S conflicts with option --config" << endl;
-	exit(EXIT_FAILURE);
-      }
-      else {
-	Do_Classic_Server = true;
-      }
-    }
-    else if ( !Do_Modern_Server ){
-      cerr << "missing -S or --config option" << endl;
-      exit(EXIT_FAILURE);
-    }
-    //    cerr << "timbl server CommandLine: "; opts.dump(cerr) << endl;
-    // force some verbosity flags
+
     opts.insert( 'v', "F", true );
     opts.insert( 'v', "S", false );
-
     Configuration *config = initServerConfig( opts );
+
     ServerBase *server = 0;
     string protocol = config->lookUp( "protocol" );
     if ( protocol.empty() )
@@ -937,15 +822,8 @@ int main(int argc, char *argv[]){
       cerr << "unknown protocol " << protocol << endl;
       exit(EXIT_FAILURE);
     }
-
-    //    cerr << "timbl server CommandLine: NA startServer:"; opts.dump(cerr) << endl;
-    if ( Do_Classic_Server ){
-      // Special case:   running a classic Server
-      startClassicExperiment( server, opts );
-    }
-    else if ( Do_Modern_Server ){
-      startExperiments( server, opts );
-    }
+    server->myLog.message("timblserver");
+    startExperiments( server, opts );
     return server->Run(); // returns EXIT_SUCCESS or EXIT_FAIL
   }
   catch(std::bad_alloc){
