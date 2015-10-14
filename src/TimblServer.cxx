@@ -78,8 +78,7 @@ inline void usage(void){
 }
 
 
-void startExperiments( ServerBase *server,
-		       TiCC::CL_Options& opts ){
+void startExperiments( ServerBase *server ){
   map<string,string> allvals;
   if ( server->config->hasSection("experiments") )
     allvals = server->config->lookUpAll("experiments");
@@ -103,11 +102,22 @@ void startExperiments( ServerBase *server,
       }
     }
   }
-  map<string, TimblExperiment*> *experiments = new map<string, TimblExperiment*>();
+  if ( allvals.empty() ){
+    cerr << "Unable to initalize at least one tagger" << endl
+	 << "please check your commandline and/or your confiuration file"
+	 << endl;
+    exit(EXIT_FAILURE);
+  }
+
+  auto experiments = new map<string, TimblExperiment*>();
   server->callback_data = experiments;
 
-  if ( allvals.empty() ){
-    // old style stuff
+  map<string,string>::iterator it = allvals.begin();
+  while ( it != allvals.end() ){
+    TiCC::CL_Options opts;
+    opts.set_short_options( timbl_short + serv_short );
+    opts.set_long_options( timbl_long + serv_long );
+    opts.init( it->second );
     string treeName;
     string trainName;
     string MatrixInFile = "";
@@ -123,6 +133,8 @@ void startExperiments( ServerBase *server,
 	exit(EXIT_FAILURE);
       }
     }
+    if ( !opts.extract( 'f', trainName ) )
+      opts.extract( 'i', treeName );
     if ( opts.extract( 'u', ProbInFile ) ){
       if ( algorithm == IGTREE ){
 	cerr << "-u option is useless for IGtree" << endl;
@@ -153,11 +165,8 @@ void startExperiments( ServerBase *server,
       }
     }
     opts.extract( "matrixin", MatrixInFile );
-    if ( !opts.extract( 'f', trainName ) ){
-      opts.extract( 'i', treeName );
-    }
     if ( !( treeName.empty() && trainName.empty() ) ){
-      TimblAPI *run = new TimblAPI( opts );
+      TimblAPI *run = new TimblAPI( opts, it->first );
       bool result = false;
       if ( run && run->Valid() ){
 	if ( treeName.empty() ){
@@ -179,109 +188,20 @@ void startExperiments( ServerBase *server,
       }
       if ( result ){
 	run->initExperiment();
-	(*experiments)["default"] = run->grabAndDisconnectExp();
-	server->myLog << "started classic experiment " << endl;
+	(*experiments)[it->first] = run->grabAndDisconnectExp();
+	delete run;
+	server->myLog << "started experiment " << it->first
+		      << " with parameters: " << it->second << endl;
       }
       else {
-	server->myLog << "FAILED to start classic experiment " << endl;
+	server->myLog << "FAILED to start experiment " << it->first
+		      << " with parameters: " << it->second << endl;
       }
     }
     else {
-      server->myLog << "missing '-i' or '-f' option on command line" << endl;
+      server->myLog << "missing '-i' or '-f' option in serverconfig file" << endl;
     }
-  }
-  else {
-    map<string,string>::iterator it = allvals.begin();
-    while ( it != allvals.end() ){
-      TiCC::CL_Options opts;
-      opts.set_short_options( timbl_short + serv_short );
-      opts.set_long_options( timbl_long + serv_long );
-      opts.init( it->second );
-      string treeName;
-      string trainName;
-      string MatrixInFile = "";
-      string WgtInFile = "";
-      Weighting WgtType = GR;
-      Algorithm algorithm = IB1;
-      string ProbInFile = "";
-      string value;
-      if ( opts.is_present( 'a', value ) ){
-	// the user gave an algorithm
-	if ( !string_to( value, algorithm ) ){
-	  cerr << "illegal -a value: " << value << endl;
-	  exit(EXIT_FAILURE);
-	}
-      }
-      if ( !opts.extract( 'f', trainName ) )
-	opts.extract( 'i', treeName );
-      if ( opts.extract( 'u', ProbInFile ) ){
-	if ( algorithm == IGTREE ){
-	  cerr << "-u option is useless for IGtree" << endl;
-	  exit(EXIT_FAILURE);
-	}
-      }
-      if ( opts.extract( 'w', value ) ){
-	Weighting W;
-	if ( !string_to( value, W ) ){
-	  // No valid weighting, so assume it also has a filename
-	  vector<string> parts;
-	  size_t num = TiCC::split_at( value, parts, ":" );
-	  if ( num == 2 ){
-	    if ( !string_to( parts[1], W ) ){
-	      cerr << "invalid weighting option: " << value << endl;
-	      exit(1);
-	    }
-	    WgtInFile = parts[0];
-	    WgtType = W;
-	  }
-	  else if ( num == 1 ){
-	    WgtInFile = value;
-	  }
-	  else {
-	    cerr << "invalid weighting option: " << value << endl;
-	    exit(1);
-	  }
-	}
-      }
-      opts.extract( "matrixin", MatrixInFile );
-      if ( !( treeName.empty() && trainName.empty() ) ){
-	TimblAPI *run = new TimblAPI( opts, it->first );
-	bool result = false;
-	if ( run && run->Valid() ){
-	  if ( treeName.empty() ){
-	    server->myLog << "trainName = " << trainName << endl;
-	    result = run->Learn( trainName );
-	  }
-	  else {
-	    server->myLog << "treeName = " << treeName << endl;
-	    result = run->GetInstanceBase( treeName );
-	  }
-	  if ( result && WgtInFile != "" ) {
-	    result = run->GetWeights( WgtInFile, WgtType );
-	  }
-	  if ( result && ProbInFile != "" )
-	    result = run->GetArrays( ProbInFile );
-	  if ( result && MatrixInFile != "" ) {
-	    result = run->GetMatrices( MatrixInFile );
-	  }
-	}
-	if ( result ){
-	  run->initExperiment();
-	  (*experiments)[it->first] = run->grabAndDisconnectExp();
-	  delete run;
-	  server->myLog << "started experiment " << it->first
-			<< " with parameters: " << it->second << endl;
-	}
-	else {
-	  server->myLog << "FAILED to start experiment " << it->first
-			<< " with parameters: " << it->second << endl;
-	}
-      }
-      else {
-	server->myLog << "missing '-i' or '-f' option in serverconfig file" << endl;
-      }
-      ++it;
-    }
+    ++it;
   }
 }
 
@@ -823,7 +743,7 @@ int main(int argc, char *argv[]){
       exit(EXIT_FAILURE);
     }
     server->myLog.message("timblserver");
-    startExperiments( server, opts );
+    startExperiments( server );
     return server->Run(); // returns EXIT_SUCCESS or EXIT_FAIL
   }
   catch(std::bad_alloc){
