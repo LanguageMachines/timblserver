@@ -32,7 +32,7 @@
 #include <cstdlib>
 #include <csignal>
 #include "ticcutils/StringOps.h"
-#include "timblserver/FdStream.h"
+#include "ticcutils/FdStream.h"
 #include "timblserver/ClientBase.h"
 
 using namespace std;

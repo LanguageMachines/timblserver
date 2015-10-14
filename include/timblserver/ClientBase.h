@@ -5,7 +5,7 @@
   Copyright (c) 1998 - 2015
   ILK   - Tilburg University
   CLiPS - University of Antwerp
- 
+
   This file is part of timblserver
 
   timblserver is free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@
 
 #include "timbl/TimblAPI.h"
 #include "ticcutils/LogStream.h"
-#include "timblserver/SocketBasics.h"
+#include "ticcutils/SocketBasics.h"
 
 namespace TimblServer {
 
