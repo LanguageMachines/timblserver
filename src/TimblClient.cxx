@@ -40,7 +40,7 @@
 using namespace std;
 
 #include "timbl/TimblAPI.h"
-#include "timblserver/SocketBasics.h"
+#include "ticcutils/SocketBasics.h"
 #include "timblserver/ClientBase.h"
 
 using namespace std;
