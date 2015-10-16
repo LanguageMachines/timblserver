@@ -36,7 +36,6 @@
 #include "ticcutils/Timer.h"
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
-#include "ticcutils/FdStream.h"
 #include "ticcutils/ServerBase.h"
 
 using namespace std;
