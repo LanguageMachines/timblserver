@@ -728,7 +728,9 @@ int main(int argc, char *argv[]){
     opts.insert( 'v', "F", true );
     opts.insert( 'v', "S", false );
     Configuration *config = initServerConfig( opts );
-
+    if ( !config ){
+      exit(EXIT_FAILURE);
+    }
     ServerBase *server = 0;
     string protocol = config->lookUp( "protocol" );
     if ( protocol.empty() )
