@@ -40,6 +40,7 @@
 using namespace std;
 
 #include "timbl/TimblAPI.h"
+#include "ticcutils/CommandLine.h"
 #include "ticcutils/SocketBasics.h"
 #include "timblserver/ClientBase.h"
 
@@ -66,10 +67,17 @@ int main(int argc, char *argv[] ){
   string base;
   string node;
   string port;
-  TimblOpts opts( argc, argv );
+  TiCC::CL_Options opts( "i:o:p:n:b:", "batch" );
+  try {
+    opts.init( argc, argv );
+  }
+  catch( TiCC::OptionError& e ){
+    cerr << e.what() << endl;
+    usage();
+    exit(EXIT_FAILURE);
+  }
   string value;
-
-  if ( opts.Find( "i", value ) ){
+  if ( opts.extract( "i", value ) ){
     if ( (input_file.open( value, ios::in ), !input_file.good() ) ){
       cerr << argv[0] << " - couldn't open inputfile " << value << endl;
       exit(EXIT_FAILURE);
@@ -77,7 +85,7 @@ int main(int argc, char *argv[] ){
     cout << "reading input from: " << value << endl;
     Input = &input_file;
   }
-  if ( opts.Find( "o", value ) ){
+  if ( opts.extract( "o", value ) ){
     if ( (output_file.open( value, ios::out ), !output_file.good() ) ){
       cerr << argv[0] << " - couldn't open outputfile " << value << endl;
       exit(EXIT_FAILURE);
@@ -85,16 +93,16 @@ int main(int argc, char *argv[] ){
     cout << "writing output to: " << value << endl;
     Output = &output_file;
   }
-  if ( opts.Find( "batch", value ) ){
+  if ( opts.extract( "batch" ) ){
     c_mode = true;
   }
-  if ( opts.Find( "p", value ) ){
+  if ( opts.extract( "p", value ) ){
     port = value;
   }
-  if ( opts.Find( "n", value ) ){
+  if ( opts.extract( "n", value ) ){
     node = value;
   }
-  if ( opts.Find( "b", value ) ){
+  if ( opts.extract( "b", value ) ){
     base = value;
   }
   if ( !node.empty() && !port.empty() ){
