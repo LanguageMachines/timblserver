@@ -285,6 +285,8 @@ TimblClient::TimblClient( TimblExperiment *exp,
   os(args->os()),
   is(args->is())
 {
+  if ( doDebug )
+    myLog.setlevel(LogHeavy);
   _exp = exp->clone();
   *_exp = *exp;
   if ( !_exp->connectToSocket( &(args->os() ) ) ){
@@ -298,16 +300,15 @@ TimblClient::TimblClient( TimblExperiment *exp,
 
 bool TimblClient::setOptions( const string& param ){
   if ( _exp->SetOptions( param ) ){
-    if ( doDebug )
-      *Log(myLog) << "setOptions: " << param << endl;
+    *Dbg(myLog) << "setOptions: " << param << endl;
     if ( _exp->ConfirmOptions() )
       os << "OK" << endl;
     else
       os << "ERROR { set options failed: " << param << "}" << endl;
   }
   else {
-    if ( doDebug )
-      *Log(myLog) << ": Don't understand '" << param << "'" << endl;
+    *Dbg(myLog) << ": Don't understand '" << param << "'" << endl;
+    os << "ERROR { set options failed: " << param << "}" << endl;
   }
   return true;
 }
@@ -317,10 +318,9 @@ bool TimblClient::classifyLine( const string& params ){
   string Distrib;
   string Answer;
   if ( _exp->Classify( params, Answer, Distrib, Distance ) ){
-    if ( doDebug )
-      *Log(myLog) << _exp->ExpName() << ":" << params << " --> "
-		  << Answer << " " << Distrib
-		  << " " << Distance << endl;
+    *Dbg(myLog) << _exp->ExpName() << ":" << params << " --> "
+		<< Answer << " " << Distrib
+		<< " " << Distance << endl;
     os << "CATEGORY {" << Answer << "}";
     if ( os.good() ){
       if ( _exp->Verbosity(DISTRIB) ){
@@ -349,9 +349,8 @@ bool TimblClient::classifyLine( const string& params ){
     return os.good();
   }
   else {
-    if ( doDebug )
-      *Log(myLog) << _exp->ExpName() << ": Classify Failed on '"
-		  << params << "'" << endl;
+    *Dbg(myLog) << _exp->ExpName() << ": Classify Failed on '"
+		<< params << "'" << endl;
     return false;
   }
 }
@@ -456,9 +455,8 @@ void TcpServer::callback( childArgs *args ){
 	args->os() << "SKIP '" << Line << "'" << endl;
 	break;
       default:
-	if ( doDebug() )
-	  *Log(myLog) << sockId << ": Don't understand '"
-		      << Line << "'" << endl;
+	*Dbg(myLog) << sockId << ": Don't understand '"
+		    << Line << "'" << endl;
 	args->os() << "ERROR { Illegal instruction:'" << Command
 		   << "' in line:" << Line << "}" << endl;
 	break;

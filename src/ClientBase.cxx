@@ -289,12 +289,12 @@ namespace TimblServer {
     if ( client.isValid() ) {
       string request;
       while( getline( is, request ) ){
-	//      cerr << "script line " << request << endl;
+	//	cerr << "script line " << request << endl;
 	if ( client.write( request + "\n" ) ){
 	  string response;
 	  bool more = true;
 	  while ( more && client.read( response ) ){
-	    //	  cerr << "response line " << response << endl;
+	    //	    cerr << "response line " << response << endl;
 	    if ( response.empty() ){
 	      continue;
 	    }
