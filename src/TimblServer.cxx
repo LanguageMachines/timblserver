@@ -43,12 +43,6 @@ using namespace Timbl;
 using namespace TimblServer;
 using namespace TiCC;
 
-const string timbl_short = "a:b:B:c:C:d:De:F:G:Hk:l:L:m:M:n:"
-  "N:o:O:p:q:QR:st:T:v:w:Wx";
-const string timbl_long = "Beam:,clones:,Diversify,occurrences:,"
-  "sloppy::,Threshold:,Treeorder:";
-// in the future, we want to query Timbl about the supported options
-// an inherit them here.
 const string serv_short = "hVS:f:i:u:";
 const string serv_long =
   ",pidfile:,logfile:,daemonize::,debug:,config:,matrixin:";
@@ -114,8 +108,8 @@ void startExperiments( ServerBase *server ){
   map<string,string>::iterator it = allvals.begin();
   while ( it != allvals.end() ){
     TiCC::CL_Options opts;
-    opts.set_short_options( timbl_short + serv_short );
-    opts.set_long_options( timbl_long + serv_long );
+    opts.set_short_options( timbl_short_opts + serv_short );
+    opts.set_long_options( timbl_long_opts + serv_long );
     opts.init( it->second );
     string treeName;
     string trainName;
@@ -709,8 +703,8 @@ int main(int argc, char *argv[]){
     TiCC::CL_Options opts;
     // in the future, we want to query Timbl about the supported options
     // an inherit them here.
-    opts.set_short_options( timbl_short + serv_short );
-    opts.set_long_options( timbl_long + serv_long );
+    opts.set_short_options( timbl_short_opts + serv_short );
+    opts.set_long_options( timbl_long_opts + serv_long );
     opts.init( argc, argv );
     string value;
     if ( opts.is_present( 'h', value ) ){
