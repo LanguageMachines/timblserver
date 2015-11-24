@@ -67,6 +67,14 @@ To install TimblServer, first consult whether your distribution's package manage
 If not, for easy installation of everything concerning TiMBL and all dependencies, it is included as part of our software
 distribution LaMachine: https://proycon.github.io/LaMachine . 
 
-To compile and install manually from source, provided you have all the
-dependencies installed, consult the included INSTALL file.
+To compile and install manually from source instead, provided you have all the dependencies installed:
+
+ $ bash bootstrap.sh
+ $ ./configure 
+ $ make
+ $ make install
+
+(See the INSTALL file for more details)
+
+
 
