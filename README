@@ -27,11 +27,10 @@ in classification than a standard k-nearest neighbor algorithm would be.
 
 -----------------------------------------------------------------------
 
-Comments and bug-reports are welcome at our
-issue tracker at https://github.com/LanguageMachines/timblserver/issues or by
-mailing
-a.vandenbosch (at) let.ru.nl. Updates and more info may be found on
-https://languagemachines.github.io/timbl .
+Comments and bug-reports are welcome at our issue tracker at
+https://github.com/LanguageMachines/timblserver/issues or by mailing
+lamasoftware (at) science.ru.nl.
+Updates and more info may be found on https://languagemachines.github.io/timbl .
 
 TimblServer is distributed under the GNU Public Licence v3
   (see the file COPYING).
