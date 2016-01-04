@@ -1,8 +1,6 @@
 /*
-  $Id$
-  $URL$
-
-  Copyright (c) 1998 - 2015
+  Copyright (c) 1998 - 2016
+  CLST  - Radboud University
   ILK   - Tilburg University
   CLiPS - University of Antwerp
 
@@ -22,9 +20,10 @@
   along with this program; if not, see <http://www.gnu.org/licenses/>.
 
   For questions and suggestions, see:
-      http://ilk.uvt.nl/software.html
+      https://github.com/LanguageMachines/timblserver/issues
   or send mail to:
-      timbl@uvt.nl
+      lamasoftware (at ) science.ru.nl
+
 */
 
 #include <exception>
@@ -685,8 +684,9 @@ int main(int argc, char *argv[]){
     // Start.
     //
     cerr << "TiMBL Server " << TimblServer::Version()
-	 << " (c) ILK 1998 - 2015.\n"
+	 << " (c) CLTS/ILK/CLIPS 1998 - 2016.\n"
 	 << "Tilburg Memory Based Learner\n"
+	 << "Centre for Language and Speech Technology, Radboud University"
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
 	 << "CLiPS Computational Linguistics Group, University of Antwerp\n"
 	 << "based on " << Timbl::VersionName() << endl;
@@ -697,8 +697,6 @@ int main(int argc, char *argv[]){
     }
 
     TiCC::CL_Options opts;
-    // in the future, we want to query Timbl about the supported options
-    // an inherit them here.
     opts.set_short_options( timbl_short_opts + serv_short_opts );
     opts.set_long_options( timbl_long_opts + serv_long_opts );
     opts.init( argc, argv );
