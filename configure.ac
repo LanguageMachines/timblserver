@@ -1,7 +1,5 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-# $Id$
-# $URL$
 
 AC_PREREQ(2.61)
 AC_INIT([timblserver],[1.10],[lamasoftware@science.ru.nl])
