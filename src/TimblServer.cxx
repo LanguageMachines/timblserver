@@ -686,7 +686,7 @@ int main(int argc, char *argv[]){
     cerr << "TiMBL Server " << TimblServer::Version()
 	 << " (c) CLTS/ILK/CLIPS 1998 - 2016.\n"
 	 << "Tilburg Memory Based Learner\n"
-	 << "Centre for Language and Speech Technology, Radboud University"
+	 << "Centre for Language and Speech Technology, Radboud University\n"
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
 	 << "CLiPS Computational Linguistics Group, University of Antwerp\n"
 	 << "based on " << Timbl::VersionName() << endl;
