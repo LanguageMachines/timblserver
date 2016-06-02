@@ -82,6 +82,7 @@ void startExperiments( ServerBase *server ){
 	   it->first == "debug" ||
 	   it->first == "pidfile" ||
 	   it->first == "daemonize" ||
+	   it->first == "configDir" ||
 	   it->first == "maxconn" ){
 	allvals.erase(it++);
       }
@@ -187,7 +188,8 @@ void startExperiments( ServerBase *server ){
       }
     }
     else {
-      server->myLog << "missing '-i' or '-f' option in serverconfig file" << endl;
+      server->myLog << "missing '-i' or '-f' option in serverconfig entry: '"
+		    << it->first << "=" << it->second << "'" << endl;
     }
     ++it;
   }
