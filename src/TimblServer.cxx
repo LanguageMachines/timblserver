@@ -40,7 +40,9 @@
 using namespace std;
 using namespace Timbl;
 using namespace TimblServer;
-using namespace TiCC;
+
+#define DBG *TiCC::Dbg(myLog)
+#define LOG *TiCC::Log(myLog)
 
 inline void usage_full(void){
   cerr << "usage: timblserver [TiMBLoptions] [ServerOptions]" << endl << endl;
@@ -218,7 +220,7 @@ TimblExperiment *createClient( const TimblExperiment *exp,
   if ( exp->getOptParams() ){
     result->setOptParams( exp->getOptParams()->Clone( &(args->os() ) ) );
   }
-  result->setExpName(string("exp-")+toString( args->id() ) );
+  result->setExpName(string("exp-")+TiCC::toString( args->id() ) );
   return result;
 }
 
@@ -262,7 +264,7 @@ public:
   void showSettings(){ _exp->ShowSettings( os ); };
   bool setOptions( const string& param );
 private:
-  LogStream& myLog;
+  TiCC::LogStream& myLog;
   bool doDebug;
   TimblExperiment *_exp;
   ostream& os;
@@ -286,19 +288,19 @@ TimblClient::TimblClient( TimblExperiment *exp,
   if ( exp->getOptParams() ){
     _exp->setOptParams( exp->getOptParams()->Clone( &(args->os() ) ) );
   }
-  _exp->setExpName(string("exp-")+toString( args->id() ) );
+  _exp->setExpName(string("exp-")+TiCC::toString( args->id() ) );
 }
 
 bool TimblClient::setOptions( const string& param ){
   if ( _exp->SetOptions( param ) ){
-    *Dbg(myLog) << "setOptions: " << param << endl;
+    DBG << "setOptions: " << param << endl;
     if ( _exp->ConfirmOptions() )
       os << "OK" << endl;
     else
       os << "ERROR { set options failed: " << param << "}" << endl;
   }
   else {
-    *Dbg(myLog) << ": Don't understand '" << param << "'" << endl;
+    DBG << ": Don't understand '" << param << "'" << endl;
     os << "ERROR { set options failed: " << param << "}" << endl;
   }
   return true;
@@ -309,7 +311,7 @@ bool TimblClient::classifyLine( const string& params ){
   string Distrib;
   string Answer;
   if ( _exp->Classify( params, Answer, Distrib, Distance ) ){
-    *Dbg(myLog) << _exp->ExpName() << ":" << params << " --> "
+    DBG << _exp->ExpName() << ":" << params << " --> "
 		<< Answer << " " << Distrib
 		<< " " << Distance << endl;
     os << "CATEGORY {" << Answer << "}";
@@ -340,7 +342,7 @@ bool TimblClient::classifyLine( const string& params ){
     return os.good();
   }
   else {
-    *Dbg(myLog) << _exp->ExpName() << ": Classify Failed on '"
+    DBG << _exp->ExpName() << ": Classify Failed on '"
 		<< params << "'" << endl;
     return false;
   }
@@ -360,9 +362,9 @@ void TcpServer::callback( childArgs *args ){
   if ( experiments->size() == 1
        && experiments->find("default") != experiments->end() ){
     baseName = "default";
-    *Dbg(myLog) << " Voor Create Default Client " << endl;
+    DBG << " Voor Create Default Client " << endl;
     client = new TimblClient( (*experiments)[baseName], args );
-    *Dbg(myLog) << " Na Create Client " << endl;
+    DBG << " Na Create Client " << endl;
     // report connection to the server terminal
     //
   }
@@ -376,17 +378,17 @@ void TcpServer::callback( childArgs *args ){
     args->os() << endl;
   }
   if ( getline( args->is(), Line ) ){
-    *Dbg(myLog) << "FirstLine='" << Line << "'" << endl;
+    DBG << "FirstLine='" << Line << "'" << endl;
     string Command, Param;
     bool go_on = true;
-    *Dbg(myLog) << "running FromSocket: " << sockId << endl;
+    DBG << "running FromSocket: " << sockId << endl;
 
     do {
-      Line = trim( Line );
-      *Dbg(myLog) << "Line='" << Line << "'" << endl;
+      Line = TiCC::trim( Line );
+      DBG << "Line='" << Line << "'" << endl;
       Split( Line, Command, Param );
-      *Dbg(myLog) << "Command='" << Command << "'" << endl;
-      *Dbg(myLog) << "Param='" << Param << "'" << endl;
+      DBG << "Command='" << Command << "'" << endl;
+      DBG << "Param='" << Param << "'" << endl;
       switch ( check_command(Command) ){
       case Base:{
 	map<string,TimblExperiment*>::const_iterator it
@@ -396,15 +398,15 @@ void TcpServer::callback( childArgs *args ){
 	  args->os() << "selected base: '" << Param << "'" << endl;
 	  if ( client )
 	    delete client;
-	  *Dbg(myLog) << " Voor Create Default Client " << endl;
+	  DBG << " Voor Create Default Client " << endl;
 	  client = new TimblClient( it->second, args );
-	  *Dbg(myLog) << " Na Create Client " << endl;
+	  DBG << " Na Create Client " << endl;
 	  // report connection to the server terminal
 	  //
 	  char line[256];
 	  sprintf( line, "Thread %zd, on Socket %d",
 		   (uintptr_t)pthread_self(), sockId );
-	  *Log(myLog) << line << ", started." << endl;
+	  LOG << line << ", started." << endl;
 	}
 	else {
 	  args->os() << "ERROR { Unknown basename: " << Param << "}" << endl;
@@ -446,7 +448,7 @@ void TcpServer::callback( childArgs *args ){
 	args->os() << "SKIP '" << Line << "'" << endl;
 	break;
       default:
-	*Dbg(myLog) << sockId << ": Don't understand '"
+	DBG << sockId << ": Don't understand '"
 		    << Line << "'" << endl;
 	args->os() << "ERROR { Illegal instruction:'" << Command
 		   << "' in line:" << Line << "}" << endl;
@@ -456,7 +458,7 @@ void TcpServer::callback( childArgs *args ){
     while ( go_on && getline( args->is(), Line ) );
   }
   delete client;
-  *Log(myLog) << "Thread " << (uintptr_t)pthread_self()
+  LOG << "Thread " << (uintptr_t)pthread_self()
 	      << " terminated, " << result
 	      << " instances processed " << endl;
 }
@@ -504,11 +506,11 @@ void HttpServer::callback( childArgs *args ){
   char logLine[256];
   sprintf( logLine, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
 	   args->id() );
-  *Log(myLog) << logLine << ", started." << endl;
+  LOG << logLine << ", started." << endl;
   string Line;
   int timeout = 1;
   if ( nb_getline( args->is(), Line, timeout ) ){
-    *Dbg(myLog) << "FirstLine='" << Line << "'" << endl;
+    DBG << "FirstLine='" << Line << "'" << endl;
     if ( Line.find( "HTTP" ) != string::npos ){
       // skip HTTP header
       string tmp;
@@ -520,7 +522,7 @@ void HttpServer::callback( childArgs *args ){
       if ( spos != string::npos ){
 	string::size_type epos = Line.find( " HTTP" );
 	string line = Line.substr( spos+3, epos - spos - 3 );
-	*Dbg(myLog) << "Line='" << line << "'" << endl;
+	DBG << "Line='" << line << "'" << endl;
 	epos = line.find( "?" );
 	string basename;
 	if ( epos != string::npos ){
@@ -533,22 +535,22 @@ void HttpServer::callback( childArgs *args ){
 	    if ( it != experiments->end() ){
 	      TimblExperiment *api = createClient( it->second, args );
 	      if ( api ){
-		LogStream LS( &myLog );
-		LogStream DS( &myLog );
+		TiCC::LogStream LS( &myLog );
+		TiCC::LogStream DS( &myLog );
 		DS.message(logLine);
 		LS.message(logLine);
 		DS.setstamp( StampBoth );
 		LS.setstamp( StampBoth );
-		XmlDoc doc( "TiMblResult" );
+		TiCC::XmlDoc doc( "TiMblResult" );
 		xmlNode *root = doc.getRoot();
-		XmlSetAttribute( root, "algorithm", toString(api->Algorithm()) );
+		TiCC::XmlSetAttribute( root, "algorithm", TiCC::toString(api->Algorithm()) );
 		vector<string> avs;
-		int avNum = split_at( qstring, avs, "&" );
+		int avNum = TiCC::split_at( qstring, avs, "&" );
 		if ( avNum > 0 ){
 		  multimap<string,string> acts;
 		  for ( int i=0; i < avNum; ++i ){
 		    vector<string> parts;
-		    int num = split_at( avs[i], parts, "=" );
+		    int num = TiCC::split_at( avs[i], parts, "=" );
 		    if ( num == 2 ){
 		      acts.insert( make_pair(parts[0], parts[1]) );
 		    }
@@ -636,19 +638,19 @@ void HttpServer::callback( childArgs *args ){
 			   << ", distance " << distance
 			   << endl;
 
-		      xmlNode *cl = XmlNewChild( root, "classification" );
-		      XmlNewTextChild( cl, "input", params );
-		      XmlNewTextChild( cl, "category", answer );
+		      xmlNode *cl = TiCC::XmlNewChild( root, "classification" );
+		      TiCC::XmlNewTextChild( cl, "input", params );
+		      TiCC::XmlNewTextChild( cl, "category", answer );
 		      if ( api->Verbosity(DISTRIB) ){
-			XmlNewTextChild( cl, "distribution", distrib );
+			TiCC::XmlNewTextChild( cl, "distribution", distrib );
 		      }
 		      if ( api->Verbosity(DISTANCE) ){
-			XmlNewTextChild( cl, "distance",
-					 toString<double>(distance) );
+			TiCC::XmlNewTextChild( cl, "distance",
+					       TiCC::toString<double>(distance) );
 		      }
 		      if ( api->Verbosity(MATCH_DEPTH) ){
-			XmlNewTextChild( cl, "match_depth",
-					 toString<double>( api->matchDepth()) );
+			TiCC::XmlNewTextChild( cl, "match_depth",
+					       TiCC::toString<double>( api->matchDepth()) );
 		      }
 		      if ( api->Verbosity(NEAR_N) ){
 			xmlNode *nb = api->bestNeighborsToXML();
@@ -669,7 +671,7 @@ void HttpServer::callback( childArgs *args ){
 	      }
 	    }
 	    else {
-	      *Dbg(myLog) << "invalid BASE! '" << basename
+	      DBG << "invalid BASE! '" << basename
 			  << "'" << endl;
 	      args->os() << "invalid basename: '" << basename << "'" << endl;
 	    }
@@ -692,7 +694,7 @@ int main(int argc, char *argv[]){
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
 	 << "CLiPS Computational Linguistics Group, University of Antwerp\n"
 	 << "based on " << Timbl::VersionName() << endl;
-    cerr << Timer::now();
+    cerr << TiCC::Timer::now();
     if ( argc <= 1 ){
       usage();
       return 1;
@@ -715,7 +717,7 @@ int main(int argc, char *argv[]){
 
     opts.insert( 'v', "F", true );
     opts.insert( 'v', "S", false );
-    Configuration *config = initServerConfig( opts );
+    TiCC::Configuration *config = initServerConfig( opts );
     if ( !config ){
       exit(EXIT_FAILURE);
     }
