@@ -705,7 +705,8 @@ int main(int argc, char *argv[]){
     opts.set_long_options( timbl_long_opts + serv_long_opts );
     opts.init( argc, argv );
     string value;
-    if ( opts.is_present( 'h' ) ){
+    if ( opts.is_present( 'h' )
+	 || opts.is_present( "help" ) ){
       usage_full();
       exit(EXIT_SUCCESS);
     }
