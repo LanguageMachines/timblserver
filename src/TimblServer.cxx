@@ -705,11 +705,12 @@ int main(int argc, char *argv[]){
     opts.set_long_options( timbl_long_opts + serv_long_opts );
     opts.init( argc, argv );
     string value;
-    if ( opts.is_present( 'h', value ) ){
+    if ( opts.is_present( 'h' ) ){
       usage_full();
       exit(EXIT_SUCCESS);
     }
-    if ( opts.is_present( 'V', value ) ){
+    if ( opts.is_present( 'V' )
+	 || opts.is_present( "version" ) ){
       cerr << "TiMBL server " << ServerBase::VersionInfo( true ) << endl;
       cerr << "Based on TiMBL " << TimblAPI::VersionInfo( true ) << endl;
       exit(EXIT_SUCCESS);
