@@ -1,4 +1,10 @@
-1.10 - 2015-01-14
+1.11 - 2016-07-11
+[Ko van der Sloot]
+Maintenance release:
+- accept long options --version and --help
+- improved a warning
+
+1.10 - 2016-01-14
 [Ko van der Sloot]
    * moved repository to GitHub
    * added Travis support
