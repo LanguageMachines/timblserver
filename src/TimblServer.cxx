@@ -94,10 +94,9 @@ void startExperiments( ServerBase *server ){
     }
   }
   if ( allvals.empty() ){
-    cerr << "Unable to initalize at least one tagger" << endl
-	 << "please check your commandline and/or your confiuration file"
-	 << endl;
-    exit(EXIT_FAILURE);
+    string mess = "TimblServer: Unable to initalize at least one experiment\n";
+    mess += "please check your commandline or configuration file";
+    throw runtime_error( mess );
   }
 
   auto experiments = new map<string, TimblExperiment*>();
@@ -105,6 +104,7 @@ void startExperiments( ServerBase *server ){
 
   map<string,string>::iterator it = allvals.begin();
   while ( it != allvals.end() ){
+    string exp_name = it->first;
     TiCC::CL_Options opts;
     opts.set_short_options( timbl_short_opts + serv_short_opts );
     opts.set_long_options( timbl_long_opts + serv_long_opts );
@@ -120,16 +120,16 @@ void startExperiments( ServerBase *server ){
     if ( opts.is_present( 'a', value ) ){
       // the user gave an algorithm
       if ( !string_to( value, algorithm ) ){
-	cerr << "illegal -a value: " << value << endl;
-	exit(EXIT_FAILURE);
+	string mess = exp_name + ":start(): illegal -a value: " + value;
+	throw runtime_error( mess );
       }
     }
     if ( !opts.extract( 'f', trainName ) )
       opts.extract( 'i', treeName );
     if ( opts.extract( 'u', ProbInFile ) ){
       if ( algorithm == IGTREE ){
-	cerr << "-u option is useless for IGtree" << endl;
-	exit(EXIT_FAILURE);
+	string mess = exp_name + ":start(): -u option is useless for IGtree";
+	throw runtime_error( mess );
       }
     }
     if ( opts.extract( 'w', value ) ){
@@ -140,8 +140,9 @@ void startExperiments( ServerBase *server ){
 	size_t num = TiCC::split_at( value, parts, ":" );
 	if ( num == 2 ){
 	  if ( !string_to( parts[1], W ) ){
-	    cerr << "invalid weighting option: " << value << endl;
-	    exit(1);
+	    string mess = exp_name + ":start(): invalid weighting option:"
+	      + value;
+	    throw runtime_error( mess );
 	  }
 	  WgtInFile = parts[0];
 	  WgtType = W;
@@ -150,14 +151,15 @@ void startExperiments( ServerBase *server ){
 	  WgtInFile = value;
 	}
 	else {
-	  cerr << "invalid weighting option: " << value << endl;
-	  exit(1);
+	  string mess = exp_name + ":start(): invalid weighting option:"
+	    + value;
+	  throw runtime_error( mess );
 	}
       }
     }
     opts.extract( "matrixin", MatrixInFile );
     if ( !( treeName.empty() && trainName.empty() ) ){
-      TimblAPI *run = new TimblAPI( opts, it->first );
+      TimblAPI *run = new TimblAPI( opts, exp_name );
       bool result = false;
       if ( run && run->Valid() ){
 	if ( treeName.empty() ){
@@ -179,19 +181,19 @@ void startExperiments( ServerBase *server ){
       }
       if ( result ){
 	run->initExperiment();
-	(*experiments)[it->first] = run->grabAndDisconnectExp();
+	(*experiments)[exp_name] = run->grabAndDisconnectExp();
 	delete run;
-	server->myLog << "started experiment " << it->first
+	server->myLog << "started experiment " << exp_name
 		      << " with parameters: " << it->second << endl;
       }
       else {
-	server->myLog << "FAILED to start experiment " << it->first
+	server->myLog << "FAILED to start experiment " << exp_name
 		      << " with parameters: " << it->second << endl;
       }
     }
     else {
       server->myLog << "missing '-i' or '-f' option in serverconfig entry: '"
-		    << it->first << "=" << it->second << "'" << endl;
+		    << exp_name << "=" << it->second << "'" << endl;
     }
     ++it;
   }
@@ -743,16 +745,12 @@ int main(int argc, char *argv[]){
     cerr << "ran out of memory somewhere" << endl;
     cerr << "timblserver terminated, Sorry for that" << endl;
   }
-  catch(std::string& what){
-    cerr << "an exception was raised: '" << what << "'" << endl;
-    cerr << "timblserver terminated, Sorry for that" << endl;
-  }
   catch(std::exception& e){
     cerr << "a standard exception was raised: '" << e.what() << "'" << endl;
     cerr << "timblserver terminated, Sorry for that" << endl;
   }
   catch(...){
-    cerr << "some exception was raised" << endl;
+    cerr << "some unhandled exception was raised" << endl;
     cerr << "timblserver terminated, Sorry for that" << endl;
   }
   return 0;
