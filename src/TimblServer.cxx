@@ -202,13 +202,13 @@ void startExperiments( ServerBase *server ){
 class TcpServer : public TcpServerBase {
 public:
   void callback( childArgs* );
-  TcpServer( const TiCC::Configuration *c ): TcpServerBase( c ){};
+  explicit TcpServer( const TiCC::Configuration *c ): TcpServerBase( c ){};
 };
 
 class HttpServer : public HttpServerBase {
 public:
   void callback( childArgs* );
-  HttpServer( const TiCC::Configuration *c ): HttpServerBase( c ){};
+  explicit HttpServer( const TiCC::Configuration *c ): HttpServerBase( c ){};
 };
 
 TimblExperiment *createClient( const TimblExperiment *exp,
@@ -406,7 +406,7 @@ void TcpServer::callback( childArgs *args ){
 	  // report connection to the server terminal
 	  //
 	  char line[256];
-	  sprintf( line, "Thread %zd, on Socket %d",
+	  sprintf( line, "Thread %lu, on Socket %d",
 		   (uintptr_t)pthread_self(), sockId );
 	  LOG << line << ", started." << endl;
 	}
@@ -471,11 +471,10 @@ void TcpServer::callback( childArgs *args ){
 
 
   string urlDecode( const string& s ) {
-    int cc;
     string result;
     int len=s.size();
     for (int i=0; i<len ; ++i ) {
-      cc=s[i];
+      int cc=s[i];
       if (cc == '+') {
 	result += ' ';
       }
@@ -506,7 +505,7 @@ void HttpServer::callback( childArgs *args ){
   map<string, TimblExperiment*> *experiments =
     static_cast<map<string, TimblExperiment*> *>(callback_data);
   char logLine[256];
-  sprintf( logLine, "Thread %zd, on Socket %d", (uintptr_t)pthread_self(),
+  sprintf( logLine, "Thread %lu, on Socket %d", (uintptr_t)pthread_self(),
 	   args->id() );
   LOG << logLine << ", started." << endl;
   string Line;
@@ -706,7 +705,6 @@ int main(int argc, char *argv[]){
     opts.set_short_options( timbl_short_opts + serv_short_opts );
     opts.set_long_options( timbl_long_opts + serv_long_opts );
     opts.init( argc, argv );
-    string value;
     if ( opts.is_present( 'h' )
 	 || opts.is_present( "help" ) ){
       usage_full();
