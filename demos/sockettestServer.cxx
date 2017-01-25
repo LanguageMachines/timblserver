@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 1998 - 2015
+  Copyright (c) 1998 - 2017
   ILK  -  Tilburg University
   CNTS -  University of Antwerp
 
