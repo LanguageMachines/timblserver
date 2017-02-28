@@ -359,13 +359,11 @@ void TcpServer::callback( childArgs *args ){
     static_cast<map<string, TimblExperiment*> *>(callback_data);
 
   int result = 0;
-  string baseName;
   args->os() << "Welcome to the Timbl server." << endl;
   if ( experiments->size() == 1
        && experiments->find("default") != experiments->end() ){
-    baseName = "default";
     DBG << " Voor Create Default Client " << endl;
-    client = new TimblClient( (*experiments)[baseName], args );
+    client = new TimblClient( (*experiments)["default"], args );
     DBG << " Na Create Client " << endl;
     // report connection to the server terminal
     //
@@ -396,7 +394,6 @@ void TcpServer::callback( childArgs *args ){
 	map<string,TimblExperiment*>::const_iterator it
 	  = experiments->find(Param);
 	if ( it != experiments->end() ){
-	  baseName = Param;
 	  args->os() << "selected base: '" << Param << "'" << endl;
 	  if ( client )
 	    delete client;
