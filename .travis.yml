@@ -3,6 +3,11 @@ branches:
   only:
     - master
 
+sudo: required
+dist: trusty
+
+group: edge
+
 notifications:
   irc:
     channels:
@@ -10,9 +15,6 @@ notifications:
     template:
       - "%{repository_slug}#%{build_number} %{message} --> %{build_url}"
     skip_join: true
-
-sudo: required
-dist: trusty
 
 language: cpp
 matrix:
