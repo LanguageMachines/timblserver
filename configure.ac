@@ -58,37 +58,23 @@ AX_TYPE_SOCKLEN_T
 
 PKG_PROG_PKG_CONFIG
 
+if test "x$PKG_CONFIG_PATH" = x; then
+    export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
+else
+    export PKG_CONFIG_PATH="$prefix/lib/pkgconfig:$PKG_CONFIG_PATH"
+fi
+
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.16] )
+CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
+LIBS="$LIBS $ticcutils_LIBS"
+
 PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
 LIBS="$XML2_LIBS $LIBS"
 
-# inspired by feh-1.3.4/configure.ac.  Tnx Tom Gilbert and feh hackers.
-# ugly hack when PKG_CONFIG_PATH isn't defined.
-# couldn't get it to work otherwise
-if test "x$PKG_CONFIG_PATH" = x; then
-    export PKG_CONFIG_PATH=""
-fi
-AC_ARG_WITH(timbl,
-       [  --with-timbl=DIR       use timbl installed in <DIR>;
-               note that you can install timbl in a non-default directory with
-               ./configure --prefix=<DIR> in the timbl installation directory],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
 PKG_CHECK_MODULES([timbl], [timbl >= 6.4.7] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$LIBS $timbl_LIBS"
-
-AC_ARG_WITH(ticcutils,
-       [  --with-ticcutils=DIR      use libticcutils installed in <DIR>;
-               note that you can install libticcutils in a non-default directory with
-               ./configure --prefix=<DIR> in the libticutils installation directory],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$withval/lib/pkgconfig"],
-       [PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$prefix/lib/pkgconfig"])
-AC_MSG_NOTICE( [pkg-config search path: $PKG_CONFIG_PATH] )
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.9] )
-CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
-LIBS="$LIBS $ticcutils_LIBS"
 
 AC_CONFIG_FILES([
   Makefile

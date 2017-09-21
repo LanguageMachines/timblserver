@@ -226,34 +226,34 @@ TimblExperiment *createClient( const TimblExperiment *exp,
   return result;
 }
 
-  enum CommandType { UnknownCommand, Classify, Base,
-		     Query, Set, Exit, Comment };
+enum CommandType { UnknownCommand, Classify, Base,
+		   Query, Set, Exit, Comment };
 
-  CommandType check_command( const string& com ){
-    CommandType result = UnknownCommand;
-    if ( compare_nocase_n( com, "CLASSIFY" ) )
-      result = Classify;
-    else if ( compare_nocase_n( com, "QUERY" ) )
-      result = Query;
-    else if ( compare_nocase_n( com, "BASE") )
-      result = Base;
-    else if ( compare_nocase_n( com, "SET") )
-      result = Set;
-    else if ( compare_nocase_n( com, "EXIT" ) )
-      result = Exit;
-    else if ( com[0] == '#' )
-      result = Comment;
-    return result;
-  }
+CommandType check_command( const string& com ){
+  CommandType result = UnknownCommand;
+  if ( compare_nocase_n( com, "CLASSIFY" ) )
+    result = Classify;
+  else if ( compare_nocase_n( com, "QUERY" ) )
+    result = Query;
+  else if ( compare_nocase_n( com, "BASE") )
+    result = Base;
+  else if ( compare_nocase_n( com, "SET") )
+    result = Set;
+  else if ( compare_nocase_n( com, "EXIT" ) )
+    result = Exit;
+  else if ( com[0] == '#' )
+    result = Comment;
+  return result;
+}
 
 inline void Split( const string& line, string& com, string& rest ){
-  string::size_type pos = line.find_first_of(" \t");
-  if ( pos != string::npos ){
-    com = line.substr(0,pos);
-    rest = line.substr(pos+1);
+  vector<string> parts = TiCC::split( line, 2 );
+  if ( parts.size() == 2 ){
+    com = parts[0];
+    rest = parts[1];
   }
   else {
-    com = line;
+    com = parts[0];
     rest = "";
   }
 }
@@ -467,32 +467,31 @@ void TcpServer::callback( childArgs *args ){
             (((x) >= 'A') && ((x) <= 'F')))
 
 
-  string urlDecode( const string& s ) {
-    string result;
-    int len=s.size();
-    for (int i=0; i<len ; ++i ) {
-      int cc=s[i];
-      if (cc == '+') {
-	result += ' ';
-      }
-      else if ( cc == '%' &&
-		( i < len-2 &&
-		  ( IS_HEX(s[i+1]) ) &&
-		  ( IS_HEX(s[i+2]) ) ) ){
-	std::istringstream ss( "0x"+s.substr(i+1,2) );
-	int tmp;
-	ss >> std::showbase >> std::hex;
-	ss >> tmp;
+string urlDecode( const string& s ) {
+  string result;
+  size_t len=s.size();
+  for ( size_t i=0; i<len ; ++i ) {
+    int cc=s[i];
+    if (cc == '+') {
+      result += ' ';
+    }
+    else if ( cc == '%' &&
+	      ( i < len-2 &&
+		( IS_HEX(s[i+1]) ) &&
+		( IS_HEX(s[i+2]) ) ) ){
+      std::istringstream ss( "0x"+s.substr(i+1,2) );
+      int tmp;
+      ss >> std::showbase >> std::hex;
+      ss >> tmp;
       result = result + (char)tmp;
       i += 2;
-      }
-      else {
-	result += cc;
-      }
     }
-    return result;
+    else {
+      result += cc;
+    }
   }
-
+  return result;
+}
 
 void HttpServer::callback( childArgs *args ){
   // process the test material
@@ -542,25 +541,17 @@ void HttpServer::callback( childArgs *args ){
 		TiCC::XmlDoc doc( "TiMblResult" );
 		xmlNode *root = doc.getRoot();
 		TiCC::XmlSetAttribute( root, "algorithm", TiCC::toString(api->Algorithm()) );
-		vector<string> avs;
-		int avNum = TiCC::split_at( qstring, avs, "&" );
-		if ( avNum > 0 ){
+		vector<string> avs = TiCC::split_at( qstring, "&" );
+		if ( !avs.empty() ){
 		  multimap<string,string> acts;
-		  for ( int i=0; i < avNum; ++i ){
-		    vector<string> parts;
-		    int num = TiCC::split_at( avs[i], parts, "=" );
-		    if ( num == 2 ){
+		  for ( const auto& av : avs ){
+		    vector<string> parts = TiCC::split_at( av, "=", 2 );
+		    if ( parts.size() == 2 ){
 		      acts.insert( make_pair(parts[0], parts[1]) );
-		    }
-		    else if ( num > 2 ){
-		      string tmp = parts[1];
-		      for( int i=2; i < num; ++i )
-			tmp += string("=")+parts[i];
-		      acts.insert( make_pair(parts[0], tmp ) );
 		    }
 		    else {
 		      LS << "unknown word in query "
-			 << avs[i] << endl;
+			 << av << endl;
 		    }
 		  }
 		  typedef multimap<string,string>::const_iterator mmit;

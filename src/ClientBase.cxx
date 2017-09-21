@@ -50,18 +50,17 @@ namespace TimblServer {
   }
 
   bool ClientClass::extractBases( const string& line ){
-    string::size_type pos = line.find( "available bases:" );
+    static const string WHAT = "available bases:";
+    string::size_type pos = line.find( WHAT );
     if ( pos == 0 ){
-      string names = line.substr( 17 );
-      //      cerr << "step 1 '" << names << "'" << endl;
-      vector<string> name;
-      if ( TiCC::split_at( names, name, " " ) > 0 ){
-	for ( size_t i=0; i < name.size(); ++i ){
-	  //	  cerr << "step 2 i= " << i << " '" << name[i] << "'" << endl;
-	  bases.insert( TiCC::trim(name[i]) );
-	}
-	return true;
+      string value = line.substr( WHAT.size() );
+      //      cerr << "step 1 '" << value << "'" << endl;
+      vector<string> names = TiCC::split( value );
+      for ( const auto& base : names ){
+	//	  cerr << "step 2 i= " << i << " '" << base << "'" << endl;
+	bases.insert( base );
       }
+      return true;
     }
     cerr << "unable to extract basenames from: '" << line << "'" << endl;
     return false;
@@ -152,15 +151,16 @@ namespace TimblServer {
     return result;
   }
 
-  code_t Split( const string& line, string& rest ){
+  code_t extract_code( const string& line, string& rest ){
     string code;
-    string::const_iterator b_it = line.begin();
-    while ( b_it != line.end() && isspace( *b_it ) ) ++b_it;
-    string::const_iterator m_it = b_it;
-    while ( m_it != line.end() && !isspace( *m_it ) ) ++m_it;
-    code = string( b_it, m_it );
-    while ( m_it != line.end() && isspace( *m_it) ) ++m_it;
-    rest = string( m_it, line.end() );
+    rest.clear();
+    vector<string> parts = TiCC::split( line, 2 );
+    if ( !parts.empty() ){
+      code = parts[0];
+      if ( parts.size() == 2 ){
+	rest = parts[1];
+      }
+    }
     return toCode( code );
   }
 
@@ -206,7 +206,7 @@ namespace TimblServer {
 	  string line;
 	  while ( client.read( line ) ){
 	    string rest;
-	    code_t code = Split( line, rest );
+	    code_t code = extract_code( line, rest );
 	    if ( code != EndNeighbors ){
 	      neighbors.push_back( line );
 	    }
@@ -238,7 +238,7 @@ namespace TimblServer {
 	  if ( response.empty() )
 	    continue;
 	  string rest;
-	  code_t code = Split( response, rest );
+	  code_t code = extract_code( response, rest );
 	  switch( code ){
 	  case Result:
 	    return extractResult( rest );
@@ -266,8 +266,8 @@ namespace TimblServer {
 	    os << " DISTANCE {" << distance << "}";
 	  if ( neighbors.size() > 0 ){
 	    os << " NEIGHBORS " << endl;
-	    for ( size_t i=0; i < neighbors.size(); ++i ){
-	      os << neighbors[i] << endl;
+	    for ( const auto& n : neighbors ){
+	      os << n << endl;
 	    }
 	    os << "ENDNEIGHBORS ";
 	  }
@@ -299,7 +299,7 @@ namespace TimblServer {
 	    }
 	    more = false;
 	    string rest;
-	    code_t code = Split( response, rest );
+	    code_t code = extract_code( response, rest );
 	    switch ( code ) {
 	    case OK:
 	      os << "OK" << endl;
@@ -318,7 +318,7 @@ namespace TimblServer {
 	      os << response << endl;
 	      if ( also_neighbors )
 		while ( client.read( response ) ){
-		  code = Split( response, rest );
+		  code = extract_code( response, rest );
 		  os << response << endl;
 		  if ( code == EndNeighbors )
 		    break;
@@ -328,7 +328,7 @@ namespace TimblServer {
 	    case Status:
 	      os << response << endl;
 	      while ( client.read( response ) ){
-		code = Split( response, rest );
+		code = extract_code( response, rest );
 		os << response << endl;
 		if ( code == EndStatus )
 		  break;
