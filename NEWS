@@ -1,3 +1,12 @@
+1.12 - 2018-05-16
+[Ko van der Sloot]
+Maintenance release:
+- updated and improved configure/build
+- typo's corrected
+- some code cleanup
+- better error messages.
+
+
 1.11 - 2016-07-11
 [Ko van der Sloot]
 Maintenance release:
