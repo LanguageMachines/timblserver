@@ -727,11 +727,11 @@ int main(int argc, char *argv[]){
     startExperiments( server );
     return server->Run(); // returns EXIT_SUCCESS or EXIT_FAIL
   }
-  catch(std::bad_alloc){
+  catch( const std::bad_alloc& ){
     cerr << "ran out of memory somewhere" << endl;
     cerr << "timblserver terminated, Sorry for that" << endl;
   }
-  catch(std::exception& e){
+  catch( const std::exception& e ){
     cerr << "a standard exception was raised: '" << e.what() << "'" << endl;
     cerr << "timblserver terminated, Sorry for that" << endl;
   }
