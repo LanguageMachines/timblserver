@@ -760,7 +760,7 @@ void JsonServer::callback( childArgs *args ){
 	map<string,TimblExperiment*>::const_iterator it
 	  = experiments->find(Params);
 	if ( it != experiments->end() ){
-	  args->os() << "selected base: '" << Params << "'" << endl;
+	  //	  args->os() << "selected base: '" << Params << "'" << endl;
 	  if ( client )
 	    delete client;
 	  DBG << " Voor Create Default Client " << endl;
@@ -789,10 +789,11 @@ void JsonServer::callback( childArgs *args ){
 	  client->setOptions( Params );
 	}
       }
-      else if ( Command == "query" ){
+      else if ( Command == "query"
+		|| Command == "show" ){
 	if ( !client ){
 	  nlohmann::json out_json;
-	  out_json["error"] = "'query' failed: you haven't selected a base yet!";
+	  out_json["error"] = "'show' failed: you haven't selected a base yet!";
 	  args->os() << out_json << endl;
 	}
 	else {
