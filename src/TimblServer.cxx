@@ -35,6 +35,7 @@
 #include "ticcutils/Timer.h"
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
+#include "json/json.hpp"
 #include "ticcutils/ServerBase.h"
 
 using namespace std;
@@ -53,6 +54,7 @@ inline void usage_full(void){
   cerr << "--pidfile=<f> store pid in file <f>" << endl;
   cerr << "--logfile=<f> log server activity in file <f>" << endl;
   cerr << "--daemonize=[yes|no] (default yes)" << endl << endl;
+  cerr << "--protocol=[tcp|http|json] (default tcp)" << endl << endl;
   cerr << "-S <port> : run as a server on <port>" << endl;
   cerr << "-C <num>  : accept a maximum of 'num' parallel connections (default 10)" << endl;
 }
@@ -197,6 +199,11 @@ void startExperiments( ServerBase *server ){
     }
     ++it;
   }
+  if ( experiments->size() == 0 ){
+    server->myLog << "Unable to start a server. "
+		    << "No valid Timbls could be instantiated" << endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 class TcpServer : public TcpServerBase {
@@ -209,6 +216,13 @@ class HttpServer : public HttpServerBase {
 public:
   void callback( childArgs* );
   explicit HttpServer( const TiCC::Configuration *c ): HttpServerBase( c ){};
+};
+
+class JsonServer : public TcpServerBase {
+public:
+  void callback( childArgs* );
+  explicit JsonServer( const TiCC::Configuration *c ): TcpServerBase( c ){};
+  bool read_json( istream&, nlohmann::json& );
 };
 
 TimblExperiment *createClient( const TimblExperiment *exp,
@@ -264,6 +278,7 @@ public:
   ~TimblClient(){ delete _exp; };
   bool classifyLine( const string& );
   void showSettings(){ _exp->ShowSettings( os ); };
+  void showSettings( ostream& ss ){ _exp->ShowSettings( ss ); };
   bool setOptions( const string& param );
 private:
   TiCC::LogStream& myLog;
@@ -672,6 +687,149 @@ void HttpServer::callback( childArgs *args ){
   }
 }
 
+bool JsonServer::read_json( istream& is,
+			    nlohmann::json& the_json ){
+  the_json.clear();
+  string json_line;
+  if ( getline( is, json_line ) ){
+    cerr << "READ json_line='" << json_line << "'" << endl;
+    try {
+      the_json = nlohmann::json::parse( json_line );
+    }
+    catch ( const exception& e ){
+      cerr << "json parsing failed on '" << json_line + "':"
+	  << e.what() << endl;
+    }
+    return true;
+  }
+  return false;
+}
+
+void JsonServer::callback( childArgs *args ){
+  JsonServer *theServer = dynamic_cast<JsonServer*>( args->mother() );
+  int sockId = args->id();
+  TimblClient *client = 0;
+  map<string, TimblExperiment*> *experiments =
+    static_cast<map<string, TimblExperiment*> *>(callback_data);
+
+  int result = 0;
+  args->os() << "Welcome to the Timbl server." << endl;
+  if ( experiments->size() == 1
+       && experiments->find("default") != experiments->end() ){
+    DBG << " Voor Create Default Client " << endl;
+    client = new TimblClient( (*experiments)["default"], args );
+    DBG << " Na Create Client " << endl;
+    // report connection to the server terminal
+    //
+  }
+  else {
+    args->os() << "available bases: ";
+    map<string,TimblExperiment*>::const_iterator it = experiments->begin();
+    while ( it != experiments->end() ){
+      args->os() << it->first << " ";
+      ++it;
+    }
+    args->os() << endl;
+  }
+
+  nlohmann::json in_json;
+  bool go_on = true;
+  while ( go_on && theServer->read_json( args->is(), in_json ) ){
+    if ( in_json.empty() ){
+      continue;
+    }
+    DBG << "running FromSocket: " << sockId << endl;
+    string Command;
+    string Params;
+    if ( in_json.find("command") != in_json.end() ){
+      Command = in_json["command"];
+    }
+    if ( Command.empty() ){
+      DBG << sockId << ": Don't understand '" << in_json << "'" << endl;
+      nlohmann::json out_json;
+      out_json["error"] = "Illegal instruction:'" + in_json.dump() + "'";
+      args->os() << out_json << endl;
+    }
+    else {
+      if ( in_json.find("params") != in_json.end() ){
+	Params = in_json["params"];
+      }
+      DBG << "Command='" << Command << "'" << endl;
+      DBG << "Param='" << Params << "'" << endl;
+      if ( Command == "base" ){
+	map<string,TimblExperiment*>::const_iterator it
+	  = experiments->find(Params);
+	if ( it != experiments->end() ){
+	  args->os() << "selected base: '" << Params << "'" << endl;
+	  if ( client )
+	    delete client;
+	  DBG << " Voor Create Default Client " << endl;
+	  client = new TimblClient( it->second, args );
+	  DBG << " Na Create Client " << endl;
+	  // report connection to the server terminal
+	  //
+	  char line[256];
+	  sprintf( line, "Thread %lu, on Socket %d",
+		   (uintptr_t)pthread_self(), sockId );
+	  LOG << line << ", started." << endl;
+	}
+	else {
+	  nlohmann::json out_json;
+	  out_json["error"] = "Unknown basename: " + Params;
+	  args->os() << out_json << endl;
+	}
+      }
+      else if ( Command == "set" ){
+	if ( !client ){
+	  nlohmann::json out_json;
+	  out_json["error"] = "'set' failed: you haven't selected a base yet!";
+	  args->os() << out_json << endl;
+	}
+	else {
+	  client->setOptions( Params );
+	}
+      }
+      else if ( Command == "query" ){
+	if ( !client ){
+	  nlohmann::json out_json;
+	  out_json["error"] = "'query' failed: you haven't selected a base yet!";
+	  args->os() << out_json << endl;
+	}
+	else {
+	  stringstream ss;
+	  client->showSettings( ss );
+	  nlohmann::json out_json;
+	  out_json["status"] = ss.str();
+	  args->os() << out_json << endl;
+	}
+      }
+      else if ( Command == "exit" ){
+	args->os() << "OK Closing" << endl;
+	go_on = false;
+      }
+      else if ( Command == "classify" ){
+	if ( !client ){
+	  args->os() << "'classify' failed: you haven't selected a base yet!" << endl;
+	}
+	else {
+	  if ( client->classifyLine( Params ) ){
+	    result++;
+	  }
+	}
+      }
+      else {
+	nlohmann::json out_json;
+	out_json["error"] = "Unknown command: '" + Command + "'";
+	args->os() << out_json << endl;
+      }
+    }
+  }
+  delete client;
+  LOG << "Thread " << (uintptr_t)pthread_self()
+	      << " terminated, " << result
+	      << " instances processed " << endl;
+}
+
 int main(int argc, char *argv[]){
   try {
     // Start.
@@ -713,12 +871,18 @@ int main(int argc, char *argv[]){
     }
     ServerBase *server = 0;
     string protocol = config->lookUp( "protocol" );
-    if ( protocol.empty() )
+    if ( protocol.empty() ){
       protocol = "tcp";
-    if ( protocol == "tcp" )
+    }
+    if ( protocol == "tcp" ){
       server = new TcpServer( config );
-    else if ( protocol == "http" )
+    }
+    else if ( protocol == "http" ){
       server = new HttpServer( config );
+    }
+    else if ( protocol == "json" ){
+      server = new JsonServer( config );
+    }
     else {
       cerr << "unknown protocol " << protocol << endl;
       exit(EXIT_FAILURE);
