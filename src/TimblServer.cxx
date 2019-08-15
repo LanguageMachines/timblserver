@@ -882,7 +882,7 @@ void JsonServer::callback( childArgs *args ){
 	  nlohmann::json out_json;
 	  if ( client->setOptions( Params ) ){
 	    DBG << "setOptions: " << Params << endl;
-	    out_json["status"] = "OK";
+	    out_json["status"] = "ok";
 	  }
 	  else {
 	    DBG << ": Don't understand set(" << Params << ")" << endl;
@@ -907,7 +907,9 @@ void JsonServer::callback( childArgs *args ){
 	}
       }
       else if ( Command == "exit" ){
-	args->os() << "OK Closing" << endl;
+	nlohmann::json out_json;
+	out_json["status"] = "closed";
+	args->os() << out_json << endl;
 	go_on = false;
       }
       else if ( Command == "classify" ){
