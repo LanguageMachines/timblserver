@@ -37,10 +37,12 @@
 #include "timbl/GetOptClass.h"
 #include "json/json.hpp"
 #include "ticcutils/ServerBase.h"
+#include "ticcutils/XMLtools.h"
 
 using namespace std;
 using namespace Timbl;
 using namespace TimblServer;
+using TiCC::operator<<;
 
 #define DBG *TiCC::Dbg(myLog)
 #define LOG *TiCC::Log(myLog)
@@ -277,6 +279,7 @@ public:
   TimblClient( TimblExperiment *, childArgs * );
   ~TimblClient(){ delete _exp; };
   bool classifyLine( const string& );
+  nlohmann::json classify_to_json( const string& );
   void showSettings(){ _exp->ShowSettings( os ); };
   void showSettings( ostream& ss ){ _exp->ShowSettings( ss ); };
   bool setOptions( const string& param );
@@ -363,6 +366,100 @@ bool TimblClient::classifyLine( const string& params ){
 		<< params << "'" << endl;
     return false;
   }
+}
+
+nlohmann::json one_neighbor( xmlNode *node ){
+  list<xmlNode*> nodes = TiCC::FindNodes( node, "./instance" );
+  nlohmann::json result;
+  result["instance"] = TiCC::XmlContent( nodes.front() );
+  nodes = TiCC::FindNodes( node, "./distribution" );
+  if ( nodes.size() == 1 ){
+    result["distribution"] = TiCC::XmlContent( nodes.front() );
+  }
+  return result;
+}
+
+nlohmann::json one_nb_to_json( xmlNode *node ){
+  nlohmann::json result;
+  map<string,string> atts = TiCC::getAttributes( node );
+  for ( const auto& att : atts ){
+    result[att.first] = att.second;
+  }
+  list<xmlNode*> neigbors = TiCC::FindNodes( node, "./neighbor" );
+  if ( neigbors.empty() ){
+    return result;
+  }
+  if ( neigbors.size() == 1 ){
+    result["neigbor"] = one_neighbor( neigbors.front() );
+  }
+  else {
+    nlohmann::json arr = nlohmann::json::array();
+    for ( const auto n : neigbors ){
+      arr.push_back( one_neighbor( n ) );
+    }
+    result["neigbor"] = arr;
+  }
+  return result;
+}
+
+nlohmann::json xml_to_json( xmlNode *nn_tree ){
+  if ( TiCC::Name(nn_tree) != "neighborset" ) {
+    nlohmann::json out_json;
+    out_json["error"] = "xml_to_json() failed. No neighborset node found";
+    return out_json;
+  }
+  list<xmlNode*> neigbors = TiCC::FindNodes( nn_tree, "./neighbors" );
+  if ( neigbors.size() == 0 ){
+    nlohmann::json out_json;
+    return out_json;
+  }
+  else if ( neigbors.size() == 1 ){
+    nlohmann::json out_json = one_nb_to_json( neigbors.front() );
+    return out_json;
+  }
+  else {
+    nlohmann::json out_json = nlohmann::json::array();
+    for ( const auto& n : neigbors ){
+      out_json.push_back( one_nb_to_json( n ) );
+    }
+    return out_json;
+  }
+}
+
+nlohmann::json TimblClient::classify_to_json( const string& params ){
+  double distance;
+  string distrib;
+  string answer;
+  nlohmann::json out_json;
+  if ( _exp->Classify( params, answer, distrib, distance ) ){
+    DBG << _exp->ExpName() << ":" << params << " --> "
+	<< answer << " " << distrib << " " << distance << endl;
+    out_json["category"] = answer;
+    if ( _exp->Verbosity(DISTRIB) ){
+      out_json["distribution"] = distrib;
+    }
+    if ( _exp->Verbosity(DISTANCE) ){
+      out_json["distance"] = distance;
+    }
+    if ( _exp->Verbosity(MATCH_DEPTH) ){
+      out_json["match_depth"] = _exp->matchDepth();
+    }
+    if ( _exp->Verbosity(NEAR_N) ){
+      xmlNode *nn_tree = _exp->bestNeighborsToXML();
+      if ( nn_tree ){
+	nlohmann::json tmp = xml_to_json( nn_tree );
+	if ( !tmp.empty() ){
+	  out_json["neighbors"] = tmp;
+	}
+      }
+    }
+  }
+  else {
+    DBG << _exp->ExpName() << ": Classify Failed on '"
+	<< params << "'" << endl;
+    out_json["error"] = "timbl:classify(" + params + ") failed";
+  }
+  return out_json;
 }
 
 
@@ -692,7 +789,6 @@ bool JsonServer::read_json( istream& is,
   the_json.clear();
   string json_line;
   if ( getline( is, json_line ) ){
-    cerr << "READ json_line='" << json_line << "'" << endl;
     try {
       the_json = nlohmann::json::parse( json_line );
     }
@@ -700,6 +796,7 @@ bool JsonServer::read_json( istream& is,
       cerr << "json parsing failed on '" << json_line + "':"
 	  << e.what() << endl;
     }
+    DBG << "Read JSON: " << the_json << endl;
     return true;
   }
   return false;
@@ -810,10 +907,15 @@ void JsonServer::callback( childArgs *args ){
       }
       else if ( Command == "classify" ){
 	if ( !client ){
-	  args->os() << "'classify' failed: you haven't selected a base yet!" << endl;
+	  nlohmann::json out_json;
+	  out_json["error"] = "'classify' failed: you haven't selected a base yet!";
+	  args->os() << out_json << endl;
 	}
 	else {
-	  if ( client->classifyLine( Params ) ){
+	  nlohmann::json out_json = client->classify_to_json( Params );
+	  DBG << "sending JSON:" << endl << out_json << endl;
+	  args->os() << out_json << endl;
+	  if ( out_json.find("error") == out_json.end() ){
 	    result++;
 	  }
 	}
