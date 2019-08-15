@@ -312,18 +312,11 @@ TimblClient::TimblClient( TimblExperiment *exp,
 }
 
 bool TimblClient::setOptions( const string& param ){
-  if ( _exp->SetOptions( param ) ){
-    DBG << "setOptions: " << param << endl;
-    if ( _exp->ConfirmOptions() )
-      os << "OK" << endl;
-    else
-      os << "ERROR { set options failed: " << param << "}" << endl;
+  if ( _exp->SetOptions( param )
+       && _exp->ConfirmOptions() ){
+    return true;
   }
-  else {
-    DBG << ": Don't understand '" << param << "'" << endl;
-    os << "ERROR { set options failed: " << param << "}" << endl;
-  }
-  return true;
+  return false;
 }
 
 bool TimblClient::classifyLine( const string& params ){
@@ -525,10 +518,15 @@ void TcpServer::callback( childArgs *args ){
       }
 	break;
       case Set:
-	if ( !client )
+	if ( !client ){
 	  args->os() << "you haven't selected a base yet!" << endl;
+	}
+	else if ( client->setOptions( Param ) ){
+	  DBG << "setOptions: " << Param << endl;
+	  args->os() << "OK" << endl;
+	}
 	else {
-	  client->setOptions( Param );
+	  args->os() << "ERROR { set options failed: " << Param << "}" << endl;
 	}
 	break;
       case Query:
@@ -881,7 +879,16 @@ void JsonServer::callback( childArgs *args ){
 	  args->os() << out_json << endl;
 	}
 	else {
-	  client->setOptions( Params );
+	  nlohmann::json out_json;
+	  if ( client->setOptions( Params ) ){
+	    DBG << "setOptions: " << Params << endl;
+	    out_json["status"] = "OK";
+	  }
+	  else {
+	    DBG << ": Don't understand set(" << Params << ")" << endl;
+	    out_json["error"] = "set( " + Params + ") failed";
+	  }
+	  args->os() << out_json << endl;
 	}
       }
       else if ( Command == "query"
