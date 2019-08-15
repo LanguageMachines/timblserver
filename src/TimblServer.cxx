@@ -820,13 +820,11 @@ void JsonServer::callback( childArgs *args ){
     //
   }
   else {
-    args->os() << "available bases: ";
-    map<string,TimblExperiment*>::const_iterator it = experiments->begin();
-    while ( it != experiments->end() ){
-      args->os() << it->first << " ";
-      ++it;
+    string out_line = "available bases: ";
+    for ( const auto& it : *experiments ){
+      out_line += it.first + " ";
     }
-    args->os() << endl;
+    args->os() << out_line << endl;
   }
 
   nlohmann::json in_json;
