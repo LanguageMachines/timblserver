@@ -35,7 +35,7 @@
 #include "ticcutils/Timer.h"
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
-#include "json/json.hpp"
+#include "ticcutils/json.hpp"
 #include "ticcutils/ServerBase.h"
 #include "ticcutils/XMLtools.h"
 

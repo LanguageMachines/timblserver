@@ -80,9 +80,6 @@ PKG_CHECK_MODULES([timbl], [timbl >= 6.4.7] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$LIBS $timbl_LIBS"
 
-PKG_CHECK_MODULES([json], [json >= 0.1] )
-CXXFLAGS="$CXXFLAGS $json_CFLAGS"
-
 AC_CONFIG_FILES([
   Makefile
   timblserver.pc
