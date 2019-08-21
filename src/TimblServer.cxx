@@ -483,17 +483,17 @@ void TcpServer::callback( childArgs *args ){
     args->os() << endl;
   }
   if ( getline( args->is(), Line ) ){
-    DBG << "FirstLine='" << Line << "'" << endl;
+    DBG << "TcpServer::FirstLine='" << Line << "'" << endl;
     string Command, Param;
     bool go_on = true;
-    DBG << "running FromSocket: " << sockId << endl;
+    DBG << "TcpServer::running FromSocket: " << sockId << endl;
 
     do {
       Line = TiCC::trim( Line );
-      DBG << "Line='" << Line << "'" << endl;
+      DBG << "TcpServer::Line='" << Line << "'" << endl;
       Split( Line, Command, Param );
-      DBG << "Command='" << Command << "'" << endl;
-      DBG << "Param='" << Param << "'" << endl;
+      DBG << "TcpServer::Command='" << Command << "'" << endl;
+      DBG << "TcpServer::Param='" << Param << "'" << endl;
       switch ( check_command(Command) ){
       case Base:{
 	map<string,TimblExperiment*>::const_iterator it
@@ -502,9 +502,9 @@ void TcpServer::callback( childArgs *args ){
 	  args->os() << "selected base: '" << Param << "'" << endl;
 	  if ( client )
 	    delete client;
-	  DBG << " Voor Create Default Client " << endl;
+	  DBG << "TcpServer::before Create Default Client " << endl;
 	  client = new TimblClient( it->second, args );
-	  DBG << " Na Create Client " << endl;
+	  DBG << " TcpServer::After Create Client " << endl;
 	  // report connection to the server terminal
 	  //
 	  char line[256];
@@ -522,7 +522,7 @@ void TcpServer::callback( childArgs *args ){
 	  args->os() << "you haven't selected a base yet!" << endl;
 	}
 	else if ( client->setOptions( Param ) ){
-	  DBG << "setOptions: " << Param << endl;
+	  DBG << "TcpServer::setOptions: " << Param << endl;
 	  args->os() << "OK" << endl;
 	}
 	else {
@@ -557,7 +557,7 @@ void TcpServer::callback( childArgs *args ){
 	args->os() << "SKIP '" << Line << "'" << endl;
 	break;
       default:
-	DBG << sockId << ": Don't understand '"
+	DBG << sockId << "TcpServer::Don't understand '"
 		    << Line << "'" << endl;
 	args->os() << "ERROR { Illegal instruction:'" << Command
 		   << "' in line:" << Line << "}" << endl;
@@ -617,7 +617,7 @@ void HttpServer::callback( childArgs *args ){
   string Line;
   int timeout = 1;
   if ( nb_getline( args->is(), Line, timeout ) ){
-    DBG << "FirstLine='" << Line << "'" << endl;
+    DBG << "HttpServer::FirstLine='" << Line << "'" << endl;
     if ( Line.find( "HTTP" ) != string::npos ){
       // skip HTTP header
       string tmp;
@@ -629,7 +629,7 @@ void HttpServer::callback( childArgs *args ){
       if ( spos != string::npos ){
 	string::size_type epos = Line.find( " HTTP" );
 	string line = Line.substr( spos+3, epos - spos - 3 );
-	DBG << "Line='" << line << "'" << endl;
+	DBG << "HttpServer::Line='" << line << "'" << endl;
 	epos = line.find( "?" );
 	string basename;
 	if ( epos != string::npos ){
@@ -770,7 +770,7 @@ void HttpServer::callback( childArgs *args ){
 	      }
 	    }
 	    else {
-	      DBG << "invalid BASE! '" << basename
+	      DBG << "HttpServer::invalid BASE! '" << basename
 			  << "'" << endl;
 	      args->os() << "invalid basename: '" << basename << "'" << endl;
 	    }
@@ -794,7 +794,7 @@ bool JsonServer::read_json( istream& is,
       cerr << "json parsing failed on '" << json_line + "':"
 	  << e.what() << endl;
     }
-    DBG << "Read JSON: " << the_json << endl;
+    DBG << "JsonServer::Read JSON: " << the_json << endl;
     return true;
   }
   return false;
@@ -811,9 +811,9 @@ void JsonServer::callback( childArgs *args ){
   args->os() << "Welcome to the Timbl server." << endl;
   if ( experiments->size() == 1
        && experiments->find("default") != experiments->end() ){
-    DBG << " Voor Create Default Client " << endl;
+    DBG << "JsonServer::Before Create Default Client " << endl;
     client = new TimblClient( (*experiments)["default"], args );
-    DBG << " Na Create Client " << endl;
+    DBG << "JsonServer::After Create Client " << endl;
     // report connection to the server terminal
     //
   }
@@ -831,14 +831,14 @@ void JsonServer::callback( childArgs *args ){
     if ( in_json.empty() ){
       continue;
     }
-    DBG << "running FromSocket: " << sockId << endl;
+    DBG << "JsonServer::running FromSocket: " << sockId << endl;
     string Command;
     string Params;
     if ( in_json.find("command") != in_json.end() ){
       Command = in_json["command"];
     }
     if ( Command.empty() ){
-      DBG << sockId << ": Don't understand '" << in_json << "'" << endl;
+      DBG << sockId << "JsonServer:: Don't understand '" << in_json << "'" << endl;
       nlohmann::json out_json;
       out_json["error"] = "Illegal instruction:'" + in_json.dump() + "'";
       args->os() << out_json << endl;
@@ -847,8 +847,8 @@ void JsonServer::callback( childArgs *args ){
       if ( in_json.find("params") != in_json.end() ){
 	Params = in_json["params"];
       }
-      DBG << "Command='" << Command << "'" << endl;
-      DBG << "Param='" << Params << "'" << endl;
+      DBG << "JsonServer::Command='" << Command << "'" << endl;
+      DBG << "JsonServer::Param='" << Params << "'" << endl;
       if ( Command == "base" ){
 	map<string,TimblExperiment*>::const_iterator it
 	  = experiments->find(Params);
@@ -856,15 +856,15 @@ void JsonServer::callback( childArgs *args ){
 	  //	  args->os() << "selected base: '" << Params << "'" << endl;
 	  if ( client )
 	    delete client;
-	  DBG << " Voor Create Default Client " << endl;
+	  DBG << "JsonServer::before Create Default Client " << endl;
 	  client = new TimblClient( it->second, args );
-	  DBG << " Na Create Client " << endl;
+	  DBG << "JsonServer::atfer Create Client " << endl;
 	  // report connection to the server terminal
 	  //
 	  char line[256];
 	  sprintf( line, "Thread %lu, on Socket %d",
 		   (uintptr_t)pthread_self(), sockId );
-	  LOG << line << ", started." << endl;
+	  LOG << "JsonServer:: " << line << ", started." << endl;
 	}
 	else {
 	  nlohmann::json out_json;
@@ -881,11 +881,11 @@ void JsonServer::callback( childArgs *args ){
 	else {
 	  nlohmann::json out_json;
 	  if ( client->setOptions( Params ) ){
-	    DBG << "setOptions: " << Params << endl;
+	    DBG << "JsonServer::setOptions: " << Params << endl;
 	    out_json["status"] = "ok";
 	  }
 	  else {
-	    DBG << ": Don't understand set(" << Params << ")" << endl;
+	    DBG << "JsonServer::Don't understand set(" << Params << ")" << endl;
 	    out_json["error"] = "set( " + Params + ") failed";
 	  }
 	  args->os() << out_json << endl;
@@ -920,7 +920,7 @@ void JsonServer::callback( childArgs *args ){
 	}
 	else {
 	  nlohmann::json out_json = client->classify_to_json( Params );
-	  DBG << "sending JSON:" << endl << out_json << endl;
+	  DBG << "JsonServer::sending JSON:" << endl << out_json << endl;
 	  args->os() << out_json << endl;
 	  if ( out_json.find("error") == out_json.end() ){
 	    result++;
