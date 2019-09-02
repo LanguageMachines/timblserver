@@ -301,8 +301,9 @@ TimblClient::TimblClient( TimblExperiment *exp,
   os(args->os()),
   is(args->is())
 {
-  if ( doDebug )
+  if ( doDebug ){
     myLog.setlevel(LogHeavy);
+  }
   _exp = exp->clone();
   *_exp = *exp;
   if ( !_exp->connectToSocket( &(args->os() ) ) ){
@@ -736,7 +737,7 @@ bool JsonServer::read_json( istream& is,
       cerr << "json parsing failed on '" << json_line + "':"
 	  << e.what() << endl;
     }
-    DBG << "JsonServer::Read JSON: " << the_json << endl;
+    DBG << "Read JSON: " << the_json << endl;
     return true;
   }
   return false;
@@ -754,9 +755,9 @@ void JsonServer::callback( childArgs *args ){
   out_json["status"] = "ok";
   if ( experiments->size() == 1
        && experiments->find("default") != experiments->end() ){
-    DBG << "JsonServer::Before Create Default Client " << endl;
+    DBG << "Before Create Default Client " << endl;
     client = new TimblClient( (*experiments)["default"], args );
-    DBG << "JsonServer::After Create Client " << endl;
+    DBG << "After Create Client " << endl;
     // report connection to the server terminal
     //
   }
@@ -775,14 +776,14 @@ void JsonServer::callback( childArgs *args ){
     if ( in_json.empty() ){
       continue;
     }
-    DBG << "JsonServer::running FromSocket: " << sockId << endl;
+    DBG << "running FromSocket: " << sockId << endl;
     string command;
     string params;
     if ( in_json.find("command") != in_json.end() ){
       command = in_json["command"];
     }
     if ( command.empty() ){
-      DBG << sockId << "JsonServer:: Don't understand '" << in_json << "'" << endl;
+      DBG << sockId << " Don't understand '" << in_json << "'" << endl;
       json out_json;
       out_json["error"] = "Illegal instruction:'" + in_json.dump() + "'";
       args->os() << out_json << endl;
@@ -791,8 +792,8 @@ void JsonServer::callback( childArgs *args ){
       if ( in_json.find("param") != in_json.end() ){
 	params = in_json["param"];
       }
-      DBG << "JsonServer::Command='" << command << "'" << endl;
-      DBG << "JsonServer::Param='" << params << "'" << endl;
+      DBG << sockId << " Command='" << command << "'" << endl;
+      DBG << sockId << " Param='" << params << "'" << endl;
       if ( command == "base" ){
 	map<string,TimblExperiment*>::const_iterator it
 	  = experiments->find(params);
@@ -801,15 +802,15 @@ void JsonServer::callback( childArgs *args ){
 	  if ( client ){
 	    delete client;
 	  }
-	  DBG << "JsonServer::before Create Default Client " << endl;
+	  DBG << sockId << " before Create Default Client " << endl;
 	  client = new TimblClient( it->second, args );
-	  DBG << "JsonServer::atfer Create Client " << endl;
+	  DBG << sockId << " after Create Client " << endl;
 	  // report connection to the server terminal
 	  //
 	  char line[256];
 	  sprintf( line, "Thread %lu, on Socket %d",
 		   (uintptr_t)pthread_self(), sockId );
-	  LOG << "JsonServer:: " << line << ", started." << endl;
+	  DBG << sockId << " " << line << ", started." << endl;
 	  json out_json;
 	  out_json["base"] = params;
 	  args->os() << out_json << endl;
@@ -829,11 +830,11 @@ void JsonServer::callback( childArgs *args ){
 	else {
 	  json out_json;
 	  if ( client->setOptions( params ) ){
-	    DBG << "JsonServer::setOptions: " << params << endl;
+	    DBG << sockId << " setOptions: " << params << endl;
 	    out_json["status"] = "ok";
 	  }
 	  else {
-	    DBG << "JsonServer::Don't understand set(" << params << ")" << endl;
+	    DBG << sockId<< " Don't understand set(" << params << ")" << endl;
 	    out_json["error"] = "set( " + params + ") failed";
 	  }
 	  args->os() << out_json << endl;
@@ -843,7 +844,7 @@ void JsonServer::callback( childArgs *args ){
 		|| command == "show" ){
 	if ( !client ){
 	  json out_json;
-	  out_json["error"] = "'show' failed: you haven't selected a base yet!";
+	  out_json["error"] = "'show' failed: no base selected";
 	  args->os() << out_json << endl;
 	}
 	else if ( params == "settings" ){
@@ -889,7 +890,7 @@ void JsonServer::callback( childArgs *args ){
     }
   }
   delete client;
-  LOG << "Thread " << (uintptr_t)pthread_self()
+  LOG << sockId << " Thread " << (uintptr_t)pthread_self()
 	      << " terminated, " << result
 	      << " instances processed " << endl;
 }
@@ -940,18 +941,20 @@ int main(int argc, char *argv[]){
     }
     if ( protocol == "tcp" ){
       server = new TcpServer( config );
+      server->myLog.message("tcp_server");
     }
     else if ( protocol == "http" ){
       server = new HttpServer( config );
+      server->myLog.message("http_server");
     }
     else if ( protocol == "json" ){
       server = new JsonServer( config );
+      server->myLog.message("json_server");
     }
     else {
       cerr << "unknown protocol " << protocol << endl;
       exit(EXIT_FAILURE);
     }
-    server->myLog.message("timblserver");
     startExperiments( server );
     return server->Run(); // returns EXIT_SUCCESS or EXIT_FAIL
   }
