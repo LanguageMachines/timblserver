@@ -363,64 +363,6 @@ bool TimblClient::classifyLine( const string& params ){
   }
 }
 
-json one_neighbor( xmlNode *node ){
-  list<xmlNode*> nodes = TiCC::FindNodes( node, "./instance" );
-  json result;
-  result["instance"] = TiCC::XmlContent( nodes.front() );
-  nodes = TiCC::FindNodes( node, "./distribution" );
-  if ( nodes.size() == 1 ){
-    result["distribution"] = TiCC::XmlContent( nodes.front() );
-  }
-  return result;
-}
-
-json one_nb_to_json( xmlNode *node ){
-  json result;
-  map<string,string> atts = TiCC::getAttributes( node );
-  for ( const auto& att : atts ){
-    result[att.first] = att.second;
-  }
-  list<xmlNode*> neigbors = TiCC::FindNodes( node, "./neighbor" );
-  if ( neigbors.empty() ){
-    return result;
-  }
-  if ( neigbors.size() == 1 ){
-    result["neigbor"] = one_neighbor( neigbors.front() );
-  }
-  else {
-    json arr = json::array();
-    for ( const auto n : neigbors ){
-      arr.push_back( one_neighbor( n ) );
-    }
-    result["neigbor"] = arr;
-  }
-  return result;
-}
-
-json xml_to_json( xmlNode *nn_tree ){
-  if ( TiCC::Name(nn_tree) != "neighborset" ) {
-    json out_json;
-    out_json["error"] = "xml_to_json() failed. No neighborset node found";
-    return out_json;
-  }
-  list<xmlNode*> neigbors = TiCC::FindNodes( nn_tree, "./neighbors" );
-  if ( neigbors.size() == 0 ){
-    json out_json;
-    return out_json;
-  }
-  else if ( neigbors.size() == 1 ){
-    json out_json = one_nb_to_json( neigbors.front() );
-    return out_json;
-  }
-  else {
-    json out_json = json::array();
-    for ( const auto& n : neigbors ){
-      out_json.push_back( one_nb_to_json( n ) );
-    }
-    return out_json;
-  }
-}
-
 json TimblClient::classify_to_json( const string& params ){
   double distance;
   string distrib;
@@ -440,12 +382,9 @@ json TimblClient::classify_to_json( const string& params ){
       out_json["match_depth"] = _exp->matchDepth();
     }
     if ( _exp->Verbosity(NEAR_N) ){
-      xmlNode *nn_tree = _exp->bestNeighborsToXML();
-      if ( nn_tree ){
-	json tmp = xml_to_json( nn_tree );
-	if ( !tmp.empty() ){
-	  out_json["neighbors"] = tmp;
-	}
+      json tmp = _exp->best_neighbors_to_JSON();
+      if ( !tmp.empty() ){
+	out_json["neighbors"] = tmp;
       }
     }
   }

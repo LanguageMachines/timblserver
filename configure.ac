@@ -76,7 +76,7 @@ PKG_CHECK_MODULES([XML2], [libxml-2.0 >= 2.6.16] )
 CXXFLAGS="$CXXFLAGS $XML2_CFLAGS"
 LIBS="$XML2_LIBS $LIBS"
 
-PKG_CHECK_MODULES([timbl], [timbl >= 6.4.7] )
+PKG_CHECK_MODULES([timbl], [timbl >= 6.4.14] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$LIBS $timbl_LIBS"
 
