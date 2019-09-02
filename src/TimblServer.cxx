@@ -750,7 +750,8 @@ void JsonServer::callback( childArgs *args ){
     static_cast<map<string, TimblExperiment*> *>(callback_data);
 
   int result = 0;
-  args->os() << "Welcome to the Timbl server." << endl;
+  json out_json;
+  out_json["status"] = "ok";
   if ( experiments->size() == 1
        && experiments->find("default") != experiments->end() ){
     DBG << "JsonServer::Before Create Default Client " << endl;
@@ -760,12 +761,13 @@ void JsonServer::callback( childArgs *args ){
     //
   }
   else {
-    string out_line = "available bases: ";
+    json arr = json::array();
     for ( const auto& it : *experiments ){
-      out_line += it.first + " ";
+      arr.push_back( it.first );
     }
-    args->os() << out_line << endl;
+    out_json["available_bases"] = arr;
   }
+  args->os() << out_json << endl;
 
   json in_json;
   bool go_on = true;
@@ -796,8 +798,9 @@ void JsonServer::callback( childArgs *args ){
 	  = experiments->find(params);
 	if ( it != experiments->end() ){
 	  //	  args->os() << "selected base: '" << Params << "'" << endl;
-	  if ( client )
+	  if ( client ){
 	    delete client;
+	  }
 	  DBG << "JsonServer::before Create Default Client " << endl;
 	  client = new TimblClient( it->second, args );
 	  DBG << "JsonServer::atfer Create Client " << endl;
@@ -807,6 +810,9 @@ void JsonServer::callback( childArgs *args ){
 	  sprintf( line, "Thread %lu, on Socket %d",
 		   (uintptr_t)pthread_self(), sockId );
 	  LOG << "JsonServer:: " << line << ", started." << endl;
+	  json out_json;
+	  out_json["base"] = params;
+	  args->os() << out_json << endl;
 	}
 	else {
 	  json out_json;
