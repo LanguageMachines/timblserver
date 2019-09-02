@@ -280,10 +280,11 @@ class TimblClient {
 public:
   TimblClient( TimblExperiment *, childArgs * );
   ~TimblClient(){ delete _exp; };
-  bool classifyLine( const string& );
-  json classify_to_json( const string& );
-  void showSettings(){ _exp->ShowSettings( os ); };
-  void showSettings( ostream& ss ){ _exp->ShowSettings( ss ); };
+  bool classifyLine( const string& ) const;
+  json classify_to_json( const string& ) const;
+  void showSettings() const { _exp->ShowSettings( os ); };
+  json settings_to_json() const { return _exp->settings_to_JSON(); };
+  json weights_to_json() const { return _exp->weights_to_JSON(); };
   bool setOptions( const string& param );
 private:
   TiCC::LogStream& myLog;
@@ -321,7 +322,7 @@ bool TimblClient::setOptions( const string& param ){
   return false;
 }
 
-bool TimblClient::classifyLine( const string& params ){
+bool TimblClient::classifyLine( const string& params ) const {
   double Distance;
   string Distrib;
   string Answer;
@@ -363,7 +364,7 @@ bool TimblClient::classifyLine( const string& params ){
   }
 }
 
-json TimblClient::classify_to_json( const string& params ){
+json TimblClient::classify_to_json( const string& params ) const{
   double distance;
   string distrib;
   string answer;
@@ -773,12 +774,12 @@ void JsonServer::callback( childArgs *args ){
       continue;
     }
     DBG << "JsonServer::running FromSocket: " << sockId << endl;
-    string Command;
-    string Params;
+    string command;
+    string params;
     if ( in_json.find("command") != in_json.end() ){
-      Command = in_json["command"];
+      command = in_json["command"];
     }
-    if ( Command.empty() ){
+    if ( command.empty() ){
       DBG << sockId << "JsonServer:: Don't understand '" << in_json << "'" << endl;
       json out_json;
       out_json["error"] = "Illegal instruction:'" + in_json.dump() + "'";
@@ -786,13 +787,13 @@ void JsonServer::callback( childArgs *args ){
     }
     else {
       if ( in_json.find("params") != in_json.end() ){
-	Params = in_json["params"];
+	params = in_json["params"];
       }
-      DBG << "JsonServer::Command='" << Command << "'" << endl;
-      DBG << "JsonServer::Param='" << Params << "'" << endl;
-      if ( Command == "base" ){
+      DBG << "JsonServer::Command='" << command << "'" << endl;
+      DBG << "JsonServer::Param='" << params << "'" << endl;
+      if ( command == "base" ){
 	map<string,TimblExperiment*>::const_iterator it
-	  = experiments->find(Params);
+	  = experiments->find(params);
 	if ( it != experiments->end() ){
 	  //	  args->os() << "selected base: '" << Params << "'" << endl;
 	  if ( client )
@@ -809,11 +810,11 @@ void JsonServer::callback( childArgs *args ){
 	}
 	else {
 	  json out_json;
-	  out_json["error"] = "Unknown basename: " + Params;
+	  out_json["error"] = "Unknown basename: " + params;
 	  args->os() << out_json << endl;
 	}
       }
-      else if ( Command == "set" ){
+      else if ( command == "set" ){
 	if ( !client ){
 	  json out_json;
 	  out_json["error"] = "'set' failed: you haven't selected a base yet!";
@@ -821,46 +822,52 @@ void JsonServer::callback( childArgs *args ){
 	}
 	else {
 	  json out_json;
-	  if ( client->setOptions( Params ) ){
-	    DBG << "JsonServer::setOptions: " << Params << endl;
+	  if ( client->setOptions( params ) ){
+	    DBG << "JsonServer::setOptions: " << params << endl;
 	    out_json["status"] = "ok";
 	  }
 	  else {
-	    DBG << "JsonServer::Don't understand set(" << Params << ")" << endl;
-	    out_json["error"] = "set( " + Params + ") failed";
+	    DBG << "JsonServer::Don't understand set(" << params << ")" << endl;
+	    out_json["error"] = "set( " + params + ") failed";
 	  }
 	  args->os() << out_json << endl;
 	}
       }
-      else if ( Command == "query"
-		|| Command == "show" ){
+      else if ( command == "query"
+		|| command == "show" ){
 	if ( !client ){
 	  json out_json;
 	  out_json["error"] = "'show' failed: you haven't selected a base yet!";
 	  args->os() << out_json << endl;
 	}
+	else if ( params == "settings" ){
+	  json out_json = client->settings_to_json();
+	  args->os() << out_json << endl;
+	}
+	else if ( params == "weights" ){
+	  json out_json = client->weights_to_json();
+	  args->os() << out_json << endl;
+	}
 	else {
-	  stringstream ss;
-	  client->showSettings( ss );
 	  json out_json;
-	  out_json["status"] = ss.str();
+	  out_json["error"] = "'show' failed, unknown parameter: " + params;
 	  args->os() << out_json << endl;
 	}
       }
-      else if ( Command == "exit" ){
+      else if ( command == "exit" ){
 	json out_json;
 	out_json["status"] = "closed";
 	args->os() << out_json << endl;
 	go_on = false;
       }
-      else if ( Command == "classify" ){
+      else if ( command == "classify" ){
 	if ( !client ){
 	  json out_json;
 	  out_json["error"] = "'classify' failed: you haven't selected a base yet!";
 	  args->os() << out_json << endl;
 	}
 	else {
-	  json out_json = client->classify_to_json( Params );
+	  json out_json = client->classify_to_json( params );
 	  DBG << "JsonServer::sending JSON:" << endl << out_json << endl;
 	  args->os() << out_json << endl;
 	  if ( out_json.find("error") == out_json.end() ){
@@ -870,7 +877,7 @@ void JsonServer::callback( childArgs *args ){
       }
       else {
 	json out_json;
-	out_json["error"] = "Unknown command: '" + Command + "'";
+	out_json["error"] = "Unknown command: '" + command + "'";
 	args->os() << out_json << endl;
       }
     }
