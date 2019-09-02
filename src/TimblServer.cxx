@@ -786,8 +786,8 @@ void JsonServer::callback( childArgs *args ){
       args->os() << out_json << endl;
     }
     else {
-      if ( in_json.find("params") != in_json.end() ){
-	params = in_json["params"];
+      if ( in_json.find("param") != in_json.end() ){
+	params = in_json["param"];
       }
       DBG << "JsonServer::Command='" << command << "'" << endl;
       DBG << "JsonServer::Param='" << params << "'" << endl;
