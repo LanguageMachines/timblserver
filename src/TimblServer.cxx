@@ -32,6 +32,7 @@
 #include <cstdlib>
 
 #include "ticcutils/CommandLine.h"
+#include "ticcutils/PrettyPrint.h"
 #include "ticcutils/Timer.h"
 #include "timbl/TimblAPI.h"
 #include "timbl/GetOptClass.h"
@@ -281,7 +282,7 @@ public:
   TimblThread( TimblExperiment *, childArgs * );
   ~TimblThread(){ delete _exp; };
   bool classifyLine( const string& ) const;
-  json classify_to_json( const string& ) const;
+  json classify_to_json( const vector<string>& ) const;
   void showSettings() const { _exp->ShowSettings( os ); };
   json settings_to_json() const { return _exp->settings_to_JSON(); };
   json weights_to_json() const { return _exp->weights_to_JSON(); };
@@ -365,37 +366,51 @@ bool TimblThread::classifyLine( const string& params ) const {
   }
 }
 
-json TimblThread::classify_to_json( const string& params ) const{
+json TimblThread::classify_to_json( const vector<string>& params ) const {
+  DBG << "classify_to_json(" << params << ")" << endl;
   double distance;
   string distrib;
   string answer;
-  json out_json;
-  if ( _exp->Classify( params, answer, distrib, distance ) ){
-    DBG << _exp->ExpName() << ":" << params << " --> "
-	<< answer << " " << distrib << " " << distance << endl;
-    out_json["category"] = answer;
-    if ( _exp->Verbosity(DISTRIB) ){
-      out_json["distribution"] = distrib;
-    }
-    if ( _exp->Verbosity(DISTANCE) ){
-      out_json["distance"] = distance;
-    }
-    if ( _exp->Verbosity(MATCH_DEPTH) ){
-      out_json["match_depth"] = _exp->matchDepth();
-    }
-    if ( _exp->Verbosity(NEAR_N) ){
-      json tmp = _exp->best_neighbors_to_JSON();
-      if ( !tmp.empty() ){
-	out_json["neighbors"] = tmp;
+  json result;
+  if ( params.size() > 1 ){
+    result = json::array();
+  }
+  for ( const auto& param : params ){
+    json out_json;
+    if ( _exp->Classify( param, answer, distrib, distance ) ){
+      DBG << _exp->ExpName() << ":" << param << " --> "
+	  << answer << " " << distrib << " " << distance << endl;
+      out_json["category"] = answer;
+      if ( _exp->Verbosity(DISTRIB) ){
+	out_json["distribution"] = distrib;
+      }
+      if ( _exp->Verbosity(DISTANCE) ){
+	out_json["distance"] = distance;
+      }
+      if ( _exp->Verbosity(MATCH_DEPTH) ){
+	out_json["match_depth"] = _exp->matchDepth();
+      }
+      if ( _exp->Verbosity(NEAR_N) ){
+	json tmp = _exp->best_neighbors_to_JSON();
+	if ( !tmp.empty() ){
+	  out_json["neighbors"] = tmp;
+	}
       }
     }
+    else {
+      DBG << _exp->ExpName() << ": Classify Failed on '"
+	  << param << "'" << endl;
+      out_json["error"] = "timbl:classify(" + param + ") failed";
+    }
+    DBG << "created json: " << out_json.dump(2) << endl;
+    if ( params.size() > 1 ){
+      result.push_back( out_json );
+    }
+    else {
+      result = out_json;
+    }
   }
-  else {
-    DBG << _exp->ExpName() << ": Classify Failed on '"
-	<< params << "'" << endl;
-    out_json["error"] = "timbl:classify(" + params + ") failed";
-  }
-  return out_json;
+  return result;
 }
 
 
@@ -778,7 +793,8 @@ void JsonServer::callback( childArgs *args ){
     }
     DBG << "running FromSocket: " << sockId << endl;
     string command;
-    string params;
+    string param;
+    vector<string> params;
     if ( in_json.find("command") != in_json.end() ){
       command = in_json["command"];
     }
@@ -790,35 +806,55 @@ void JsonServer::callback( childArgs *args ){
     }
     else {
       if ( in_json.find("param") != in_json.end() ){
-	params = in_json["param"];
+	param = in_json["param"];
+      }
+      else if ( in_json.find("params") != in_json.end() ){
+	json pars = in_json["params"];
+	if ( pars.is_array() ){
+	  for ( size_t i=0; i < pars.size(); ++i ){
+	    params.push_back( pars[i].get<std::string>() );
+	  }
+	}
       }
       DBG << sockId << " Command='" << command << "'" << endl;
-      DBG << sockId << " Param='" << params << "'" << endl;
+      if ( param.empty() ){
+	DBG << sockId << " Params='" << params << "'" << endl;
+      }
+      else {
+	DBG << sockId << " Param='" << param << "'" << endl;
+      }
       if ( command == "base" ){
-	map<string,TimblExperiment*>::const_iterator it
-	  = experiments->find(params);
-	if ( it != experiments->end() ){
-	  //	  args->os() << "selected base: '" << Params << "'" << endl;
-	  if ( client ){
-	    delete client;
-	  }
-	  DBG << sockId << " before Create Default Client " << endl;
-	  client = new TimblThread( it->second, args );
-	  DBG << sockId << " after Create Client " << endl;
-	  // report connection to the server terminal
-	  //
-	  char line[256];
-	  sprintf( line, "Thread %lu, on Socket %d",
-		   (uintptr_t)pthread_self(), sockId );
-	  DBG << sockId << " " << line << ", started." << endl;
+	if ( param.empty() ){
 	  json out_json;
-	  out_json["base"] = params;
+	  out_json["error"] = "missing 'param' for base command ";
 	  args->os() << out_json << endl;
 	}
 	else {
-	  json out_json;
-	  out_json["error"] = "Unknown basename: " + params;
-	  args->os() << out_json << endl;
+	  map<string,TimblExperiment*>::const_iterator it
+	    = experiments->find(param);
+	  if ( it != experiments->end() ){
+	    //	  args->os() << "selected base: '" << Params << "'" << endl;
+	    if ( client ){
+	      delete client;
+	    }
+	    DBG << sockId << " before Create Default Client " << endl;
+	    client = new TimblThread( it->second, args );
+	    DBG << sockId << " after Create Client " << endl;
+	    // report connection to the server terminal
+	    //
+	    char line[256];
+	    sprintf( line, "Thread %lu, on Socket %d",
+		     (uintptr_t)pthread_self(), sockId );
+	    DBG << sockId << " " << line << ", started." << endl;
+	    json out_json;
+	    out_json["base"] = param;
+	    args->os() << out_json << endl;
+	  }
+	  else {
+	    json out_json;
+	    out_json["error"] = "Unknown basename: " + param;
+	    args->os() << out_json << endl;
+	  }
 	}
       }
       else if ( command == "set" ){
@@ -828,16 +864,23 @@ void JsonServer::callback( childArgs *args ){
 	  args->os() << out_json << endl;
 	}
 	else {
-	  json out_json;
-	  if ( client->setOptions( params ) ){
-	    DBG << sockId << " setOptions: " << params << endl;
-	    out_json["status"] = "ok";
+	  if ( param.empty() ){
+	    json out_json;
+	    out_json["error"] = "missing 'param' for set command ";
+	    args->os() << out_json << endl;
 	  }
 	  else {
-	    DBG << sockId<< " Don't understand set(" << params << ")" << endl;
-	    out_json["error"] = "set( " + params + ") failed";
+	    json out_json;
+	    if ( client->setOptions( param ) ){
+	      DBG << sockId << " setOptions: " << param << endl;
+	      out_json["status"] = "ok";
+	    }
+	    else {
+	      DBG << sockId<< " Don't understand set(" << param << ")" << endl;
+	      out_json["error"] = "set( " + param + ") failed";
+	    }
+	    args->os() << out_json << endl;
 	  }
-	  args->os() << out_json << endl;
 	}
       }
       else if ( command == "query"
@@ -847,18 +890,25 @@ void JsonServer::callback( childArgs *args ){
 	  out_json["error"] = "'show' failed: no base selected";
 	  args->os() << out_json << endl;
 	}
-	else if ( params == "settings" ){
-	  json out_json = client->settings_to_json();
-	  args->os() << out_json << endl;
-	}
-	else if ( params == "weights" ){
-	  json out_json = client->weights_to_json();
+	if ( param.empty() ){
+	  json out_json;
+	  out_json["error"] = "missing 'param' for " + command + " command ";
 	  args->os() << out_json << endl;
 	}
 	else {
-	  json out_json;
-	  out_json["error"] = "'show' failed, unknown parameter: " + params;
-	  args->os() << out_json << endl;
+	  if ( param == "settings" ){
+	    json out_json = client->settings_to_json();
+	    args->os() << out_json << endl;
+	  }
+	  else if ( param == "weights" ){
+	    json out_json = client->weights_to_json();
+	    args->os() << out_json << endl;
+	  }
+	  else {
+	    json out_json;
+	    out_json["error"] = "'show' failed, unknown parameters: ";// + params;
+	    args->os() << out_json << endl;
+	  }
 	}
       }
       else if ( command == "exit" ){
@@ -874,11 +924,28 @@ void JsonServer::callback( childArgs *args ){
 	  args->os() << out_json << endl;
 	}
 	else {
-	  json out_json = client->classify_to_json( params );
-	  DBG << "JsonServer::sending JSON:" << endl << out_json << endl;
-	  args->os() << out_json << endl;
-	  if ( out_json.find("error") == out_json.end() ){
-	    result++;
+	  if ( params.empty() ){
+	    if ( param.empty() ){
+	      json out_json;
+	      out_json["error"] = "missing 'param' or 'params' for 'classify'";
+	      args->os() << out_json << endl;
+	    }
+	    else {
+	      params.push_back( param );
+	    }
+	  }
+	  else if ( !param.empty() ){
+	    json out_json;
+	    out_json["error"] = "both 'param' and 'params' found";
+	    args->os() << out_json << endl;
+	  }
+	  if ( !params.empty() ){
+	    json out_json = client->classify_to_json( params );
+	    DBG << "JsonServer::sending JSON:" << endl << out_json << endl;
+	    args->os() << out_json << endl;
+	    if ( out_json.find("error") == out_json.end() ){
+	      result += out_json.size();
+	    }
 	  }
 	}
       }
