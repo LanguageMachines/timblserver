@@ -276,10 +276,10 @@ inline void Split( const string& line, string& com, string& rest ){
   }
 }
 
-class TimblClient {
+class TimblThread {
 public:
-  TimblClient( TimblExperiment *, childArgs * );
-  ~TimblClient(){ delete _exp; };
+  TimblThread( TimblExperiment *, childArgs * );
+  ~TimblThread(){ delete _exp; };
   bool classifyLine( const string& ) const;
   json classify_to_json( const string& ) const;
   void showSettings() const { _exp->ShowSettings( os ); };
@@ -294,7 +294,7 @@ private:
   istream& is;
 };
 
-TimblClient::TimblClient( TimblExperiment *exp,
+TimblThread::TimblThread( TimblExperiment *exp,
 			  childArgs* args ):
   myLog(args->logstream()),
   doDebug(args->debug()),
@@ -315,7 +315,7 @@ TimblClient::TimblClient( TimblExperiment *exp,
   _exp->setExpName(string("exp-")+TiCC::toString( args->id() ) );
 }
 
-bool TimblClient::setOptions( const string& param ){
+bool TimblThread::setOptions( const string& param ){
   if ( _exp->SetOptions( param )
        && _exp->ConfirmOptions() ){
     return true;
@@ -323,7 +323,7 @@ bool TimblClient::setOptions( const string& param ){
   return false;
 }
 
-bool TimblClient::classifyLine( const string& params ) const {
+bool TimblThread::classifyLine( const string& params ) const {
   double Distance;
   string Distrib;
   string Answer;
@@ -365,7 +365,7 @@ bool TimblClient::classifyLine( const string& params ) const {
   }
 }
 
-json TimblClient::classify_to_json( const string& params ) const{
+json TimblThread::classify_to_json( const string& params ) const{
   double distance;
   string distrib;
   string answer;
@@ -402,7 +402,7 @@ json TimblClient::classify_to_json( const string& params ) const{
 void TcpServer::callback( childArgs *args ){
   string Line;
   int sockId = args->id();
-  TimblClient *client = 0;
+  TimblThread *client = 0;
   map<string, TimblExperiment*> *experiments =
     static_cast<map<string, TimblExperiment*> *>(callback_data);
 
@@ -411,7 +411,7 @@ void TcpServer::callback( childArgs *args ){
   if ( experiments->size() == 1
        && experiments->find("default") != experiments->end() ){
     DBG << " Voor Create Default Client " << endl;
-    client = new TimblClient( (*experiments)["default"], args );
+    client = new TimblThread( (*experiments)["default"], args );
     DBG << " Na Create Client " << endl;
     // report connection to the server terminal
     //
@@ -446,7 +446,7 @@ void TcpServer::callback( childArgs *args ){
 	  if ( client )
 	    delete client;
 	  DBG << "TcpServer::before Create Default Client " << endl;
-	  client = new TimblClient( it->second, args );
+	  client = new TimblThread( it->second, args );
 	  DBG << " TcpServer::After Create Client " << endl;
 	  // report connection to the server terminal
 	  //
@@ -746,7 +746,7 @@ bool JsonServer::read_json( istream& is,
 void JsonServer::callback( childArgs *args ){
   JsonServer *theServer = dynamic_cast<JsonServer*>( args->mother() );
   int sockId = args->id();
-  TimblClient *client = 0;
+  TimblThread *client = 0;
   map<string, TimblExperiment*> *experiments =
     static_cast<map<string, TimblExperiment*> *>(callback_data);
 
@@ -756,7 +756,7 @@ void JsonServer::callback( childArgs *args ){
   if ( experiments->size() == 1
        && experiments->find("default") != experiments->end() ){
     DBG << "Before Create Default Client " << endl;
-    client = new TimblClient( (*experiments)["default"], args );
+    client = new TimblThread( (*experiments)["default"], args );
     DBG << "After Create Client " << endl;
     // report connection to the server terminal
     //
@@ -803,7 +803,7 @@ void JsonServer::callback( childArgs *args ){
 	    delete client;
 	  }
 	  DBG << sockId << " before Create Default Client " << endl;
-	  client = new TimblClient( it->second, args );
+	  client = new TimblThread( it->second, args );
 	  DBG << sockId << " after Create Client " << endl;
 	  // report connection to the server terminal
 	  //
