@@ -783,6 +783,7 @@ void JsonServer::callback( childArgs *args ){
     }
     out_json["available_bases"] = arr;
   }
+  DBG << "send JSON: " << out_json.dump(2) << endl;
   args->os() << out_json << endl;
 
   json in_json;
@@ -791,6 +792,7 @@ void JsonServer::callback( childArgs *args ){
     if ( in_json.empty() ){
       continue;
     }
+    DBG << "handling JSON: " << in_json.dump(2) << endl;
     DBG << "running FromSocket: " << sockId << endl;
     string command;
     string param;
