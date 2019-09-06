@@ -337,22 +337,27 @@ bool TimblThread::classifyLine( const string& params ) const {
       if ( _exp->Verbosity(DISTRIB) ){
 	os << " DISTRIBUTION " <<Distrib;
       }
-      if ( os.good() ){
-	if ( _exp->Verbosity(DISTANCE) ){
-	  os << " DISTANCE {" << Distance << "}";
-	}
-	if ( os.good() ){
-	  if ( _exp->Verbosity(MATCH_DEPTH) ){
-	    os << " MATCH_DEPTH {" << _exp->matchDepth() << "}";
-	  }
-	  if ( os.good() ){
-	    if ( _exp->Verbosity(NEAR_N) ){
-	      os << " NEIGHBORS" << endl;
-	      _exp->showBestNeighbors( os );
-	      os << "ENDNEIGHBORS";
-	    }
-	  }
-	}
+    }
+    if ( os.good() ){
+      if ( _exp->Verbosity(DISTANCE) ){
+	os << " DISTANCE {" << Distance << "}";
+      }
+    }
+    if ( os.good() ){
+      if ( _exp->Verbosity(MATCH_DEPTH) ){
+	os << " MATCH_DEPTH {" << _exp->matchDepth() << "}";
+      }
+    }
+    if ( os.good() ){
+      if ( _exp->Verbosity(CONFIDENCE) ){
+	os << " CONFIDENCE {" <<_exp->confidence() << "}";
+      }
+    }
+    if ( os.good() ){
+      if ( _exp->Verbosity(NEAR_N) ){
+	os << " NEIGHBORS" << endl;
+	_exp->showBestNeighbors( os );
+	os << "ENDNEIGHBORS";
       }
     }
     if ( os.good() )
@@ -365,6 +370,7 @@ bool TimblThread::classifyLine( const string& params ) const {
     return false;
   }
 }
+#define ADD_CONF
 
 json TimblThread::classify_to_json( const vector<string>& params ) const {
   DBG << "classify_to_json(" << params << ")" << endl;
@@ -390,6 +396,11 @@ json TimblThread::classify_to_json( const vector<string>& params ) const {
       if ( _exp->Verbosity(MATCH_DEPTH) ){
 	out_json["match_depth"] = _exp->matchDepth();
       }
+#ifdef ADD_CONF
+      if ( _exp->Verbosity(CONFIDENCE) ){
+	out_json["confidence"] = _exp->confidence();
+      }
+#endif
       if ( _exp->Verbosity(NEAR_N) ){
 	json tmp = _exp->best_neighbors_to_JSON();
 	if ( !tmp.empty() ){
@@ -705,6 +716,12 @@ void HttpServer::callback( childArgs *args ){
 			TiCC::XmlNewTextChild( cl, "distance",
 					       TiCC::toString<double>(distance) );
 		      }
+#ifdef ADD_CONF
+		      if ( api->Verbosity(CONFIDENCE) ){
+		       	TiCC::XmlNewTextChild( cl, "confidence",
+		       			       TiCC::toString<double>( api->confidence() ) );
+		      }
+#endif
 		      if ( api->Verbosity(MATCH_DEPTH) ){
 			TiCC::XmlNewTextChild( cl, "match_depth",
 					       TiCC::toString<double>( api->matchDepth()) );
