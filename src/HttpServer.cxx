@@ -79,21 +79,6 @@ string urlDecode( const string& s ) {
   return result;
 }
 
-TimblExperiment *createClient( const TimblExperiment *exp,
-			       childArgs *args ){
-  TimblExperiment *result = exp->clone();
-  *result = *exp;
-  if ( !result->connectToSocket( &(args->os() ) ) ){
-    cerr << "unable to create working client" << endl;
-    return 0;
-  }
-  if ( exp->getOptParams() ){
-    result->setOptParams( exp->getOptParams()->Clone( &(args->os() ) ) );
-  }
-  result->setExpName(string("exp-")+TiCC::toString( args->id() ) );
-  return result;
-}
-
 void HttpServer::callback( childArgs *args ){
   // process the test material
   // report connection to the server terminal
@@ -131,8 +116,8 @@ void HttpServer::callback( childArgs *args ){
 	    basename = basename.substr( epos+1 );
 	    map<string,TimblExperiment*>::const_iterator it= experiments->find(basename);
 	    if ( it != experiments->end() ){
-	      TimblExperiment *api = createClient( it->second, args );
-	      if ( api ){
+	      TimblThread *client = new TimblThread( it->second, args );
+	      if ( client ){
 		TiCC::LogStream LS( &myLog );
 		TiCC::LogStream DS( &myLog );
 		DS.message(logLine);
@@ -141,7 +126,8 @@ void HttpServer::callback( childArgs *args ){
 		LS.setstamp( StampBoth );
 		TiCC::XmlDoc doc( "TiMblResult" );
 		xmlNode *root = doc.getRoot();
-		TiCC::XmlSetAttribute( root, "algorithm", TiCC::toString(api->Algorithm()) );
+		TiCC::XmlSetAttribute( root, "algorithm",
+				       TiCC::toString(client->_exp->Algorithm()) );
 		vector<string> avs = TiCC::split_at( qstring, "&" );
 		if ( !avs.empty() ){
 		  multimap<string,string> acts;
@@ -160,16 +146,13 @@ void HttpServer::callback( childArgs *args ){
 		  mmit it = range.first;
 		  while ( it != range.second ){
 		    string opt = it->second;
-		    if ( !opt.empty() && opt[0] != '-' && opt[0] != '+' )
+		    if ( !opt.empty() && opt[0] != '-' && opt[0] != '+' ){
 		      opt = string("-") + opt;
-		    if ( doDebug() )
-		      DS << "set :" << opt << endl;
-		    if ( api->SetOptions( opt ) ){
-		      if ( !api->ConfirmOptions() ){
-			args->os() << "set " << opt << " failed" << endl;
-		      }
 		    }
-		    else {
+		    if ( doDebug() ){
+		      DS << "set :" << opt << endl;
+		    }
+		    if ( !client->setOptions( opt ) ){
 		      LS << ": Don't understand set='"
 			 << opt << "'" << endl;
 		      args->os() << ": Don't understand set='"
@@ -181,11 +164,11 @@ void HttpServer::callback( childArgs *args ){
 		  it = range.first;
 		  while ( it != range.second ){
 		    if ( it->second == "settings" ){
-		      xmlNode *tmp = api->settingsToXML();
+		      xmlNode *tmp = client->_exp->settingsToXML();
 		      xmlAddChild( root, tmp );
 		    }
 		    else if ( it->second == "weights" ){
-		      xmlNode *tmp = api->weightsToXML();
+		      xmlNode *tmp = client->_exp->weightsToXML();
 		      xmlAddChild( root, tmp );
 		    }
 		    else
@@ -209,8 +192,9 @@ void HttpServer::callback( childArgs *args ){
 			 << endl;
 
 		      if ( ( params[0] == '"' && params[len-1] == '"' )
-			   || ( params[0] == '\'' && params[len-1] == '\'' ) )
+			   || ( params[0] == '\'' && params[len-1] == '\'' ) ){
 			params = params.substr( 1, len-2 );
+		      }
 		    }
 		    DS << "base='" << basename << "'"
 		       << endl
@@ -218,36 +202,37 @@ void HttpServer::callback( childArgs *args ){
 		       << endl;
 		    string distrib, answer;
 		    double distance;
-		    if ( doDebug() )
+		    if ( doDebug() ){
 		      LS << "Classify(" << params << ")" << endl;
-		    if ( api->Classify( params, answer, distrib, distance ) ){
+		    }
+		    if ( client->_exp->Classify( params, answer, distrib, distance ) ){
 
-		      if ( doDebug() )
+		      if ( doDebug() ){
 			LS << "resultaat: " << answer
 			   << ", distrib: " << distrib
 			   << ", distance " << distance
 			   << endl;
-
+		      }
 		      xmlNode *cl = TiCC::XmlNewChild( root, "classification" );
 		      TiCC::XmlNewTextChild( cl, "input", params );
 		      TiCC::XmlNewTextChild( cl, "category", answer );
-		      if ( api->Verbosity(DISTRIB) ){
+		      if ( client->_exp->Verbosity(DISTRIB) ){
 			TiCC::XmlNewTextChild( cl, "distribution", distrib );
 		      }
-		      if ( api->Verbosity(DISTANCE) ){
+		      if ( client->_exp->Verbosity(DISTANCE) ){
 			TiCC::XmlNewTextChild( cl, "distance",
 					       TiCC::toString<double>(distance) );
 		      }
-		      if ( api->Verbosity(CONFIDENCE) ){
+		      if ( client->_exp->Verbosity(CONFIDENCE) ){
 		       	TiCC::XmlNewTextChild( cl, "confidence",
-		       			       TiCC::toString<double>( api->confidence() ) );
+		       			       TiCC::toString<double>( client->_exp->confidence() ) );
 		      }
-		      if ( api->Verbosity(MATCH_DEPTH) ){
+		      if ( client->_exp->Verbosity(MATCH_DEPTH) ){
 			TiCC::XmlNewTextChild( cl, "match_depth",
-					       TiCC::toString<double>( api->matchDepth()) );
+					       TiCC::toString<double>( client->_exp->matchDepth()) );
 		      }
-		      if ( api->Verbosity(NEAR_N) ){
-			xmlNode *nb = api->bestNeighborsToXML();
+		      if ( client->_exp->Verbosity(NEAR_N) ){
+			xmlNode *nb = client->_exp->bestNeighborsToXML();
 			xmlAddChild( cl, nb );
 		      }
 		    }
@@ -261,7 +246,7 @@ void HttpServer::callback( childArgs *args ){
 		// cerr << "THE DOCUMENT for sending!" << endl << tmp << endl;
 		int timeout=10;
 		nb_putline( args->os(), tmp , timeout );
-		delete api;
+		delete client;
 	      }
 	    }
 	    else {
