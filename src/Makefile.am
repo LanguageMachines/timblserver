@@ -11,4 +11,5 @@ timblserver_SOURCES = TimblServer.cxx
 lib_LTLIBRARIES = libtimblserver.la
 libtimblserver_la_LDFLAGS= -version-info 4:0:0
 
-libtimblserver_la_SOURCES = ClientBase.cxx
+libtimblserver_la_SOURCES = ClientBase.cxx TimblThread.cxx TcpServer.cxx \
+	HttpServer.cxx JsonServer.cxx
