@@ -47,7 +47,8 @@ using TiCC::operator<<;
 #define LOG *TiCC::Log(myLog)
 
 TimblThread::TimblThread( TimblExperiment *exp,
-			  childArgs* args ):
+			  childArgs* args,
+			  bool json ):
   myLog(args->logstream()),
   doDebug(args->debug()),
   os(args->os()),
@@ -58,7 +59,7 @@ TimblThread::TimblThread( TimblExperiment *exp,
   }
   _exp = exp->clone();
   *_exp = *exp;
-  if ( !_exp->connectToSocket( &(args->os() ) ) ){
+  if ( !_exp->connectToSocket( &(args->os() ) , json ) ){
     throw logic_error( "unable to create working client" );
   }
   if ( exp->getOptParams() ){

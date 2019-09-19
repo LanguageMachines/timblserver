@@ -38,7 +38,7 @@ namespace TimblServer {
 
   class TimblThread {
   public:
-    TimblThread( Timbl::TimblExperiment *, childArgs * );
+    TimblThread( Timbl::TimblExperiment *, childArgs *, bool = false );
     ~TimblThread(){ delete _exp; };
     bool setOptions( const std::string& param );
     Timbl::TimblExperiment *_exp;

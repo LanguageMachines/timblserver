@@ -50,6 +50,14 @@ using TiCC::operator<<;
 
 #define SDBG *TiCC::Dbg(client->myLog)
 
+
+json json_error( const string& message ){
+  json result;
+  result["status"] = "error";
+  result["message"] = message;
+  return result;
+}
+
 json JsonServer::classify_to_json( TimblThread *client,
 				   const vector<string>& params ) const {
   SDBG << "classify_to_json(" << params << ")" << endl;
@@ -89,7 +97,7 @@ json JsonServer::classify_to_json( TimblThread *client,
     else {
       SDBG << _exp->ExpName() << ": Classify Failed on '"
 	   << param << "'" << endl;
-      out_json["error"] = "timbl:classify(" + param + ") failed";
+      out_json = _exp->last_error;
     }
     SDBG << "created json: " << out_json.dump(2) << endl;
     if ( params.size() > 1 ){
@@ -133,7 +141,7 @@ void JsonServer::callback( childArgs *args ){
   if ( experiments->size() == 1
        && experiments->find("default") != experiments->end() ){
     DBG << "Before Create Default Client " << endl;
-    client = new TimblThread( (*experiments)["default"], args );
+    client = new TimblThread( (*experiments)["default"], args, true );
     DBG << "After Create Client " << endl;
     // report connection to the server terminal
     //
@@ -164,8 +172,7 @@ void JsonServer::callback( childArgs *args ){
     }
     if ( command.empty() ){
       DBG << sockId << " Don't understand '" << in_json << "'" << endl;
-      json out_json;
-      out_json["error"] = "Illegal instruction:'" + in_json.dump() + "'";
+      json out_json = json_error( "Illegal instruction:'" + in_json.dump() + "'" );
       args->os() << out_json << endl;
     }
     else {
@@ -189,8 +196,7 @@ void JsonServer::callback( childArgs *args ){
       }
       if ( command == "base" ){
 	if ( param.empty() ){
-	  json out_json;
-	  out_json["error"] = "missing 'param' for base command ";
+	  json out_json = json_error( "missing 'param' for base command " );
 	  args->os() << out_json << endl;
 	}
 	else {
@@ -202,7 +208,7 @@ void JsonServer::callback( childArgs *args ){
 	      delete client;
 	    }
 	    DBG << sockId << " before Create Default Client " << endl;
-	    client = new TimblThread( it->second, args );
+	    client = new TimblThread( it->second, args, true );
 	    DBG << sockId << " after Create Client " << endl;
 	    // report connection to the server terminal
 	    //
@@ -215,22 +221,19 @@ void JsonServer::callback( childArgs *args ){
 	    args->os() << out_json << endl;
 	  }
 	  else {
-	    json out_json;
-	    out_json["error"] = "Unknown basename: " + param;
+	    json out_json = json_error( "Unknown basename: '" + param + "'" );
 	    args->os() << out_json << endl;
 	  }
 	}
       }
       else if ( command == "set" ){
 	if ( !client ){
-	  json out_json;
-	  out_json["error"] = "'set' failed: you haven't selected a base yet!";
+	  json out_json = json_error( "'set' failed: you haven't selected a base yet!" );
 	  args->os() << out_json << endl;
 	}
 	else {
 	  if ( param.empty() ){
-	    json out_json;
-	    out_json["error"] = "missing 'param' for set command ";
+	    json out_json = json_error( "missing 'param' for set command " );
 	    args->os() << out_json << endl;
 	  }
 	  else {
@@ -241,7 +244,7 @@ void JsonServer::callback( childArgs *args ){
 	    }
 	    else {
 	      DBG << sockId<< " Don't understand set(" << param << ")" << endl;
-	      out_json["error"] = "set( " + param + ") failed";
+	      out_json = json_error("set( " + param + ") failed" );
 	    }
 	    args->os() << out_json << endl;
 	  }
@@ -250,29 +253,26 @@ void JsonServer::callback( childArgs *args ){
       else if ( command == "query"
 		|| command == "show" ){
 	if ( !client ){
-	  json out_json;
-	  out_json["error"] = "'show' failed: no base selected";
+	  json out_json = json_error( "'show' failed: no base selected" );
 	  args->os() << out_json << endl;
 	}
 	if ( param.empty() ){
-	  json out_json;
-	  out_json["error"] = "missing 'param' for " + command + " command ";
+	  json out_json = json_error( "missing 'param' for " + command + " command " );
 	  args->os() << out_json << endl;
 	}
 	else {
+	  json out_json;
 	  if ( param == "settings" ){
-	    json out_json = client->_exp->settings_to_JSON();
-	    args->os() << out_json << endl;
+	    out_json = client->_exp->settings_to_JSON();
 	  }
 	  else if ( param == "weights" ){
-	    json out_json = client->_exp->weights_to_JSON();
-	    args->os() << out_json << endl;
+	    out_json = client->_exp->weights_to_JSON();
 	  }
 	  else {
-	    json out_json;
-	    out_json["error"] = "'show' failed, unknown parameters: ";// + params;
-	    args->os() << out_json << endl;
+	    out_json = json_error( "'show' failed, unknown parameter: "
+					+ param );
 	  }
+	  args->os() << out_json << endl;
 	}
       }
       else if ( command == "exit" ){
@@ -283,15 +283,13 @@ void JsonServer::callback( childArgs *args ){
       }
       else if ( command == "classify" ){
 	if ( !client ){
-	  json out_json;
-	  out_json["error"] = "'classify' failed: you haven't selected a base yet!";
+	  json out_json = json_error( "'classify' failed: you haven't selected a base yet!" );
 	  args->os() << out_json << endl;
 	}
 	else {
 	  if ( params.empty() ){
 	    if ( param.empty() ){
-	      json out_json;
-	      out_json["error"] = "missing 'param' or 'params' for 'classify'";
+	      json out_json = json_error( "missing 'param' or 'params' for 'classify'" );
 	      args->os() << out_json << endl;
 	    }
 	    else {
@@ -299,8 +297,7 @@ void JsonServer::callback( childArgs *args ){
 	    }
 	  }
 	  else if ( !param.empty() ){
-	    json out_json;
-	    out_json["error"] = "both 'param' and 'params' found";
+	    json out_json = json_error( "both 'param' and 'params' found" );
 	    args->os() << out_json << endl;
 	  }
 	  if ( !params.empty() ){
@@ -314,8 +311,7 @@ void JsonServer::callback( childArgs *args ){
 	}
       }
       else {
-	json out_json;
-	out_json["error"] = "Unknown command: '" + command + "'";
+	json out_json = json_error( "Unknown command: '" + command + "'" );
 	args->os() << out_json << endl;
       }
     }
