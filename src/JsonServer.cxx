@@ -33,9 +33,7 @@
 
 #include "ticcutils/CommandLine.h"
 #include "ticcutils/PrettyPrint.h"
-#include "ticcutils/Timer.h"
 #include "timbl/TimblAPI.h"
-#include "timbl/GetOptClass.h"
 #include "ticcutils/json.hpp"
 #include "ticcutils/ServerBase.h"
 #include "timblserver/TimblServer.h"

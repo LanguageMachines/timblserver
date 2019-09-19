@@ -33,10 +33,8 @@
 
 #include "ticcutils/CommandLine.h"
 #include "ticcutils/PrettyPrint.h"
-#include "ticcutils/Timer.h"
-#include "timbl/TimblAPI.h"
-#include "timbl/GetOptClass.h"
 #include "ticcutils/ServerBase.h"
+#include "timbl/TimblAPI.h"
 #include "timblserver/TimblServer.h"
 
 using namespace std;
