@@ -283,14 +283,11 @@ public:
   ~TimblThread(){ delete _exp; };
   bool classifyLine( const string& ) const;
   json classify_to_json( const vector<string>& ) const;
-  void showSettings() const { _exp->ShowSettings( os ); };
-  json settings_to_json() const { return _exp->settings_to_JSON(); };
-  json weights_to_json() const { return _exp->weights_to_JSON(); };
   bool setOptions( const string& param );
+  TimblExperiment *_exp;
 private:
   TiCC::LogStream& myLog;
   bool doDebug;
-  TimblExperiment *_exp;
   ostream& os;
   istream& is;
 };
@@ -370,7 +367,6 @@ bool TimblThread::classifyLine( const string& params ) const {
     return false;
   }
 }
-#define ADD_CONF
 
 json TimblThread::classify_to_json( const vector<string>& params ) const {
   DBG << "classify_to_json(" << params << ")" << endl;
@@ -396,11 +392,9 @@ json TimblThread::classify_to_json( const vector<string>& params ) const {
       if ( _exp->Verbosity(MATCH_DEPTH) ){
 	out_json["match_depth"] = _exp->matchDepth();
       }
-#ifdef ADD_CONF
       if ( _exp->Verbosity(CONFIDENCE) ){
 	out_json["confidence"] = _exp->confidence();
       }
-#endif
       if ( _exp->Verbosity(NEAR_N) ){
 	json tmp = _exp->best_neighbors_to_JSON();
 	if ( !tmp.empty() ){
@@ -503,7 +497,7 @@ void TcpServer::callback( childArgs *args ){
 	  args->os() << "you haven't selected a base yet!" << endl;
 	else {
 	  args->os() << "STATUS" << endl;
-	  client->showSettings( );
+	  client->_exp->ShowSettings( args->os() );
 	  args->os() << "ENDSTATUS" << endl;
 	}
 	break;
@@ -716,12 +710,10 @@ void HttpServer::callback( childArgs *args ){
 			TiCC::XmlNewTextChild( cl, "distance",
 					       TiCC::toString<double>(distance) );
 		      }
-#ifdef ADD_CONF
 		      if ( api->Verbosity(CONFIDENCE) ){
 		       	TiCC::XmlNewTextChild( cl, "confidence",
 		       			       TiCC::toString<double>( api->confidence() ) );
 		      }
-#endif
 		      if ( api->Verbosity(MATCH_DEPTH) ){
 			TiCC::XmlNewTextChild( cl, "match_depth",
 					       TiCC::toString<double>( api->matchDepth()) );
@@ -916,11 +908,11 @@ void JsonServer::callback( childArgs *args ){
 	}
 	else {
 	  if ( param == "settings" ){
-	    json out_json = client->settings_to_json();
+	    json out_json = client->_exp->settings_to_JSON();
 	    args->os() << out_json << endl;
 	  }
 	  else if ( param == "weights" ){
-	    json out_json = client->weights_to_json();
+	    json out_json = client->_exp->weights_to_JSON();
 	    args->os() << out_json << endl;
 	  }
 	  else {
