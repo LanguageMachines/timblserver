@@ -102,7 +102,7 @@ namespace TimblServer {
   }
 
   bool ClientClass::setBase( const string& base ){
-    cout << "Setting base to :" << base << endl;
+    //    cout << "Setting base to :" << base << endl;
     if ( bases.find( base ) == bases.end() ){
       cerr << "'" << base << "' is not a valid base." << endl;
       return false;
