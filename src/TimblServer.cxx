@@ -54,7 +54,7 @@ inline void usage_full(void){
 inline void usage(void){
   cerr << "usage:  timblserver --config=config-file"
        << endl;
-  cerr << "or      timblserver -f data-file {-S socket} {-C num}"
+  cerr << "        timblserver -f data-file {-S socket} {-C num}"
        << endl;
   cerr << "or see: timblserver -h" << endl;
   cerr << "        for more options" << endl;
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]){
 	 << "Induction of Linguistic Knowledge Research Group, Tilburg University\n"
 	 << "CLiPS Computational Linguistics Group, University of Antwerp\n"
 	 << "based on " << Timbl::VersionName() << endl;
-    cerr << TiCC::Timer::now();
+    cerr << TiCC::Timer::now() << endl;
     if ( argc <= 1 ){
       usage();
       return 1;
@@ -265,6 +265,9 @@ int main(int argc, char *argv[]){
   catch( const std::bad_alloc& ){
     cerr << "ran out of memory somewhere" << endl;
     cerr << "timblserver terminated, Sorry for that" << endl;
+  }
+  catch( const TiCC::OptionError& e ){
+    cerr << " " << e.what() << endl;
   }
   catch( const std::exception& e ){
     cerr << "a standard exception was raised: '" << e.what() << "'" << endl;

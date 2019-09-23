@@ -61,9 +61,6 @@ json json_error( const string& message ){
 json JsonServer::classify_to_json( TimblThread *client,
 				   const vector<string>& params ) const {
   SDBG << "classify_to_json(" << params << ")" << endl;
-  double distance;
-  string distrib;
-  string answer;
   TimblExperiment *_exp = client->_exp;
   json result;
   if ( params.size() > 1 ){
