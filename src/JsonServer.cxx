@@ -67,46 +67,12 @@ json JsonServer::classify_to_json( TimblThread *client,
   TimblExperiment *_exp = client->_exp;
   json result;
   if ( params.size() > 1 ){
-    result = json::array();
+    result = _exp->classify_to_JSON( params );
   }
-  for ( const auto& param : params ){
-    json out_json;
-    if ( _exp->Classify( param, answer, distrib, distance ) ){
-      SDBG << _exp->ExpName() << ":" << param << " --> "
-	   << answer << " " << distrib << " " << distance << endl;
-      out_json["category"] = answer;
-      if ( _exp->Verbosity(DISTRIB) ){
-	out_json["distribution"] = distrib;
-      }
-      if ( _exp->Verbosity(DISTANCE) ){
-	out_json["distance"] = distance;
-      }
-      if ( _exp->Verbosity(MATCH_DEPTH) ){
-	out_json["match_depth"] = _exp->matchDepth();
-      }
-      if ( _exp->Verbosity(CONFIDENCE) ){
-	out_json["confidence"] = _exp->confidence();
-      }
-      if ( _exp->Verbosity(NEAR_N) ){
-	json tmp = _exp->best_neighbors_to_JSON();
-	if ( !tmp.empty() ){
-	  out_json["neighbors"] = tmp;
-	}
-      }
-    }
-    else {
-      SDBG << _exp->ExpName() << ": Classify Failed on '"
-	   << param << "'" << endl;
-      out_json = _exp->last_error;
-    }
-    SDBG << "created json: " << out_json.dump(2) << endl;
-    if ( params.size() > 1 ){
-      result.push_back( out_json );
-    }
-    else {
-      result = out_json;
-    }
+  else {
+    result = _exp->classify_to_JSON( params[0] );
   }
+  SDBG << "created json: " << result.dump(2) << endl;
   return result;
 }
 
