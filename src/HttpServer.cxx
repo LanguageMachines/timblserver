@@ -43,8 +43,8 @@ using namespace TimblServer;
 
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(myLog)
-#define DBG *TiCC::Dbg(myLog)
+#define LOG *TiCC::Log(logstream())
+#define DBG *TiCC::Dbg(logstream())
 
 #define IS_DIGIT(x) (((x) >= '0') && ((x) <= '9'))
 #define IS_HEX(x) ((IS_DIGIT(x)) || (((x) >= 'a') && ((x) <= 'f')) || \
@@ -82,8 +82,8 @@ void HttpServer::callback( childArgs *args ){
   // report connection to the server terminal
   //
   args->socket()->setNonBlocking();
-  map<string, TimblExperiment*> *experiments =
-    static_cast<map<string, TimblExperiment*> *>(callback_data);
+  map<string, TimblExperiment*> experiments =
+    *(static_cast<map<string, TimblExperiment*> *>(callback_data()));
   char logLine[256];
   sprintf( logLine, "Thread %lu, on Socket %d", (uintptr_t)pthread_self(),
 	   args->id() );
@@ -112,12 +112,12 @@ void HttpServer::callback( childArgs *args ){
 	  epos = basename.find( "/" );
 	  if ( epos != string::npos ){
 	    basename = basename.substr( epos+1 );
-	    map<string,TimblExperiment*>::const_iterator it= experiments->find(basename);
-	    if ( it != experiments->end() ){
+	    map<string,TimblExperiment*>::const_iterator it= experiments.find(basename);
+	    if ( it != experiments.end() ){
 	      TimblThread *client = new TimblThread( it->second, args );
 	      if ( client ){
-		TiCC::LogStream LS( &myLog );
-		TiCC::LogStream DS( &myLog );
+		TiCC::LogStream LS( &logstream() );
+		TiCC::LogStream DS( &logstream() );
 		DS.message(logLine);
 		LS.message(logLine);
 		DS.setstamp( StampBoth );

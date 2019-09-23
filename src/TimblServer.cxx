@@ -48,14 +48,7 @@ inline void usage_full(void){
   cerr << "usage: timblserver [TiMBLoptions] [ServerOptions]" << endl << endl;
   cerr << "for an overwiew of all TiMBLoptions, use 'timbl -h'" << endl;
   cerr << endl;
-  cerr << "Server options" << endl;
-  cerr << "--config=<f> read server settings from file <f>" << endl;
-  cerr << "--pidfile=<f> store pid in file <f>" << endl;
-  cerr << "--logfile=<f> log server activity in file <f>" << endl;
-  cerr << "--daemonize=[yes|no] (default yes)" << endl << endl;
-  cerr << "--protocol=[tcp|http|json] (default tcp)" << endl << endl;
-  cerr << "-S <port> : run as a server on <port>" << endl;
-  cerr << "-C <num>  : accept a maximum of 'num' parallel connections (default 10)" << endl;
+  ServerBase::server_usage();
 }
 
 inline void usage(void){
@@ -70,11 +63,14 @@ inline void usage(void){
 
 
 void startExperiments( ServerBase *server ){
+  map<string,TimblExperiment*> *experiments
+    = static_cast<map<string, TimblExperiment*> *>(server->callback_data());
+  TiCC::LogStream &s_log = server->logstream();
   map<string,string> allvals;
-  if ( server->config->hasSection("experiments") )
-    allvals = server->config->lookUpAll("experiments");
+  if ( server->config()->hasSection("experiments") )
+    allvals = server->config()->lookUpAll("experiments");
   else {
-    allvals = server->config->lookUpAll("global");
+    allvals = server->config()->lookUpAll("global");
     // old style, everything is global
     // remove all already processed stuff
     map<string,string>::iterator it = allvals.begin();
@@ -99,9 +95,6 @@ void startExperiments( ServerBase *server ){
     mess += "please check your commandline or configuration file";
     throw runtime_error( mess );
   }
-
-  auto experiments = new map<string, TimblExperiment*>();
-  server->callback_data = experiments;
 
   map<string,string>::iterator it = allvals.begin();
   while ( it != allvals.end() ){
@@ -164,11 +157,11 @@ void startExperiments( ServerBase *server ){
       bool result = false;
       if ( run && run->Valid() ){
 	if ( treeName.empty() ){
-	  server->myLog << "trainName = " << trainName << endl;
+	  s_log << "trainName = " << trainName << endl;
 	  result = run->Learn( trainName );
 	}
 	else {
-	  server->myLog << "treeName = " << treeName << endl;
+	  s_log << "treeName = " << treeName << endl;
 	  result = run->GetInstanceBase( treeName );
 	}
 	if ( result && WgtInFile != "" ) {
@@ -182,25 +175,26 @@ void startExperiments( ServerBase *server ){
       }
       if ( result ){
 	run->initExperiment();
-	(*experiments)[exp_name] = run->grabAndDisconnectExp();
+	TimblExperiment *exp = run->grabAndDisconnectExp();
+	(*experiments)[exp_name] = exp;
 	delete run;
-	server->myLog << "started experiment " << exp_name
-		      << " with parameters: " << it->second << endl;
+	s_log << "started experiment " << exp_name
+	      << " with parameters: " << it->second << endl;
       }
       else {
-	server->myLog << "FAILED to start experiment " << exp_name
-		      << " with parameters: " << it->second << endl;
+	s_log << "FAILED to start experiment " << exp_name
+	      << " with parameters: " << it->second << endl;
       }
     }
     else {
-      server->myLog << "missing '-i' or '-f' option in serverconfig entry: '"
-		    << exp_name << "=" << it->second << "'" << endl;
+      s_log << "missing '-i' or '-f' option in serverconfig entry: '"
+	    << exp_name << "=" << it->second << "'" << endl;
     }
     ++it;
   }
   if ( experiments->size() == 0 ){
-    server->myLog << "Unable to start a server. "
-		    << "No valid Timbls could be instantiated" << endl;
+    s_log << "Unable to start a server. "
+	  << "No valid Timbls could be instantiated" << endl;
     exit(EXIT_FAILURE);
   }
 }
@@ -251,15 +245,15 @@ int main(int argc, char *argv[]){
     }
     if ( protocol == "tcp" ){
       server = new TcpServer( config );
-      server->myLog.message("tcp_server");
+      server->logstream().message("tcp_server");
     }
     else if ( protocol == "http" ){
       server = new HttpServer( config );
-      server->myLog.message("http_server");
+      server->logstream().message("http_server");
     }
     else if ( protocol == "json" ){
       server = new JsonServer( config );
-      server->myLog.message("json_server");
+      server->logstream().message("json_server");
     }
     else {
       cerr << "unknown protocol " << protocol << endl;

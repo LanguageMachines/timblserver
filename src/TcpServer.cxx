@@ -43,8 +43,8 @@ using namespace TimblServer;
 
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(myLog)
-#define DBG *TiCC::Dbg(myLog)
+#define LOG *TiCC::Log(logstream())
+#define DBG *TiCC::Dbg(logstream())
 
 #define SDBG *TiCC::Dbg(client->myLog)
 
@@ -135,23 +135,24 @@ void TcpServer::callback( childArgs *args ){
   string Line;
   int sockId = args->id();
   TimblThread *client = 0;
-  map<string, TimblExperiment*> *experiments =
-    static_cast<map<string, TimblExperiment*> *>(callback_data);
+  map<string, TimblExperiment*> experiments =
+    *(static_cast<const map<string, TimblExperiment*> *>(callback_data()));
 
   int result = 0;
   args->os() << "Welcome to the Timbl server." << endl;
-  if ( experiments->size() == 1
-       && experiments->find("default") != experiments->end() ){
+  if ( experiments.size() == 1
+       && experiments.find("default") != experiments.end() ){
     DBG << " Voor Create Default Client " << endl;
-    client = new TimblThread( (*experiments)["default"], args );
+    TimblExperiment *exp = experiments["default"];
+    client = new TimblThread( exp, args );
     DBG << " Na Create Client " << endl;
     // report connection to the server terminal
     //
   }
   else {
     args->os() << "available bases: ";
-    map<string,TimblExperiment*>::const_iterator it = experiments->begin();
-    while ( it != experiments->end() ){
+    map<string,TimblExperiment*>::const_iterator it = experiments.begin();
+    while ( it != experiments.end() ){
       args->os() << it->first << " ";
       ++it;
     }
@@ -172,8 +173,8 @@ void TcpServer::callback( childArgs *args ){
       switch ( check_command(Command) ){
       case Base:{
 	map<string,TimblExperiment*>::const_iterator it
-	  = experiments->find(Param);
-	if ( it != experiments->end() ){
+	  = experiments.find(Param);
+	if ( it != experiments.end() ){
 	  args->os() << "selected base: '" << Param << "'" << endl;
 	  if ( client )
 	    delete client;

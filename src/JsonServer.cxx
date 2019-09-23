@@ -45,8 +45,8 @@ using namespace nlohmann;
 
 using TiCC::operator<<;
 
-#define LOG *TiCC::Log(myLog)
-#define DBG *TiCC::Dbg(myLog)
+#define LOG *TiCC::Log(logstream())
+#define DBG *TiCC::Dbg(logstream())
 
 #define SDBG *TiCC::Dbg(client->myLog)
 
@@ -132,23 +132,24 @@ void JsonServer::callback( childArgs *args ){
   JsonServer *theServer = dynamic_cast<JsonServer*>( args->mother() );
   int sockId = args->id();
   TimblThread *client = 0;
-  map<string, TimblExperiment*> *experiments =
-    static_cast<map<string, TimblExperiment*> *>(callback_data);
+  map<string, TimblExperiment*> experiments =
+    *(static_cast<map<string, TimblExperiment*> *>(callback_data()));
 
   int result = 0;
   json out_json;
   out_json["status"] = "ok";
-  if ( experiments->size() == 1
-       && experiments->find("default") != experiments->end() ){
+  if ( experiments.size() == 1
+       && experiments.find("default") != experiments.end() ){
     DBG << "Before Create Default Client " << endl;
-    client = new TimblThread( (*experiments)["default"], args, true );
+    TimblExperiment *exp = experiments["default"];
+    client = new TimblThread( exp, args, true );
     DBG << "After Create Client " << endl;
     // report connection to the server terminal
     //
   }
   else {
     json arr = json::array();
-    for ( const auto& it : *experiments ){
+    for ( const auto& it : experiments ){
       arr.push_back( it.first );
     }
     out_json["available_bases"] = arr;
@@ -201,8 +202,8 @@ void JsonServer::callback( childArgs *args ){
 	}
 	else {
 	  map<string,TimblExperiment*>::const_iterator it
-	    = experiments->find(param);
-	  if ( it != experiments->end() ){
+	    = experiments.find(param);
+	  if ( it != experiments.end() ){
 	    //	  args->os() << "selected base: '" << Params << "'" << endl;
 	    if ( client ){
 	      delete client;

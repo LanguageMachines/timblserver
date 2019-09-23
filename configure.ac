@@ -68,7 +68,7 @@ else
     export PKG_CONFIG_PATH="$prefix/lib/pkgconfig:$PKG_CONFIG_PATH"
 fi
 
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.22] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.23] )
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$LIBS $ticcutils_LIBS"
 
