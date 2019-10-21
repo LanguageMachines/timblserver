@@ -1,3 +1,9 @@
+1.13 - 2019-10-21
+[Ko van der Sloot]
+* Added JSON support.
+  The JSON syntax might change in the future, so handle with care.
+* lots of refactoring. Depends on recent ticcutils and timbl
+
 1.12 - 2018-05-16
 [Ko van der Sloot]
 Maintenance release:
