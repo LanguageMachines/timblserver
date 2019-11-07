@@ -220,23 +220,25 @@ void JsonServer::callback( childArgs *args ){
 	  json out_json = json_error( "'show' failed: no base selected" );
 	  args->os() << out_json << endl;
 	}
-	if ( param.empty() ){
-	  json out_json = json_error( "missing 'param' for " + command + " command " );
-	  args->os() << out_json << endl;
-	}
 	else {
-	  json out_json;
-	  if ( param == "settings" ){
-	    out_json = client->_exp->settings_to_JSON();
-	  }
-	  else if ( param == "weights" ){
-	    out_json = client->_exp->weights_to_JSON();
+	  if ( param.empty() ){
+	    json out_json = json_error( "missing 'param' for " + command + " command " );
+	    args->os() << out_json << endl;
 	  }
 	  else {
-	    out_json = json_error( "'show' failed, unknown parameter: "
-					+ param );
+	    json out_json;
+	    if ( param == "settings" ){
+	      out_json = client->_exp->settings_to_JSON();
+	    }
+	    else if ( param == "weights" ){
+	      out_json = client->_exp->weights_to_JSON();
+	    }
+	    else {
+	      out_json = json_error( "'show' failed, unknown parameter: "
+				     + param );
+	    }
+	    args->os() << out_json << endl;
 	  }
-	  args->os() << out_json << endl;
 	}
       }
       else if ( command == "exit" ){
