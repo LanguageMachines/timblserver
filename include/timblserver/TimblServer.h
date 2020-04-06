@@ -38,7 +38,9 @@ namespace TimblServer {
 
   class TimblThread {
   public:
-    TimblThread( Timbl::TimblExperiment *, childArgs *, bool = false );
+    TimblThread( Timbl::TimblExperiment *,
+		 TiCCServer::childArgs *,
+		 bool = false );
     ~TimblThread(){ delete _exp; };
     bool setOptions( const std::string& param );
     Timbl::TimblExperiment *_exp;
@@ -48,9 +50,9 @@ namespace TimblServer {
     std::istream& is;
   };
 
-  class TcpServer : public TcpServerBase {
+  class TcpServer : public TiCCServer::TcpServerBase {
   public:
-    void callback( childArgs* );
+    void callback( TiCCServer::childArgs* );
     explicit TcpServer( const TiCC::Configuration *c ):
     TcpServerBase( c, &experiments ){};
     bool classifyLine( TimblThread *, const std::string& ) const;
@@ -58,18 +60,18 @@ namespace TimblServer {
     std::map<std::string, Timbl::TimblExperiment*> experiments;
   };
 
-  class HttpServer : public HttpServerBase {
+  class HttpServer : public TiCCServer::HttpServerBase {
   public:
-    void callback( childArgs* );
+    void callback( TiCCServer::childArgs* );
     explicit HttpServer( const TiCC::Configuration *c ):
     HttpServerBase( c, &experiments ){};
   private:
     std::map<std::string, Timbl::TimblExperiment*> experiments;
   };
 
-  class JsonServer : public TcpServerBase {
+  class JsonServer : public TiCCServer::TcpServerBase {
   public:
-    void callback( childArgs* );
+    void callback( TiCCServer::childArgs* );
     explicit JsonServer( const TiCC::Configuration *c ):
     TcpServerBase( c, &experiments ){};
     bool read_json( std::istream&, nlohmann::json& );
@@ -78,6 +80,9 @@ namespace TimblServer {
   private:
     std::map<std::string, Timbl::TimblExperiment*> experiments;
   };
+
+  std::string Version();
+  std::string VersionName();
 
 }
 

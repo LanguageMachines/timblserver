@@ -39,6 +39,7 @@
 
 using namespace std;
 using namespace Timbl;
+using namespace TiCCServer;
 using namespace TimblServer;
 
 using TiCC::operator<<;

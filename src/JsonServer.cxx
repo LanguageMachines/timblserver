@@ -41,6 +41,7 @@
 using namespace std;
 using namespace Timbl;
 using namespace TimblServer;
+using namespace TiCCServer;
 using namespace nlohmann;
 
 using TiCC::operator<<;

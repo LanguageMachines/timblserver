@@ -37,12 +37,19 @@
 #include "timbl/TimblAPI.h"
 #include "ticcutils/ServerBase.h"
 #include "timblserver/TimblServer.h"
+#include "config.h"
 
 using namespace std;
 using namespace Timbl;
+using namespace TiCCServer;
 using namespace TimblServer;
 
 using TiCC::operator<<;
+
+namespace TimblServer {
+  string Version() { return VERSION; }
+  string VersionName() { return PACKAGE_STRING; }
+}
 
 inline void usage_full(void){
   cerr << "usage: timblserver [TiMBLoptions] [ServerOptions]" << endl << endl;
