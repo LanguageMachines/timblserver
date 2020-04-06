@@ -128,7 +128,7 @@ bool startServer( const string& portString ){
   int failcount = 0;
   while( true ){ // waiting for connections loop
     signal( SIGPIPE, SIG_IGN );
-    Sockets::ServerSocket *newSocket = new Sockets::ServerSocket();
+    Sockets::ClientSocket *newSocket = new Sockets::ClientSocket();
     if ( !server.accept( *newSocket ) ){
       cerr << server.getMessage() << endl;
       if ( ++failcount > 20 ){
