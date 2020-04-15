@@ -1,7 +1,7 @@
 1.14 - 2020-04-15
 [Ko van der Sloot]
 * adapted to the newest ticcutils
-  - changed namespace TimblServer to TiCCServe
+  - changed namespace TimblServer to TiCCServer
   - modifications in Socket stuff
 * fix for https://github.com/LanguageMachines/timblserver/issues/2
 
