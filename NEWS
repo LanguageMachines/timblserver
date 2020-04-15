@@ -1,3 +1,10 @@
+1.14 - 2020-04-15
+[Ko van der Sloot]
+* adapted to the newest ticcutils
+  - changed namespace TimblServer to TiCCServe
+  - modifications in Socket stuff
+* fix for https://github.com/LanguageMachines/timblserver/issues/2
+
 1.13 - 2019-10-21
 [Ko van der Sloot]
 * Added JSON support.
