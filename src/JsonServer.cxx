@@ -177,10 +177,8 @@ void JsonServer::callback( childArgs *args ){
 	    DBG << sockId << " after Create Client " << endl;
 	    // report connection to the server terminal
 	    //
-	    char line[256];
-	    sprintf( line, "Thread %lu, on Socket %d",
-		     (uintptr_t)pthread_self(), sockId );
-	    DBG << sockId << " " << line << ", started." << endl;
+	    DBG << sockId << " Thread " << (uintptr_t)pthread_self()
+		<< " on Socket " << sockId << " started." << endl;
 	    json out_json;
 	    out_json["base"] = param;
 	    args->os() << out_json << endl;

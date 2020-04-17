@@ -85,10 +85,9 @@ void HttpServer::callback( childArgs *args ){
   args->socket()->setNonBlocking();
   map<string, TimblExperiment*> experiments =
     *(static_cast<map<string, TimblExperiment*> *>(callback_data()));
-  char logLine[256];
-  sprintf( logLine, "Thread %lu, on Socket %d", (uintptr_t)pthread_self(),
-	   args->id() );
-  LOG << logLine << ", started." << endl;
+  string logLine = "Thread " + to_string( (uintptr_t)pthread_self() )
+    + " on Socket " + to_string( args->id() );
+  LOG << logLine << " started." << endl;
   string Line;
   int timeout = 1;
   if ( nb_getline( args->is(), Line, timeout ) ){

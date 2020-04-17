@@ -184,10 +184,8 @@ void TcpServer::callback( childArgs *args ){
 	  DBG << " TcpServer::After Create Client " << endl;
 	  // report connection to the server terminal
 	  //
-	  char line[256];
-	  sprintf( line, "Thread %lu, on Socket %d",
-		   (uintptr_t)pthread_self(), sockId );
-	  LOG << line << ", started." << endl;
+	  LOG << sockId << " Thread " << (uintptr_t)pthread_self()
+	      << " on Socket " << sockId << " started." << endl;
 	}
 	else {
 	  args->os() << "ERROR { Unknown basename: " << Param << "}" << endl;
