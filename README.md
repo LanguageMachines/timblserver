@@ -1,4 +1,4 @@
-TimblServer 1.1 (c) CLS/ILK/CLiPS 1998 - 2020
+TimblServer 1.1 (c) CLS/ILK/CLiPS 1998 - 2021
 
 Tilburg Memory Based Learner -- Server
  https://languagemachines.github.io/timbl/
