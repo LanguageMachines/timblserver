@@ -1,14 +1,22 @@
-TimblServer 1.1 (c) CLS/ILK/CLiPS 1998 - 2021
+[![GitHub build](https://github.com/LanguageMachines/timblserver/actions/workflows/timblserver.yml/badge.svg?branch=master)](https://github.com/LanguageMachines/timblserver/actions/)
+[![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/timblserver)](http://applejack.science.ru.nl/languagemachines/
+)
+[![DOI](https://zenodo.org/badge/20526237.svg)](https://zenodo.org/badge/latestdoi/20526237)
 
-Tilburg Memory Based Learner -- Server
- https://languagemachines.github.io/timbl/
+===========================================
+TimblServer 1.15 (c) CLS/ILK/CLiPS 1998 - 2021
+===========================================
 
+    Tilburg Memory Based Learner -- Server
     Centre for Language Studies, Radboud University Nijmegen
     Induction of Linguistic Knowledge Research Group, Tilburg University and
     Centre for Dutch Language and Speech, University of Antwerp
 
-This is the Server part of Timbl.
 
+**Website:** https://languagemachines.github.io/timbl/
+
+
+This is the Server extension for Timbl.
 
 TiMBL is an open source software package implementing several memory-based
 learning algorithms, among which IB1-IG, an implementation of k-nearest
@@ -43,7 +51,7 @@ This software has been tested on:
 - MAC platform running OS X 10.10
 
 Compilers:
- - GCC (use 4.8 or later)
+ - GCC (use 7.0 or later)
  - Clang
 
 Contents of this distribution:
