@@ -137,8 +137,8 @@ void startExperiments( ServerBase *server ){
       Weighting W;
       if ( !string_to( value, W ) ){
 	// No valid weighting, so assume it also has a filename
-	vector<string> parts;
-	size_t num = TiCC::split_at( value, parts, ":" );
+	vector<string> parts = TiCC::split_at( value, ":" );
+	size_t num = parts.size();
 	if ( num == 2 ){
 	  if ( !string_to( parts[1], W ) ){
 	    string mess = exp_name + ":start(): invalid weighting option:"
