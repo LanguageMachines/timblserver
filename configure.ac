@@ -80,6 +80,10 @@ PKG_CHECK_MODULES([timbl], [timbl >= 6.4.14] )
 CXXFLAGS="$CXXFLAGS $timbl_CFLAGS"
 LIBS="$LIBS $timbl_LIBS"
 
+PKG_CHECK_MODULES([ICU], [icu-uc >= 50 icu-io] )
+CXXFLAGS="$CXXFLAGS $ICU_CFLAGS"
+LIBS="$ICU_LIBS $LIBS"
+
 AC_CONFIG_FILES([
   Makefile
   timblserver.pc

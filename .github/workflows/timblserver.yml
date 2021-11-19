@@ -6,6 +6,7 @@ on:
     paths:
       - 'src/**'
       - 'include/**'
+      - '.github/**'
 
   pull_request:
     branches: [master]
@@ -13,7 +14,7 @@ on:
 jobs:
   notification:
     runs-on: ubuntu-latest
-    name: Notify start to #gitlama
+    name: Notify start to IRC-gitlama
     steps:
       - name: IRC notification
         uses: Gottox/irc-message-action@v1
@@ -47,13 +48,14 @@ jobs:
       - name: Install Dependencies
         run: |
              if [ "$RUNNER_OS" == "Linux" ]; then
-                sudo apt-get install libicu-dev libxml2-dev libbz2-dev;
-                sudo apt-get install zlib1g-dev libtar-dev
+                sudo apt-get install libicu-dev libxml2-dev libbz2-dev
+                sudo apt-get install zlib1g-dev libtar-dev cppcheck
              else
                 brew install libxml2;
                 brew install bzip2;
                 brew install zlib;
                 brew install libtar
+                brew install cppcheck
              fi
       - name: install TiccUtils
         env:
@@ -81,10 +83,17 @@ jobs:
 
       - name: bootstrap
         run: sh bootstrap.sh
+      - name: compiler-id
+        id: compiler
+        run: |
+          id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
+          echo "::set-output name=id::$id"
       - name: configure
         env:
-          CXX:  ${{ matrix.compiler }}
+          CXX: ${{ matrix.compiler }}
         run: ./configure
+      - name: Static Code-check
+        run: cppcheck --enable=all --quiet --error-exitcode=0
       - name: make
         run: make
       - name: install
@@ -95,7 +104,7 @@ jobs:
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GitHub
+          nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
           message: |-
             ${{ github.event.repository.name }} with ${{ matrix.compiler }} build by ${{ github.actor }} on ${{ matrix.os }}: FAILED
       - name: Notify IRC of succes
@@ -104,6 +113,6 @@ jobs:
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
-          nickname: GitHub
+          nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
           message: |-
             ${{ github.event.repository.name }} with ${{ matrix.compiler }} build by ${{ github.actor }} on ${{ matrix.os }}: SUCCESS
