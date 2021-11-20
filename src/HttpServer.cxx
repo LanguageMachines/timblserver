@@ -112,9 +112,9 @@ void HttpServer::callback( childArgs *args ){
 	  epos = basename.find( "/" );
 	  if ( epos != string::npos ){
 	    basename = basename.substr( epos+1 );
-	    map<string,TimblExperiment*>::const_iterator it= experiments.find(basename);
-	    if ( it != experiments.end() ){
-	      TimblThread *client = new TimblThread( it->second, args );
+	    auto exp_it = experiments.find(basename);
+	    if ( exp_it != experiments.end() ){
+	      TimblThread *client = new TimblThread( exp_it->second, args );
 	      if ( client ){
 		TiCC::LogStream LS( &logstream() );
 		TiCC::LogStream DS( &logstream() );
@@ -162,12 +162,12 @@ void HttpServer::callback( childArgs *args ){
 		  it = range.first;
 		  while ( it != range.second ){
 		    if ( it->second == "settings" ){
-		      xmlNode *tmp = client->_exp->settingsToXML();
-		      xmlAddChild( root, tmp );
+		      xmlNode *node = client->_exp->settingsToXML();
+		      xmlAddChild( root, node );
 		    }
 		    else if ( it->second == "weights" ){
-		      xmlNode *tmp = client->_exp->weightsToXML();
-		      xmlAddChild( root, tmp );
+		      xmlNode *node = client->_exp->weightsToXML();
+		      xmlAddChild( root, node );
 		    }
 		    else
 		      LS << "don't know how to SHOW: "
@@ -240,10 +240,9 @@ void HttpServer::callback( childArgs *args ){
 		    ++it;
 		  }
 		}
-		string tmp = doc.toString();
-		// cerr << "THE DOCUMENT for sending!" << endl << tmp << endl;
-		int timeout=10;
-		nb_putline( args->os(), tmp , timeout );
+		string out_line = doc.toString();
+		timeout=10;
+		nb_putline( args->os(), out_line , timeout );
 		delete client;
 	      }
 	    }

@@ -137,7 +137,7 @@ void JsonServer::callback( childArgs *args ){
     }
     if ( command.empty() ){
       DBG << sockId << " Don't understand '" << in_json << "'" << endl;
-      json out_json = json_error( "Illegal instruction:'" + in_json.dump() + "'" );
+      out_json = json_error( "Illegal instruction:'" + in_json.dump() + "'" );
       args->os() << out_json << endl;
     }
     else {
@@ -161,7 +161,7 @@ void JsonServer::callback( childArgs *args ){
       }
       if ( command == "base" ){
 	if ( param.empty() ){
-	  json out_json = json_error( "missing 'param' for base command " );
+	  out_json = json_error( "missing 'param' for base command " );
 	  args->os() << out_json << endl;
 	}
 	else {
@@ -179,28 +179,28 @@ void JsonServer::callback( childArgs *args ){
 	    //
 	    DBG << sockId << " Thread " << (uintptr_t)pthread_self()
 		<< " on Socket " << sockId << " started." << endl;
-	    json out_json;
+	    out_json.clear();
 	    out_json["base"] = param;
 	    args->os() << out_json << endl;
 	  }
 	  else {
-	    json out_json = json_error( "Unknown basename: '" + param + "'" );
+	    out_json = json_error( "Unknown basename: '" + param + "'" );
 	    args->os() << out_json << endl;
 	  }
 	}
       }
       else if ( command == "set" ){
 	if ( !client ){
-	  json out_json = json_error( "'set' failed: you haven't selected a base yet!" );
+	  out_json = json_error( "'set' failed: you haven't selected a base yet!" );
 	  args->os() << out_json << endl;
 	}
 	else {
 	  if ( param.empty() ){
-	    json out_json = json_error( "missing 'param' for set command " );
+	    out_json = json_error( "missing 'param' for set command " );
 	    args->os() << out_json << endl;
 	  }
 	  else {
-	    json out_json;
+	    out_json.clear();
 	    if ( client->setOptions( param ) ){
 	      DBG << sockId << " setOptions: " << param << endl;
 	      out_json["status"] = "ok";
@@ -216,16 +216,16 @@ void JsonServer::callback( childArgs *args ){
       else if ( command == "query"
 		|| command == "show" ){
 	if ( !client ){
-	  json out_json = json_error( "'show' failed: no base selected" );
+	  out_json = json_error( "'show' failed: no base selected" );
 	  args->os() << out_json << endl;
 	}
 	else {
 	  if ( param.empty() ){
-	    json out_json = json_error( "missing 'param' for " + command + " command " );
+	    out_json = json_error( "missing 'param' for " + command + " command " );
 	    args->os() << out_json << endl;
 	  }
 	  else {
-	    json out_json;
+	    out_json.clear();
 	    if ( param == "settings" ){
 	      out_json = client->_exp->settings_to_JSON();
 	    }
@@ -241,20 +241,20 @@ void JsonServer::callback( childArgs *args ){
 	}
       }
       else if ( command == "exit" ){
-	json out_json;
+	out_json.clear();
 	out_json["status"] = "closed";
 	args->os() << out_json << endl;
 	go_on = false;
       }
       else if ( command == "classify" ){
 	if ( !client ){
-	  json out_json = json_error( "'classify' failed: you haven't selected a base yet!" );
+	  out_json = json_error( "'classify' failed: you haven't selected a base yet!" );
 	  args->os() << out_json << endl;
 	}
 	else {
 	  if ( params.empty() ){
 	    if ( param.empty() ){
-	      json out_json = json_error( "missing 'param' or 'params' for 'classify'" );
+	      out_json = json_error( "missing 'param' or 'params' for 'classify'" );
 	      args->os() << out_json << endl;
 	    }
 	    else {
@@ -262,7 +262,7 @@ void JsonServer::callback( childArgs *args ){
 	    }
 	  }
 	  else if ( !param.empty() ){
-	    json out_json = json_error( "both 'param' and 'params' found" );
+	    out_json = json_error( "both 'param' and 'params' found" );
 	    args->os() << out_json << endl;
 	  }
 	  if ( !params.empty() ){
@@ -276,7 +276,7 @@ void JsonServer::callback( childArgs *args ){
 	}
       }
       else {
-	json out_json = json_error( "Unknown command: '" + command + "'" );
+	out_json = json_error( "Unknown command: '" + command + "'" );
 	args->os() << out_json << endl;
       }
     }
