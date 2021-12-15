@@ -1,3 +1,10 @@
+1.15 - 2020-12-15
+[Ko van der Sloot]
+* adapted to the newest ticcutils
+* depends on ICU too, now
+* small code refactorings
+* bumped library version
+
 1.14 - 2020-04-15
 [Ko van der Sloot]
 * adapted to the newest ticcutils
