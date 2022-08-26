@@ -93,7 +93,7 @@ void *do_to_child( void *arg ){
   while( mysock->read( buf, timeOut ) ){
     cerr << "ToServer: read()" << buf << endl;
     string answer = string( "echo: " ) + buf + "\n";
-    int snorr = randomSecs();
+    snorr = randomSecs();
     cerr << "Server sleeps " << snorr << " seconds" << endl;
     sleep( snorr);
     mysock->write( answer, timeOut );

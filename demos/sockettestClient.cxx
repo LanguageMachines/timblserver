@@ -100,12 +100,12 @@ bool runToClient( const string& sock, int id ){
       int i = 0;
       string testLine = lines[i];
       while ( !testLine.empty() ){
-	int snorr = randomSecs();
+	snorr = randomSecs();
 	cerr << "client " << id << " sleeps " << snorr << " seconds" << endl;
 	sleep( snorr);
 	if ( client.write( testLine + "\n", timeOut ) ){
 	  cerr << "Client " << id << " wrote():\t\t\t\t" << testLine << endl;
-	  int snorr = randomSecs();
+	  snorr = randomSecs();
 	  cerr << "client " << id << " sleeps " << snorr << " seconds" << endl;
 	  sleep( snorr);
 	  if ( client.read( resultLine, timeOut ) ){
