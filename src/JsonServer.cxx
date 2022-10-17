@@ -166,8 +166,7 @@ void JsonServer::callback( childArgs *args ){
 	  args->os() << err_json << endl;
 	}
 	else {
-	  map<string,TimblExperiment*>::const_iterator it
-	    = experiments.find(param);
+	  auto it = experiments.find(param);
 	  if ( it != experiments.end() ){
 	    //	  args->os() << "selected base: '" << Params << "'" << endl;
 	    if ( client ){

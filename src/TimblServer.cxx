@@ -79,7 +79,7 @@ void startExperiments( ServerBase *server ){
     allvals = server->config()->lookUpAll("global");
     // old style, everything is global
     // remove all already processed stuff
-    map<string,string>::iterator it = allvals.begin();
+    auto it = allvals.begin();
     while ( it != allvals.end() ){
       if ( it->first == "port" ||
 	   it->first == "protocol" ||
@@ -102,13 +102,12 @@ void startExperiments( ServerBase *server ){
     throw runtime_error( mess );
   }
 
-  map<string,string>::iterator it = allvals.begin();
-  while ( it != allvals.end() ){
-    string exp_name = it->first;
+  for ( const auto& it : allvals ){
+    string exp_name = it.first;
     TiCC::CL_Options opts;
     opts.set_short_options( timbl_short_opts + serv_short_opts );
     opts.set_long_options( timbl_long_opts + serv_long_opts );
-    opts.init( it->second );
+    opts.init( it.second );
     string treeName;
     string trainName;
     string MatrixInFile = "";
@@ -185,18 +184,17 @@ void startExperiments( ServerBase *server ){
 	(*experiments)[exp_name] = exp;
 	delete run;
 	s_log << "started experiment " << exp_name
-	      << " with parameters: " << it->second << endl;
+	      << " with parameters: " << it.second << endl;
       }
       else {
 	s_log << "FAILED to start experiment " << exp_name
-	      << " with parameters: " << it->second << endl;
+	      << " with parameters: " << it.second << endl;
       }
     }
     else {
       s_log << "missing '-i' or '-f' option in serverconfig entry: '"
-	    << exp_name << "=" << it->second << "'" << endl;
+	    << exp_name << "=" << it.second << "'" << endl;
     }
-    ++it;
   }
   if ( experiments->size() == 0 ){
     s_log << "Unable to start a server. "

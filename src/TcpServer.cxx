@@ -152,10 +152,8 @@ void TcpServer::callback( childArgs *args ){
   }
   else {
     args->os() << "available bases: ";
-    map<string,TimblExperiment*>::const_iterator it = experiments.begin();
-    while ( it != experiments.end() ){
-      args->os() << it->first << " ";
-      ++it;
+    for ( const auto& exp_it : experiments ){
+      args->os() << exp_it.first << " ";
     }
     args->os() << endl;
   }
@@ -173,14 +171,14 @@ void TcpServer::callback( childArgs *args ){
       DBG << "TcpServer::Param='" << Param << "'" << endl;
       switch ( check_command(Command) ){
       case Base:{
-	map<string,TimblExperiment*>::const_iterator it
-	  = experiments.find(Param);
-	if ( it != experiments.end() ){
+	auto exp_it = experiments.find(Param);
+	if ( exp_it != experiments.end() ){
 	  args->os() << "selected base: '" << Param << "'" << endl;
-	  if ( client )
+	  if ( client ){
 	    delete client;
+	  }
 	  DBG << "TcpServer::before Create Default Client " << endl;
-	  client = new TimblThread( it->second, args );
+	  client = new TimblThread( exp_it->second, args );
 	  DBG << " TcpServer::After Create Client " << endl;
 	  // report connection to the server terminal
 	  //
