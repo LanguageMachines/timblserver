@@ -148,8 +148,8 @@ void JsonServer::callback( childArgs *args ){
       else if ( in_json.find("params") != in_json.end() ){
 	json pars = in_json["params"];
 	if ( pars.is_array() ){
-	  for ( size_t i=0; i < pars.size(); ++i ){
-	    params.push_back( pars[i].get<std::string>() );
+	  for ( auto const& par : pars ){
+	    params.push_back( par.get<std::string>() );
 	  }
 	}
       }
