@@ -1,12 +1,12 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.61)
+AC_PREREQ([2.69])
 AC_INIT([timblserver],[1.16],[lamasoftware@science.ru.nl])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([.])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 
 if test x"${CXXFLAGS+set}" = xset; then
   # the user set CXXFLAGS; don't override it.
@@ -22,16 +22,15 @@ fi
 AC_PROG_CXX( [g++ c++] )
 
 # libtool stuff
-AC_PROG_LIBTOOL
 LT_INIT
 
 
 # when running tests, use CXX
 AC_LANG([C++])
 
-ACX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
+AX_PTHREAD([],[AC_MSG_ERROR([We need pthread support!])])
 
-if test x"$acx_pthread_ok" = xyes; then
+if test x"$ax_pthread_ok" = xyes; then
    LIBS="$PTHREAD_LIBS $LIBS" \
    CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
 fi
