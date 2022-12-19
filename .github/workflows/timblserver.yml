@@ -23,7 +23,7 @@ jobs:
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
         id: extract_branch
       - name: IRC notification
-        uses: Gottox/irc-message-action@v1
+        uses: Gottox/irc-message-action@v2
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.0
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 
@@ -101,7 +101,7 @@ jobs:
         id: compiler
         run: |
           id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
-          echo "id=$id" >> GITHUB_OUTPUT
+          echo "id=$id" >> $GITHUB_OUTPUT
       - name: configure
         env:
           CXX: ${{ matrix.compiler }}
@@ -114,25 +114,17 @@ jobs:
         run: sudo make install
       - name: Notify IRC of failure
         if: ${{ failure() }}
-        uses: Gottox/irc-message-action@v1
+        uses: Gottox/irc-message-action@v2
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
           nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
-          message: >
-            TimblServer
-            [${{ needs.notification.outputs.branch }}]
-            build with ${{ matrix.compiler }} by ${{ github.actor }}
-            on ${{ matrix.os }}: FAILED
+          message: "timblserver [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00034FAIL\u0003"
       - name: Notify IRC of succes
         if: ${{ success() }}
-        uses: Gottox/irc-message-action@v1
+        uses: Gottox/irc-message-action@v2
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
           nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
-          message: >
-            TimblServer
-            [${{ needs.notification.outputs.branch }}]
-            build with ${{ matrix.compiler }} by ${{ github.actor }}
-            on ${{ matrix.os }}: SUCCESS
+          message: "timblserver [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00033SUCCESS\u0003"
