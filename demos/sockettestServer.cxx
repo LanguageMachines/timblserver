@@ -41,7 +41,7 @@ using namespace std;
 int globalTimeOut = 0; // evil
 
 void *do_child( void *arg ){
-  Sockets::Socket *mysock = (Sockets::Socket*)arg;
+  Sockets::Socket *mysock = static_cast<Sockets::Socket*>(arg);
   // Greeting message for the client
   //
   //
@@ -151,10 +151,16 @@ bool startServer( const string& portString ){
       pthread_t chld_thr;
       if ( globalTimeOut > 0 ){
 	newSocket->setNonBlocking();
-	pthread_create( &chld_thr, &attr, do_to_child, (void *)newSocket );
+	pthread_create( &chld_thr,
+			&attr,
+			do_to_child,
+			static_cast<void *>(newSocket) );
       }
-      else
-	pthread_create( &chld_thr, &attr, do_child, (void *)newSocket );
+      else {
+	pthread_create( &chld_thr,
+			&attr, do_child,
+			static_cast<void *>(newSocket) );
+      }
     }
     // the server is now free to accept another socket request
   }

@@ -69,10 +69,10 @@ namespace TimblServer {
   bool ClientClass::connect( const string& node,  const string& port ){
     cout << "Starting Client on node:" << node << ", port:"
 	 << port << endl;
-    string line;
     if ( client.connect( node, port) ){
       serverPort = TiCC::stringTo<int>( port );
       serverName = node;
+      string line;
       if ( client.read( line ) ){
 	//	cout << "read line " << line << endl;
 	if ( line == TimblEntree ){
@@ -107,9 +107,9 @@ namespace TimblServer {
       cerr << "'" << base << "' is not a valid base." << endl;
       return false;
     }
-    string line;
     if ( client.isValid() ) {
       if ( client.write( "base " + base + "\n" ) ){
+	string line;
 	if ( client.read( line ) ){
 	  if ( line.find("selected base") != string::npos &&
 	       line.find( base ) != string::npos ){

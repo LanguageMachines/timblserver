@@ -131,7 +131,6 @@ void JsonServer::callback( childArgs *args ){
     DBG << "running FromSocket: " << sockId << endl;
     string command;
     string param;
-    vector<string> params;
     if ( in_json.find("command") != in_json.end() ){
       command = in_json["command"];
     }
@@ -142,6 +141,7 @@ void JsonServer::callback( childArgs *args ){
       args->os() << err_json << endl;
     }
     else {
+      vector<string> params;
       if ( in_json.find("param") != in_json.end() ){
 	param = in_json["param"];
       }

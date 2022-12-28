@@ -157,7 +157,15 @@ void startExperiments( ServerBase *server ){
       }
     }
     opts.extract( "matrixin", MatrixInFile );
-    if ( !( treeName.empty() && trainName.empty() ) ){
+    if ( treeName.empty()
+	 && trainName.empty() ) {
+      // we need to learn from trainName
+      // OR read a tree from treeName
+      s_log << "missing '-i' or '-f' option in serverconfig entry: '"
+	    << exp_name << "=" << it.second << "'" << endl;
+    }
+    else {
+      // let's start
       TimblAPI *run = new TimblAPI( opts, exp_name );
       bool result = false;
       if ( run && run->Valid() ){
@@ -172,8 +180,9 @@ void startExperiments( ServerBase *server ){
 	if ( result && WgtInFile != "" ) {
 	  result = run->GetWeights( WgtInFile, WgtType );
 	}
-	if ( result && ProbInFile != "" )
+	if ( result && ProbInFile != "" ){
 	  result = run->GetArrays( ProbInFile );
+	}
 	if ( result && MatrixInFile != "" ) {
 	  result = run->GetMatrices( MatrixInFile );
 	}
@@ -190,10 +199,6 @@ void startExperiments( ServerBase *server ){
 	s_log << "FAILED to start experiment " << exp_name
 	      << " with parameters: " << it.second << endl;
       }
-    }
-    else {
-      s_log << "missing '-i' or '-f' option in serverconfig entry: '"
-	    << exp_name << "=" << it.second << "'" << endl;
     }
   }
   if ( experiments->size() == 0 ){
