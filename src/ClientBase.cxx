@@ -203,12 +203,12 @@ namespace TimblServer {
 	}
 	pos1 = line.find( "NEIGHBORS" );
 	if ( pos1 != string::npos ) {
-	  string line;
-	  while ( client.read( line ) ){
+	  string answer;
+	  while ( client.read( answer ) ){
 	    string rest;
-	    code_t code = extract_code( line, rest );
+	    code_t code = extract_code( answer, rest );
 	    if ( code != EndNeighbors ){
-	      neighbors.push_back( line );
+	      neighbors.push_back( answer );
 	    }
 	    else
 	      break;
