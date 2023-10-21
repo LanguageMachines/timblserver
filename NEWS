@@ -1,3 +1,9 @@
+1.17 - 2023-10-21
+[Ko van der Sloot]
+* dependency on libtar is removed
+* code modernization/cleanup
+
+* some code modernization, avoiding CppCheck warnings
 1.16 - 2023-01-02
 [Ko van der Sloot]
 * some code modernization, avoiding CppCheck warnings
