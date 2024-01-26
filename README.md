@@ -4,7 +4,7 @@
 [![DOI](https://zenodo.org/badge/20526237.svg)](https://zenodo.org/badge/latestdoi/20526237)
 
 ===========================================
-TimblServer 1.18 (c) CLS/ILK/CLiPS 1998 - 2023
+TimblServer 1.18 (c) CLS/ILK/CLiPS 1998 - 2024
 ===========================================
 
     Tilburg Memory Based Learner -- Server
