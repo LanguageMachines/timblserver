@@ -42,13 +42,13 @@ namespace TimblServer {
     bool connect( const std::string&, const std::string& );
     const std::string& getBase( ) const { return _base; };
     bool setBase( const std::string& );
-    const std::set<std::string> baseNames() const { return bases;};
+    const std::set<std::string>& baseNames() const { return bases;};
     bool classify( const std::string& );
     bool classifyFile( std::istream&, std::ostream& );
     bool runScript( std::istream&, std::ostream& );
-    std::string getClass() const { return Class; };
-    std::string getDistance() const { return distance; };
-    std::string getDistribution() const { return distribution; };
+    const std::string& getClass() const { return Class; };
+    const std::string& getDistance() const { return distance; };
+    const std::string& getDistribution() const { return distribution; };
     const std::vector<std::string>& getNeighbors() const { return neighbors; };
   private:
     bool extractBases( const std::string& );

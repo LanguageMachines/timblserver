@@ -83,7 +83,7 @@ void HttpServer::callback( childArgs *args ){
   // report connection to the server terminal
   //
   args->socket()->setNonBlocking();
-  map<string, TimblExperiment*> experiments =
+  map<string, TimblExperiment*> my_experiments =
     *(static_cast<map<string, TimblExperiment*> *>(callback_data()));
   string logLine = "Thread " + to_string( (uintptr_t)pthread_self() )
     + " on Socket " + to_string( args->id() );
@@ -112,8 +112,8 @@ void HttpServer::callback( childArgs *args ){
 	  epos = basename.find( "/" );
 	  if ( epos != string::npos ){
 	    basename = basename.substr( epos+1 );
-	    auto exp_it = experiments.find(basename);
-	    if ( exp_it != experiments.end() ){
+	    auto exp_it = my_experiments.find(basename);
+	    if ( exp_it != my_experiments.end() ){
 	      TimblThread *client = new TimblThread( exp_it->second, args );
 	      if ( client ){
 		TiCC::LogStream LS( &logstream() );

@@ -75,7 +75,7 @@ int randomSecs(){
 }
 
 void *do_to_child( void *arg ){
-  Sockets::Socket *mysock = (Sockets::Socket*)arg;
+  Sockets::Socket *mysock = static_cast<Sockets::Socket*>(arg);
   // Greeting message for the client
   //
   //
