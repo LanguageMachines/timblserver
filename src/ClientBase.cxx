@@ -341,13 +341,17 @@ namespace TimblServer {
 	    }
 	  }
 	}
-	else
+	else {
+	  os << "Client write failed" << endl;
 	  return false;
+	}
       }
       return true;
     }
-    else
+    else {
+      os << "Invalid Client!" << endl;
       return false;
+    }
   }
 
 }
