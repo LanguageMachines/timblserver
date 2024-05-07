@@ -136,15 +136,12 @@ void TcpServer::callback( childArgs *args ){
   string Line;
   int sockId = args->id();
   TimblThread *client = 0;
-  map<string, TimblExperiment*> my_experiments =
-    *(static_cast<const map<string, TimblExperiment*> *>(callback_data()));
-
   int result = 0;
   args->os() << "Welcome to the Timbl server." << endl;
-  if ( my_experiments.size() == 1
-       && my_experiments.find("default") != my_experiments.end() ){
+  if ( experiments.size() == 1
+       && experiments.find("default") != experiments.end() ){
     DBG << " Voor Create Default Client " << endl;
-    TimblExperiment *exp = my_experiments["default"];
+    TimblExperiment *exp = experiments["default"];
     client = new TimblThread( exp, args );
     DBG << " Na Create Client " << endl;
     // report connection to the server terminal
@@ -152,7 +149,7 @@ void TcpServer::callback( childArgs *args ){
   }
   else {
     args->os() << "available bases: ";
-    for ( const auto& exp_it : my_experiments ){
+    for ( const auto& exp_it : experiments ){
       args->os() << exp_it.first << " ";
     }
     args->os() << endl;
@@ -171,8 +168,8 @@ void TcpServer::callback( childArgs *args ){
       DBG << "TcpServer::Param='" << Param << "'" << endl;
       switch ( check_command(Command) ){
       case Base:{
-	auto exp_it = my_experiments.find(Param);
-	if ( exp_it != my_experiments.end() ){
+	auto exp_it = experiments.find(Param);
+	if ( exp_it != experiments.end() ){
 	  args->os() << "selected base: '" << Param << "'" << endl;
 	  if ( client ){
 	    delete client;

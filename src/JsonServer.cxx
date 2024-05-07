@@ -96,16 +96,13 @@ void JsonServer::callback( childArgs *args ){
   JsonServer *theServer = dynamic_cast<JsonServer*>( args->mother() );
   int sockId = args->id();
   TimblThread *client = 0;
-  map<string, TimblExperiment*> my_experiments =
-    *(static_cast<map<string, TimblExperiment*> *>(callback_data()));
-
   int result = 0;
   json out_json;
   out_json["status"] = "ok";
-  if ( my_experiments.size() == 1
-       && my_experiments.find("default") != my_experiments.end() ){
+  if ( experiments.size() == 1
+       && experiments.find("default") != experiments.end() ){
     DBG << "Before Create Default Client " << endl;
-    TimblExperiment *exp = my_experiments["default"];
+    TimblExperiment *exp = experiments["default"];
     client = new TimblThread( exp, args, true );
     DBG << "After Create Client " << endl;
     // report connection to the server terminal
@@ -113,7 +110,7 @@ void JsonServer::callback( childArgs *args ){
   }
   else {
     json arr = json::array();
-    for ( const auto& it : my_experiments ){
+    for ( const auto& it : experiments ){
       arr.push_back( it.first );
     }
     out_json["available_bases"] = arr;
@@ -166,8 +163,8 @@ void JsonServer::callback( childArgs *args ){
 	  args->os() << err_json << endl;
 	}
 	else {
-	  auto it = my_experiments.find(param);
-	  if ( it != my_experiments.end() ){
+	  auto it = experiments.find(param);
+	  if ( it != experiments.end() ){
 	    //	  args->os() << "selected base: '" << Params << "'" << endl;
 	    if ( client ){
 	      delete client;

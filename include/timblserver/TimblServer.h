@@ -52,9 +52,9 @@ namespace TimblServer {
 
   class TcpServer : public TiCCServer::TcpServerBase {
   public:
-    void callback( TiCCServer::childArgs* );
     explicit TcpServer( const TiCC::Configuration *c ):
-    TcpServerBase( c, &experiments ){};
+      TcpServerBase( c, &experiments ){};
+    void callback( TiCCServer::childArgs* );
     bool classifyLine( TimblThread *, const std::string& ) const;
   private:
     std::map<std::string, Timbl::TimblExperiment*> experiments;
@@ -62,18 +62,18 @@ namespace TimblServer {
 
   class HttpServer : public TiCCServer::HttpServerBase {
   public:
-    void callback( TiCCServer::childArgs* );
     explicit HttpServer( const TiCC::Configuration *c ):
-    HttpServerBase( c, &experiments ){};
+      HttpServerBase( c, &experiments ){};
+    void callback( TiCCServer::childArgs* );
   private:
     std::map<std::string, Timbl::TimblExperiment*> experiments;
   };
 
   class JsonServer : public TiCCServer::TcpServerBase {
   public:
-    void callback( TiCCServer::childArgs* );
     explicit JsonServer( const TiCC::Configuration *c ):
-    TcpServerBase( c, &experiments ){};
+      TcpServerBase( c, &experiments ){};
+    void callback( TiCCServer::childArgs* );
     bool read_json( std::istream&, nlohmann::json& );
     nlohmann::json classify_to_json( TimblThread *,
 				     const std::vector<std::string>& ) const;
