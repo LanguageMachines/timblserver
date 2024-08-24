@@ -103,7 +103,7 @@ jobs:
           make;
           sudo make install;
           cd ..;
-
+        continue-on-error: true
       - name: bootstrap
         run: sh bootstrap.sh
       - name: compiler-id
