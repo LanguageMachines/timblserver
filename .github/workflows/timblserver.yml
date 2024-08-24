@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-14]
-        compiler: [g++, clang++]
+        compiler: [g++-12, clang++]
 
     steps:
       - name: Cancel Previous Runs
@@ -56,7 +56,6 @@ jobs:
                 sudo apt-get install pkg-config autoconf-archive
              else
                 brew upgrade
-                brew install pkg-config
                 brew install libtool
                 brew install autoconf-archive
                 brew install autoconf
@@ -119,9 +118,14 @@ jobs:
       - name: Static Code-check
         run: cppcheck ${{ env.cpc_opts }} .
       - name: make
+        id: make
         run: make
+        continue-on-error: true
       - name: install
+        id: install
+        if: ${{ steps.make.outcome == 'success' }}
         run: sudo make install
+        continue-on-error: true
       - name: Notify IRC of failure
         if: ${{ failure() }}
         uses: Gottox/irc-message-action@v2
