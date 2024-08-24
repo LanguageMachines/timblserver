@@ -93,6 +93,7 @@ jobs:
           cd ..;
 
       - name: install TiMBL
+        id: timbl
         env:
           CXX: ${{ matrix.compiler }}
         run: |
@@ -115,6 +116,7 @@ jobs:
         env:
           CXX: ${{ matrix.compiler }}
         run: ./configure
+        continue-on-error: true
       - name: Static Code-check
         run: cppcheck ${{ env.cpc_opts }} .
       - name: make
@@ -123,7 +125,9 @@ jobs:
         continue-on-error: true
       - name: install
         id: install
-        if: ${{ steps.make.outcome == 'success' }}
+        if: |
+          ${{ steps.make.outcome == 'success'
+              && steps.timbl.outcome == 'success' }}
         run: sudo make install
         continue-on-error: true
       - name: Notify IRC of failure
