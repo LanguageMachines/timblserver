@@ -135,7 +135,7 @@ jobs:
         run: ./configure
         continue-on-error: true
       - name: get status configure
-        if: ${{ steps.configure.outcome != 'success' }}
+        if: ${{ env.action_status == '' && steps.configure.outcome != 'success' }}
         run: |
            echo "action_status=configure" >> $GITHUB_ENV
            cat config.log
@@ -145,7 +145,7 @@ jobs:
         run: make
         continue-on-error: true
       - name: get status make
-        if: ${{ steps.make.outcome != 'success' }}
+        if: ${{ env.action_status == '' && steps.make.outcome != 'success' }}
         run: echo "action_status=make" >> $GITHUB_ENV
       - name: install
         id: install
