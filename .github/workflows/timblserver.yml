@@ -138,7 +138,7 @@ jobs:
         if: ${{ env.action_status == '' && steps.configure.outcome != 'success' }}
         run: |
            echo "action_status=configure" >> $GITHUB_ENV
-           cat config.log
+           [ -f config.log ] && cat config.log
       - name: make
         if: ${{ env.action_status == '' }}
         id: make
