@@ -105,8 +105,10 @@ void startExperiments( ServerBase *server ){
   for ( const auto& it : allvals ){
     string exp_name = it.first;
     TiCC::CL_Options opts;
-    opts.set_short_options( timbl_short_opts + serv_short_opts );
-    opts.set_long_options( timbl_long_opts + serv_long_opts );
+    opts.add_short_options( timbl_short_opts );
+    opts.add_short_options( serv_short_opts );
+    opts.add_long_options( timbl_long_opts );
+    opts.add_long_options( serv_long_opts );
     opts.init( it.second );
     string treeName;
     string trainName;
@@ -123,8 +125,9 @@ void startExperiments( ServerBase *server ){
 	throw runtime_error( mess );
       }
     }
-    if ( !opts.extract( 'f', trainName ) )
+    if ( !opts.extract( 'f', trainName ) ){
       opts.extract( 'i', treeName );
+    }
     if ( opts.extract( 'u', ProbInFile ) ){
       if ( algorithm == IGTREE ){
 	string mess = exp_name + ":start(): -u option is useless for IGtree";
@@ -226,8 +229,10 @@ int main(int argc, char *argv[]){
     }
 
     TiCC::CL_Options opts;
-    opts.set_short_options( timbl_short_opts + serv_short_opts );
-    opts.set_long_options( timbl_long_opts + serv_long_opts );
+    opts.add_short_options( timbl_short_opts );
+    opts.add_short_options( serv_short_opts );
+    opts.add_long_options( timbl_long_opts );
+    opts.add_long_options( serv_long_opts );
     opts.init( argc, argv );
     if ( opts.is_present( 'h' )
 	 || opts.is_present( "help" ) ){

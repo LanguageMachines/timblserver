@@ -34,6 +34,7 @@ jobs:
             ${{ github.actor }} started a build of
             ${{ github.event.repository.name }}
             [${{ steps.extract_branch.outputs.branch }}]
+            "${{ github.event.head_commit.message }}"
 
   build:
     runs-on: ${{ matrix.os }}
@@ -75,12 +76,17 @@ jobs:
       - name: Configure CppCheck
         run: |
              if [ "$RUNNER_OS" == "Linux" ]; then
-                cpc_opts="--enable=warning,style --inline-suppr --force -I include -I /usr/local/include --quiet --error-exitcode=0"
+                cpc_opts="--enable=warning,style --inline-suppr --force \
+                          -I include -I /usr/local/include --quiet \
+                          --std=c++17 --error-exitcode=0"
              else
-                cpc_opts="--enable=warning,style --inline-suppr --force -I include --check-level=exhaustive --quiet --error-exitcode=0"
+                cpc_opts="--enable=warning,style --inline-suppr --force \
+                          -I include --check-level=exhaustive --quiet \
+                          --std=c++17 --error-exitcode=0"
              fi
              echo "cpc_opts=$cpc_opts" >> $GITHUB_ENV
       - name: install TiccUtils
+        id: ticcutils
         env:
           CXX: ${{ matrix.compiler }}
         run: |
@@ -91,8 +97,12 @@ jobs:
           make;
           sudo make install;
           cd ..;
-
+        continue-on-error: true
+      - name: get status ticcutils
+        if: ${{ steps.ticcutils.outcome != 'success' }}
+        run: echo "action_status=ticcutils" >> $GITHUB_ENV
       - name: install TiMBL
+        if: ${{ env.action_status == '' }}
         id: timbl
         env:
           CXX: ${{ matrix.compiler }}
@@ -105,41 +115,56 @@ jobs:
           sudo make install;
           cd ..;
         continue-on-error: true
-      - name: bootstrap
-        run: sh bootstrap.sh
+      - name: get status timbl
+        if: ${{ steps.timbl.outcome != 'success' }}
+        run: echo "action_status=timbl" >> $GITHUB_ENV
       - name: compiler-id
         id: compiler
         run: |
           id=$(echo ${{matrix.compiler}} | cut -d\+ -f1)
           echo "id=$id" >> $GITHUB_OUTPUT
+      - name: Static Code-check
+        run: cppcheck ${{ env.cpc_opts }} .
+      - name: bootstrap
+        run: sh bootstrap.sh
       - name: configure
+        if: ${{ env.action_status == '' }}
+        id: configure
         env:
           CXX: ${{ matrix.compiler }}
         run: ./configure
         continue-on-error: true
-      - name: Static Code-check
-        run: cppcheck ${{ env.cpc_opts }} .
+      - name: get status configure
+        if: ${{ steps.configure.outcome != 'success' }}
+        run: |
+           echo "action_status=configure" >> $GITHUB_ENV
+           cat config.log
       - name: make
+        if: ${{ env.action_status == '' }}
         id: make
         run: make
         continue-on-error: true
+      - name: get status make
+        if: ${{ steps.make.outcome != 'success' }}
+        run: echo "action_status=make" >> $GITHUB_ENV
       - name: install
         id: install
-        if: |
-          ${{ steps.make.outcome == 'success'
-              && steps.timbl.outcome == 'success' }}
+        if: ${{ env.action_status == '' }}
         run: sudo make install
         continue-on-error: true
+      - name: get status install
+        if: ${{ env.action_status == '' && steps.install.outcome != 'success' }}
+        run: echo "action_status=install" >> $GITHUB_ENV
       - name: Notify IRC of failure
-        if: ${{ failure() }}
+        if: ${{ env.action_status != '' }}
         uses: Gottox/irc-message-action@v2
         with:
           server: irc.uvt.nl
           channel: '#gitlama'
           nickname: GH-${{ runner.os }}-${{ steps.compiler.outputs.id }}
-          message: "timblserver [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00034FAIL\u0003"
+          message: "timblserver [${{ needs.notification.outputs.branch }}] build with ${{ matrix.compiler }} by ${{ github.actor }} on ${{ matrix.os }}: \u00034FAILED\u0003 in step ${{ env.action_status }}"
       - name: Notify IRC of succes
-        if: ${{ success() }}
+        if: ${{ env.action_status == '' }}
         uses: Gottox/irc-message-action@v2
         with:
           server: irc.uvt.nl

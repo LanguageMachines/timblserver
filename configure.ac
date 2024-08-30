@@ -61,7 +61,7 @@ else
 fi
 
 AC_OSX_PKG( [icu4c] )
-PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.28] )
+PKG_CHECK_MODULES([ticcutils], [ticcutils >= 0.35] )
 CXXFLAGS="$CXXFLAGS $ticcutils_CFLAGS"
 LIBS="$LIBS $ticcutils_LIBS"
 
