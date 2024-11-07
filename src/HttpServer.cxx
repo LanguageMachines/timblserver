@@ -137,9 +137,8 @@ void HttpServer::callback( childArgs *args ){
 			 << av << endl;
 		    }
 		  }
-		  typedef multimap<string,string>::const_iterator mmit;
-		  pair<mmit,mmit> range = acts.equal_range( "set" );
-		  mmit it = range.first;
+		  auto range = acts.equal_range( "set" );
+		  auto it = range.first;
 		  while ( it != range.second ){
 		    string opt = it->second;
 		    if ( !opt.empty() && opt[0] != '-' && opt[0] != '+' ){
