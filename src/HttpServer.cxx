@@ -116,8 +116,8 @@ void HttpServer::callback( childArgs *args ){
 	      if ( client ){
 		TiCC::LogStream LS( &logstream() );
 		TiCC::LogStream DS( &logstream() );
-		DS.message(logLine);
-		LS.message(logLine);
+		DS.set_message(logLine);
+		LS.set_message(logLine);
 		DS.setstamp( StampBoth );
 		LS.setstamp( StampBoth );
 		TiCC::XmlDoc doc( "TiMblResult" );
