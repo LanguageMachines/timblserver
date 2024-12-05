@@ -259,15 +259,15 @@ int main(int argc, char *argv[]){
     }
     if ( protocol == "tcp" ){
       server = new TcpServer( config );
-      server->logstream().message("tcp_server");
+      server->logstream().set_message("tcp_server");
     }
     else if ( protocol == "http" ){
       server = new HttpServer( config );
-      server->logstream().message("http_server");
+      server->logstream().set_message("http_server");
     }
     else if ( protocol == "json" ){
       server = new JsonServer( config );
-      server->logstream().message("json_server");
+      server->logstream().set_message("json_server");
     }
     else {
       cerr << "unknown protocol " << protocol << endl;

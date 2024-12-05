@@ -116,12 +116,16 @@ void HttpServer::callback( childArgs *args ){
 	      if ( client ){
 		TiCC::LogStream LS( &logstream() );
 		TiCC::LogStream DS( &logstream() );
-		DS.message(logLine);
-		LS.message(logLine);
-		DS.setstamp( StampBoth );
-		LS.setstamp( StampBoth );
-		TiCC::XmlDoc doc( "TiMblResult" );
-		xmlNode *root = doc.getRoot();
+		DS.set_message(logLine);
+		LS.set_message(logLine);
+		DS.set_stamp( StampBoth );
+		LS.set_stamp( StampBoth );
+		xmlDoc *doc = xmlNewDoc( TiCC::to_xmlChar("1.0") );
+		xmlNode *root = xmlNewDocNode( doc,
+					       0,
+					       TiCC::to_xmlChar("TiMblResult" ),
+					       0 );
+		xmlDocSetRootElement( doc, root );
 		TiCC::XmlSetAttribute( root, "algorithm",
 				       TiCC::toString(client->_exp->Algorithm()) );
 		vector<string> avs = TiCC::split_at( qstring, "&" );
@@ -237,7 +241,7 @@ void HttpServer::callback( childArgs *args ){
 		    ++it;
 		  }
 		}
-		string out_line = doc.toString();
+		string out_line = TiCC::serialize(*doc);
 		timeout=10;
 		nb_putline( args->os(), out_line , timeout );
 		delete client;

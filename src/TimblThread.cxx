@@ -56,7 +56,7 @@ TimblThread::TimblThread( TimblExperiment *exp,
   is(args->is())
 {
   if ( doDebug ){
-    myLog.setlevel(LogHeavy);
+    myLog.set_level(LogHeavy);
   }
   _exp = exp->clone();
   *_exp = *exp;
