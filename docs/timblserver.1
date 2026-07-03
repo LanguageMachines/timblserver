@@ -1,11 +1,11 @@
-.TH timblserver 1 "2014 december 2"
+.TH timblserver 1.20 "2026 july 3"
 
 .SH NAME
 timblserver \- Tilburg Memory Based Learner Server
 .SH SYNOPSIS
 timblserver [TiMBL options] [Server options]
 
-timblserver \-\-config=configfile [\-\-pidfile=pfile] [\-\-logfile=lfile] [\-\-daemonize=val]
+timblserver \-\-config=configfile [\-\-pidfile=pfile] [\-\-logfile=lfile] [\-\-daemonize=val] [\-\-protocol=protocol]
 
 .SH DESCRIPTION
 timblserver extends
@@ -13,6 +13,7 @@ timblserver extends
 with a server layer. It provides the possibility to access one timbl instance
 from multiple sessions. It also allows running and accessing different timbl
 instances in parallel.
+Several communication protocols can be used. Default is plain TCP.
 
 .SH OPTIONS
 The
@@ -31,6 +32,16 @@ store the pid of the main server process in 'file'. A full path must me given fo
 .RE
 
 .BR \-\-logfile =file
+
+.RS
+log server actions to 'file'. A full path must me given for 'file' otherwise the file will end up in '/'.
+.RE
+
+.BR \-\-protocol =tcp|http|json]
+.RS
+use one of te protocols 'tcp', 'http' or 'json'. Default is tcp
+
+.RE
 
 .RS
 log server actions to 'file'. A full path must me given for 'file' otherwise the file will end up in '/'.
@@ -59,12 +70,15 @@ options are documented in
 .BR timbl (1)
 
 .SH BUGS
-possibly
+possibly. Please report bugs and issues at the issue tracker:
+https://github.com/LanguageMachines/timblserver/issues
 
 .SH AUTHORS
-Ko van der Sloot Timbl@uvt.nl
+Ko van der Sloot
 
-Antal van den Bosch Timbl@uvt.nl
+Antal van den Bosch
+
+Contact: lamasoftware@science.ru.nl
 
 .SH SEE ALSO
 .BR timbl (1)
