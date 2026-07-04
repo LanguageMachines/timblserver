@@ -1,3 +1,11 @@
+1.20 - 2026-06-04
+[Ko van der Sloot]
+* updated man page
+
+[Antal van de Bosch]
+* updated Manual, using Claude Fable 5
+  new HTTP and JSON possiblities
+
 1.19 - 2024-12-16
 [Ko van der Sloot]
 * require C++17
