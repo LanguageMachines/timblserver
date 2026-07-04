@@ -1,6 +1,3 @@
-# $Id: Makefile.am 2927 2009-09-08 15:26:45Z sloot $
-# $URL: $
-
 AM_CPPFLAGS = -I@top_srcdir@/include
 AM_CXXFLAGS = -std=c++0x
 
