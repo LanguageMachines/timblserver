@@ -26,7 +26,7 @@ algorithms have in common that they store some representation of the training
 set explicitly in memory. During testing, new cases are classified by
 extrapolation from the most similar stored cases.
 
-For over fifteen years TiMBL has been mostly used in natural language
+For over twenty-five years TiMBL has been mostly used in natural language
 processing as a machine learning classifier component, but its use extends to
 virtually any supervised machine learning domain. Due to its particular
 decision-tree-based implementation, TiMBL is in many cases far more efficient
