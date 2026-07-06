@@ -1,10 +1,10 @@
 [![GitHub build](https://github.com/LanguageMachines/timblserver/actions/workflows/timblserver.yml/badge.svg?branch=master)](https://github.com/LanguageMachines/timblserver/actions/)
 [![Language Machines Badge](http://applejack.science.ru.nl/lamabadge.php/timblserver)](http://applejack.science.ru.nl/languagemachines/
 )
-[![DOI](https://zenodo.org/badge/20526237.svg)](https://zenodo.org/badge/latestdoi/20526237)
+[![DOI](https://zenodo.org/badge/20526303.svg)](https://zenodo.org/badge/latestdoi/20526303)
 
 ===========================================
-TimblServer 1.18 (c) CLS/ILK/CLiPS 1998 - 2026
+TimblServer 1.20 (c) CLS/ILK/CLiPS 1998 - 2026
 ===========================================
 
     Tilburg Memory Based Learner -- Server
@@ -16,7 +16,7 @@ TimblServer 1.18 (c) CLS/ILK/CLiPS 1998 - 2026
 **Website:** https://languagemachines.github.io/timbl/
 
 
-This is the Server extension for Timbl.
+This is the Server extension for TiMBL.
 
 TiMBL is an open source software package implementing several memory-based
 learning algorithms, among which IB1-IG, an implementation of k-nearest
@@ -26,7 +26,7 @@ algorithms have in common that they store some representation of the training
 set explicitly in memory. During testing, new cases are classified by
 extrapolation from the most similar stored cases.
 
-For over fifteen years TiMBL has been mostly used in natural language
+For over twenty-five years TiMBL has been mostly used in natural language
 processing as a machine learning classifier component, but its use extends to
 virtually any supervised machine learning domain. Due to its particular
 decision-tree-based implementation, TiMBL is in many cases far more efficient
@@ -48,7 +48,7 @@ TimblServer is distributed under the GNU Public Licence v3
 This software has been tested on:
 - Intel platforms running several versions of Linux, including Ubuntu, Debian,
   Arch Linux, Fedora (both 32 and 64 bits)
-- MAC platform running OS X 10.10
+- MAC platform running macOS Tahoe
 
 Compilers:
  - GCC (use 7.0 or later)
@@ -63,8 +63,8 @@ Contents of this distribution:
 - Documentation ( in the docs directory )
 
 Dependencies:
-To be able to succesfully build TiMBL from the tarball, you need the
-following pakages:
+To be able to successfully build TimblServer from the tarball, you need the
+following packages:
 - ticcutils (https://github.com/LanguageMachines/ticcutils)
 - timbl (https://github.com/LanguageMachines/timbl)
 - pkg-config
